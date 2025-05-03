@@ -30,7 +30,7 @@
 //     }
 //   });
 
-
+//Drag and Drop function 
 const dropZone = document.querySelector("#dropzone");
 const dropZoneMSG = document.querySelector("#dropzone p");
 const input = document.querySelector("input");
