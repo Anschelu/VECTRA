@@ -2,12 +2,14 @@ body {
     margin: 0;
     font-family: Arial, Helvetica, sans-serif;
     position: relative;
+    background-color: white;
   }
-  
 
   .dropzone{
-    width: 500px;
-    height: 400px;
+    /* width: calc(100vw / 6);
+    height: 5vh; */
+    width: 100px;
+    height: 100px;
     border: 5px dashed #eee;
     text-align: center;
     line-height: 100px;

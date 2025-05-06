@@ -1,71 +1,77 @@
 //Drag and Drop function 
-const dropZone = document.querySelector("#dropzone");
 const dropZoneMSG = document.querySelector("#dropzone p");
-// const input = document.querySelector("input");
 const input = document.querySelector("input[type='file']");
 const colorPicker = document.getElementById("colorPicker");
+const path01 = document.getElementById("path-01");
+const path02 = document.getElementById("path-02");
 const svgContainer = document.getElementById("svg-container");
 
-dropZone.addEventListener("click", () => {
+
+const dropzones = document.querySelectorAll('.dropzone');
+dropzones.forEach((dz, index) => setupDropzone(dz, index + 1));
+
+function setupDropzone(dropzone, id) {
+
+dropzone.addEventListener("click", () => {
     input.click();
     input.onchange = (e) => {
       const file = e.target.files[0];
-      rightFiles(file); 
-      upload(file);
+      rightFiles(file, dropzone, id); 
+      upload(file, dropzone, id);
     };
   });
 
-dropZone.addEventListener("dragover", (e) => {
+dropzone.addEventListener("dragover", (e) => {
     e.preventDefault(); 
 });
 
-dropZone.addEventListener("drop", (e) => {
-    e.preventDefault();
-    const filesArray = [... e.dataTransfer.files];
-    rightFiles(e);
-    upload(filesArray[0]);
+dropzone.addEventListener("drop", (e) => {
+  e.preventDefault();
+  const file = e.dataTransfer.files[0];
+  if (rightFiles(file, dropzone)) {
+    upload(file, dropzone, id);
+  }
 });
+}
 
-function rightFiles(file) {
+function rightFiles(file, dropzone) {
+  const msg = dropzone.querySelector("p");
     if (!file) {
-      dropZoneMSG.textContent = "Error: No file selected";
+      if (msg) msg.textContent = "Error: No file selected";
       throw new Error("No file selected");
     }
   
     if (file.type !== "image/svg+xml") {
-      dropZoneMSG.textContent = "Error: Not an SVG file";
+      if (msg) msg.textContent = "Error: Not an SVG file";
       throw new Error("Not an SVG file");
     }
   }
 
-function upload(file) {
-    const reader = new FileReader();
-    reader.onload = function(event) {
-      const svgContent = event.target.result;
-  
-      const draw = SVG().addTo("#svg-container").size("100%", "100%");
-      const svgElement = draw.svg(svgContent);
-  
-      // Alle SVG-Kinder (Pfad, Rechtecke, Kreise, etc.) klickbar machen
-      svgElement.each(function () {
-        enableColorChangeOn(this);  // Klick-Ereignis für jedes Element aktivieren
-      });
+function upload(file, dzContainer, id) {
+   dzContainer.innerHTML = "";
+
+   const reader = new FileReader();
+   reader.onload = function(event) {
+     const svgContent = event.target.result;
+    
+    const parser = new DOMParser();
+    const svgDoc = parser.parseFromString(svgContent, "image/svg+xml");
+    const importedSVG = svgDoc.documentElement;
+
+    const newId = `path-0${id}`;
+    importedSVG.setAttribute("id", newId);
+
+    const existing = document.querySelector(`#svg-container svg#${newId}`);
+    if (existing) {
+      existing.remove();
+    }
+    
+    const clonedSVG = document.importNode(importedSVG, true);
+    document.getElementById("svg-container").appendChild(clonedSVG);
+
+      const preview = SVG().addTo(dzContainer).size("100%", "100%");
+      preview.svg(svgContent);
+
     };
     reader.readAsText(file);
   }
-  
-  // Funktion zum Aktivieren des Klick-Events für Farbänderung
-  function enableColorChangeOn(element) {
-    element.on("click", function (e) {
-      e.stopPropagation();  // Verhindert, dass der Klick auch das Container-Element trifft
-      const selectedElement = this;
-  
-      // Zeige den Farbwähler an und setze die ausgewählte Farbe auf das geklickte Element
-      colorPicker.click();  // Öffne den Farbwähler
-  
-      colorPicker.oninput = function () {
-        selectedElement.fill(colorPicker.value);  // Wende die gewählte Farbe an
-      };
-    });
-  }
-
