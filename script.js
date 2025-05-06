@@ -1,9 +1,41 @@
+//Animation Morphing
+let uploadedPaths = {
+  1: null,
+  2: null  
+};
+
+let start = null;
+let end = null;
+
+function morphingAnimation(start, end) {
+
+const interpolator1 = flubber.interpolate(start, end, { maxSegmentLength: 1 });
+const interpolator2 = flubber.interpolate(start, end, { maxSegmentLength: 1 });
+
+const svg1 = document.querySelector("#path-01");
+const svg2 = document.querySelector("#path-02");
+
+const path1 = svg1.querySelector("path");
+const path2 = svg2.querySelector("path");
+
+let time = 0;
+
+function animate() {
+    time += 0.02; 
+    const t1 = (Math.sin(time) + 1) / 2;
+  const t2 = (Math.sin(time + 0.5) + 1) / 2; 
+  path1.setAttribute("d", interpolator1(t1));
+  path2.setAttribute("d", interpolator2(t2));
+    requestAnimationFrame(animate);
+  }
+
+  animate();
+}
+
 //Drag and Drop function 
 const dropZoneMSG = document.querySelector("#dropzone p");
 const input = document.querySelector("input[type='file']");
 const colorPicker = document.getElementById("colorPicker");
-const path01 = document.getElementById("path-01");
-const path02 = document.getElementById("path-02");
 const svgContainer = document.getElementById("svg-container");
 
 
@@ -53,6 +85,9 @@ function upload(file, dzContainer, id) {
    const reader = new FileReader();
    reader.onload = function(event) {
      const svgContent = event.target.result;
+     console.log(svgContent);
+
+
     
     const parser = new DOMParser();
     const svgDoc = parser.parseFromString(svgContent, "image/svg+xml");
@@ -61,6 +96,8 @@ function upload(file, dzContainer, id) {
     const newId = `path-0${id}`;
     importedSVG.setAttribute("id", newId);
 
+    uploadedPaths[id] = importedSVG;
+
     const existing = document.querySelector(`#svg-container svg#${newId}`);
     if (existing) {
       existing.remove();
@@ -68,10 +105,28 @@ function upload(file, dzContainer, id) {
     
     const clonedSVG = document.importNode(importedSVG, true);
     document.getElementById("svg-container").appendChild(clonedSVG);
+    
+    console.log("hiii" + id);
+
+    if (id === 1){
+    start = uploadedPaths[id].querySelector('path').getAttribute('d'); 
+    console.log('SVG 1 d value:', start);
+  }
+    else{
+      end = uploadedPaths[id].querySelector('path').getAttribute('d');
+      console.log('SVG 2 d value:', end);
+    }
+
+    console.log('SVG 1 d value:', start);
+    console.log('SVG 2 d value:', end);
+
+    if (uploadedPaths[1] && uploadedPaths[2]) {
+      console.log(start);
+      morphingAnimation(start, end);
+    }
 
       const preview = SVG().addTo(dzContainer).size("100%", "100%");
       preview.svg(svgContent);
-
     };
     reader.readAsText(file);
   }
