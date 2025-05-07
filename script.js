@@ -1,7 +1,11 @@
 
 var slider = document.getElementById("myRange");
+const maxVal = parseInt(document.getElementById("myRange").max);
+const max = maxVal*1.2;
 
-let animationSpeed = slider ? parseFloat(slider.value) : 0.01;
+console.log(max);
+
+let animationSpeed = slider ? parseFloat(slider.value) : 0.001;
 
 let uploadedPaths = {
   1: null,
@@ -10,10 +14,14 @@ let uploadedPaths = {
 
 let start = null;
 let end = null;
+let animation = null;
 
 if (slider) {
   slider.oninput = function() {
       animationSpeed = parseFloat(this.value);
+      if (animation) {
+        animation.duration = animationSpeed;
+      }
   };
 }
 
@@ -33,18 +41,28 @@ if (!path) {
   return;
 }
 
-
-let time = 0;
-
 function animate() {
-  time += animationSpeed;
-  const t = (Math.sin(time) + 1) / 2;
-  path.setAttribute("d", interpolator(t));
-  requestAnimationFrame(animate);
+  animation = anime({
+    targets: {},
+    duration: max - animationSpeed,
+    easing: 'easeInOutCirc',
+    loop: true,
+    direction: 'alternate',
+    update: function(anim) {
+      const t = anim.progress / 100;
+      path.setAttribute('d', interpolator(t));
+    }
+  });
 }
   animate();
 }
 
+document.querySelector('#myRange').addEventListener('input', function() {
+  animationSpeed = this.value;
+  var speedAnimation = max - animationSpeed;
+    animation.duration = speedAnimation;
+  console.log(animation.duration);
+});
 
 //Drag and Drop function 
 const dropZoneMSG = document.querySelector("#dropzone p");
@@ -101,7 +119,7 @@ function upload(file, dzContainer, id) {
    reader.onload = function(event) {
 
      const svgContent = event.target.result;
-     console.log(svgContent);
+    //  console.log(svgContent);
 
      
     const parser = new DOMParser();
@@ -114,7 +132,7 @@ function upload(file, dzContainer, id) {
     
     uploadedPaths[id] = importedSVG;
     
-    console.log("hiii" + id);
+    // console.log("hiii" + id);
 
     if (id === 1){
     svgContainer.innerHTML = "";
@@ -126,11 +144,11 @@ function upload(file, dzContainer, id) {
   }
     else{
       end = uploadedPaths[id].querySelector('path').getAttribute('d');
-      console.log('SVG 2 d value:', end);
+      // console.log('SVG 2 d value:', end);
     }
 
-    console.log('SVG 1 d value:', start);
-    console.log('SVG 2 d value:', end);
+    // console.log('SVG 1 d value:', start);
+    // console.log('SVG 2 d value:', end);
 
     if (uploadedPaths[1] && uploadedPaths[2]) {
       console.log(start);
