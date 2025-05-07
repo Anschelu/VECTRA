@@ -7,25 +7,29 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <div class="page-container">
+  <div id="svg-container"></div>
+  <div class="gui-container">
   <div class="slidecontainer">
     <input type="range" min="1000" max="3000" value="2000" step="10" class="slider" id="myRange">
   </div>
 
+  <div> <h3>loop</h3>
+  <input type="checkbox" id="checkLoop">
+  </div>
+  <div class="spaceing"></div>
+  <div id="upload-zone">
     <div class="dropzone" id="dropzone1"> 
         <input type="file">
-        <p>SVG 01</p></div>
+        <h4>SVG 01</h4></div>
     <div class="dropzone" id="dropzone2"> 
           <input type="file">
-          <p>SVG 02</p></div>
-
-        <div id="svg-container">
+          <h4>SVG 02</h4></div>
         </div>
-
-        <input type="color" id="colorPicker">
-
-
+      </div>
+    </div>
     <script src="anime.min.js"></script>
-    <script src="https://unpkg.com/flubber"></script>
+    <script src="flubber.min.js"></script>
     <script src="svg.min.js"></script>
     <script src="script.js"></script>
 </body>

@@ -5,6 +5,15 @@ body {
     background-color: white;
   }
 
+  h3{
+    font-size: 18px;
+    margin: 0px;
+  }
+
+  h4{
+    font-size: 11px;
+    margin: 0px;
+  }
   .dropzone{
     /* width: calc(100vw / 6);
     height: 5vh; */
@@ -18,11 +27,16 @@ body {
   .dropzone input{
     display: none;
   }
-  
-  #colorPicker{
-    position: absolute; 
-    left: -9999px; 
-    visibility: hidden;
+
+  .page-container{
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  #upload-zone{
+    display: flex;
+    justify-content: space-between;
   }
 
   .slidecontainer {
@@ -30,11 +44,31 @@ body {
     height: 200px;
   }
 
+  .spaceing{
+    height:50px;
+  }
+
+  .gui-container{
+    padding: 20px;
+    background-color: grey;
+    width: 300px;
+    flex-direction: column;
+    display: flex;
+
+  }
+
+  #svg-container{
+    display: flex;
+    width: calc(100vw - 300px);
+    height: 100vh;
+    align-items: stretch;
+  }
+
   .slider {
-    -webkit-appearance: none;  /* Override default CSS styles */
+    -webkit-appearance: none; 
     appearance: none;
-    width: 100%; /* Full-width */
-    height: 25px; /* Specified height */
+    width: 100%;
+    height: 15px;
     background: black;
     outline: none; /* Remove outline */
     opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */

@@ -1,68 +1,78 @@
-
+var checkLoop= document.getElementById("checkLoop");
 var slider = document.getElementById("myRange");
 const maxVal = parseInt(document.getElementById("myRange").max);
 const max = maxVal*1.2;
-
-console.log(max);
-
+let animation = null;
 let animationSpeed = slider ? parseFloat(slider.value) : 0.001;
-
 let uploadedPaths = {
   1: null,
   2: null  
 };
-
+let interpolator = null;
+let path = null;
 let start = null;
 let end = null;
-let animation = null;
-
-if (slider) {
-  slider.oninput = function() {
-      animationSpeed = parseFloat(this.value);
-      if (animation) {
-        animation.duration = animationSpeed;
-      }
-  };
-}
-
-function morphingAnimation(start, end) {
-
-const interpolator = flubber.interpolate(start, end, { maxSegmentLength: 1 });
-
-const svg = document.querySelector("#path-01");
-if (!svg) {
-  console.error("SVG element with id #path-01 not found.");
-  return;
-}
-
-const path = svg.querySelector("path");
-if (!path) {
-  console.error("No <path> found in #path-01.");
-  return;
-}
 
 function animate() {
+  if (animation) animation.pause();
+
+  const shouldLoop = checkLoop.checked;
+  console.log("Animating with loop:", shouldLoop);
+
   animation = anime({
     targets: {},
     duration: max - animationSpeed,
-    easing: 'easeInOutCirc',
-    loop: true,
+    easing: 'easeOutQuad',
+    loop: shouldLoop,
     direction: 'alternate',
     update: function(anim) {
       const t = anim.progress / 100;
-      path.setAttribute('d', interpolator(t));
+      if (path && interpolator) {
+        path.setAttribute('d', interpolator(t));
+      }
     }
   });
 }
-  animate();
+
+function morphingAnimation(start, end) {
+  interpolator = flubber.interpolate(start, end, { maxSegmentLength: 1 });
+
+  const svg = document.querySelector("#path-01");
+  if (!svg) {
+    console.error("SVG element with id #path-01 not found.");
+    return;
+  }
+
+  path = svg.querySelector("path");
+  if (!path) {
+    console.error("No <path> found in #path-01.");
+    return;
+  }
+
+  animate(); 
 }
+
+if (checkLoop) {
+  checkLoop.addEventListener('change', function () {
+    if (uploadedPaths[1] && uploadedPaths[2]) {
+      animate();
+    } else {
+      window.loopPreference = this.checked;
+    }
+  });
+}
+
+// if (stopAnimation) {
+//   stopAnimation.addEventListener('change', function () {
+//   });
+// }
 
 document.querySelector('#myRange').addEventListener('input', function() {
   animationSpeed = this.value;
   var speedAnimation = max - animationSpeed;
     animation.duration = speedAnimation;
-  console.log(animation.duration);
 });
+
 
 //Drag and Drop function 
 const dropZoneMSG = document.querySelector("#dropzone p");
