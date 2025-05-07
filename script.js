@@ -1,4 +1,8 @@
-//Animation Morphing
+
+var slider = document.getElementById("myRange");
+
+let animationSpeed = slider ? parseFloat(slider.value) : 0.01;
+
 let uploadedPaths = {
   1: null,
   2: null  
@@ -7,30 +11,40 @@ let uploadedPaths = {
 let start = null;
 let end = null;
 
+if (slider) {
+  slider.oninput = function() {
+      animationSpeed = parseFloat(this.value);
+  };
+}
+
 function morphingAnimation(start, end) {
 
-const interpolator1 = flubber.interpolate(start, end, { maxSegmentLength: 1 });
-const interpolator2 = flubber.interpolate(start, end, { maxSegmentLength: 1 });
+const interpolator = flubber.interpolate(start, end, { maxSegmentLength: 1 });
 
-const svg1 = document.querySelector("#path-01");
-const svg2 = document.querySelector("#path-02");
+const svg = document.querySelector("#path-01");
+if (!svg) {
+  console.error("SVG element with id #path-01 not found.");
+  return;
+}
 
-const path1 = svg1.querySelector("path");
-const path2 = svg2.querySelector("path");
+const path = svg.querySelector("path");
+if (!path) {
+  console.error("No <path> found in #path-01.");
+  return;
+}
+
 
 let time = 0;
 
 function animate() {
-    time += 0.02; 
-    const t1 = (Math.sin(time) + 1) / 2;
-  const t2 = (Math.sin(time + 0.5) + 1) / 2; 
-  path1.setAttribute("d", interpolator1(t1));
-  path2.setAttribute("d", interpolator2(t2));
-    requestAnimationFrame(animate);
-  }
-
+  time += animationSpeed;
+  const t = (Math.sin(time) + 1) / 2;
+  path.setAttribute("d", interpolator(t));
+  requestAnimationFrame(animate);
+}
   animate();
 }
+
 
 //Drag and Drop function 
 const dropZoneMSG = document.querySelector("#dropzone p");
@@ -99,18 +113,14 @@ function upload(file, dzContainer, id) {
     
     
     uploadedPaths[id] = importedSVG;
-
-    const existing = document.querySelector(`#svg-container svg#${newId}`);
-    if (existing) {
-      existing.remove();
-    }
-    
-    const clonedSVG = document.importNode(importedSVG, true);
-    document.getElementById("svg-container").appendChild(clonedSVG);
     
     console.log("hiii" + id);
 
     if (id === 1){
+    svgContainer.innerHTML = "";
+
+    const clonedSVG = document.importNode(importedSVG, true);
+    svgContainer.appendChild(clonedSVG);
     start = uploadedPaths[id].querySelector('path').getAttribute('d'); 
     console.log('SVG 1 d value:', start);
   }
@@ -118,6 +128,7 @@ function upload(file, dzContainer, id) {
       end = uploadedPaths[id].querySelector('path').getAttribute('d');
       console.log('SVG 2 d value:', end);
     }
+
     console.log('SVG 1 d value:', start);
     console.log('SVG 2 d value:', end);
 
@@ -132,3 +143,4 @@ function upload(file, dzContainer, id) {
     reader.readAsText(file);
 
   }
+
