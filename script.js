@@ -80,22 +80,24 @@ function rightFiles(file, dropzone) {
   }
 
 function upload(file, dzContainer, id) {
-   dzContainer.innerHTML = "";
 
+   dzContainer.innerHTML = "";
+   
    const reader = new FileReader();
    reader.onload = function(event) {
+
      const svgContent = event.target.result;
      console.log(svgContent);
 
-
-    
+     
     const parser = new DOMParser();
     const svgDoc = parser.parseFromString(svgContent, "image/svg+xml");
     const importedSVG = svgDoc.documentElement;
 
     const newId = `path-0${id}`;
     importedSVG.setAttribute("id", newId);
-
+    
+    
     uploadedPaths[id] = importedSVG;
 
     const existing = document.querySelector(`#svg-container svg#${newId}`);
@@ -116,7 +118,6 @@ function upload(file, dzContainer, id) {
       end = uploadedPaths[id].querySelector('path').getAttribute('d');
       console.log('SVG 2 d value:', end);
     }
-
     console.log('SVG 1 d value:', start);
     console.log('SVG 2 d value:', end);
 
@@ -125,8 +126,9 @@ function upload(file, dzContainer, id) {
       morphingAnimation(start, end);
     }
 
-      const preview = SVG().addTo(dzContainer).size("100%", "100%");
-      preview.svg(svgContent);
+    const preview = SVG().addTo(dzContainer).size("100%", "100%");
+    preview.svg(svgContent);
     };
     reader.readAsText(file);
+
   }
