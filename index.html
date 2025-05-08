@@ -14,12 +14,15 @@
     <label for="myRange">speed</label>
     <input type="range" min="1000" max="3000" value="2000" step="10" class="slider" id="myRange">
   </div>
-
+  <input type="color" id="colorPicker" value="#0000ff">
   <div>
-    <label for="checkLoop">Loop</label>
+    <label for="checkLoop">Bounce</label>
   <input type="checkbox" id="checkLoop">
   </div>
-  <div class="spaceing"></div>
+  <div>
+    <label for="pauseAnimation">Pause</label>
+  <input type="checkbox" id="pauseAnimation">
+  </div>
   <div id="upload-zone">
     <div class="dropzone" id="dropzone1"> 
         <input type="file">
@@ -28,8 +31,11 @@
           <input type="file">
           <h4>SVG 02</h4></div>
         </div>
+        <button type="button" id="delete-button">Delete</button>
       </div>
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Draggable.min.js"></script>
     <script src="anime.min.js"></script>
     <script src="flubber.min.js"></script>
     <script src="svg.min.js"></script>

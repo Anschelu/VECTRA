@@ -1,4 +1,6 @@
 var checkLoop= document.getElementById("checkLoop");
+var deleteButton= document.getElementById("delete-button");
+var pauseAnimation = document.getElementById('pauseAnimation')
 var slider = document.getElementById("myRange");
 const maxVal = parseInt(document.getElementById("myRange").max);
 const max = maxVal*1.2;
@@ -62,10 +64,15 @@ if (checkLoop) {
   });
 }
 
-// if (stopAnimation) {
-//   stopAnimation.addEventListener('change', function () {
-//   });
-// }
+pauseAnimation.addEventListener('change', () => {
+  if (pauseAnimation.checked) {
+    animation.pause();
+    console.log("animation paused")
+  } else {
+    animation.play();
+    console.log("animation started")
+  }
+});
 
 document.querySelector('#myRange').addEventListener('input', function() {
   animationSpeed = this.value;
@@ -73,9 +80,8 @@ document.querySelector('#myRange').addEventListener('input', function() {
     animation.duration = speedAnimation;
 });
 
-
 //Drag and Drop function 
-const dropZoneMSG = document.querySelector("#dropzone p");
+const dropZoneMSG = document.querySelector("#dropzone h4");
 const input = document.querySelector("input[type='file']");
 const colorPicker = document.getElementById("colorPicker");
 const svgContainer = document.getElementById("svg-container");
@@ -121,6 +127,23 @@ function rightFiles(file, dropzone) {
     }
   }
 
+  function combiningFunction(id){
+    const paths = uploadedPaths[id].querySelectorAll('path');
+  
+    let combinedD = "";
+  paths.forEach(p => {
+   combinedD += p.getAttribute("d") + " ";
+  p.remove();
+   });
+  
+   const newPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+   newPath.setAttribute("d", combinedD.trim());
+   newPath.setAttribute("stroke", "#000"); // Or use `fillSVG`
+   newPath.setAttribute("id", "path-01");
+   svgContainer.querySelector("svg").appendChild(newPath);
+  return newPath;
+  }
+
 function upload(file, dzContainer, id) {
 
    dzContainer.innerHTML = "";
@@ -129,34 +152,67 @@ function upload(file, dzContainer, id) {
    reader.onload = function(event) {
 
      const svgContent = event.target.result;
-    //  console.log(svgContent);
+     console.log(svgContent);
 
-     
     const parser = new DOMParser();
     const svgDoc = parser.parseFromString(svgContent, "image/svg+xml");
     const importedSVG = svgDoc.documentElement;
 
     const newId = `path-0${id}`;
     importedSVG.setAttribute("id", newId);
-    
+
     
     uploadedPaths[id] = importedSVG;
     
     // console.log("hiii" + id);
 
+    
+    
+  
+      // console.log("combinedD" + combinedD)
+    
+      // newPath.setAttribute("d", combinedD.trim());
+      // newPath.setAttribute("stroke", newStroke);
+    
+      // svgContainer.appendChild(newPath);
+    // }
+    
     if (id === 1){
-    svgContainer.innerHTML = "";
-
-    const clonedSVG = document.importNode(importedSVG, true);
-    svgContainer.appendChild(clonedSVG);
-    start = uploadedPaths[id].querySelector('path').getAttribute('d'); 
-    console.log('SVG 1 d value:', start);
-  }
+      svgContainer.innerHTML = "";
+      const clonedSVG = document.importNode(importedSVG, true);
+      svgContainer.appendChild(clonedSVG);
+      
+      combiningFunction(id);
+      start = newPath.querySelector('path').getAttribute('d'); 
+      fillSVG = uploadedPaths[id].getAttribute('stroke'); 
+      console.log('SVG 1 d value:', start);
+    
+       Draggable.create("#path-01", {
+        onClick: function () {
+          const selectedColor = colorPicker.value;
+        svgContainer.querySelector('path').style.fill = selectedColor;
+        }
+       });
+      
+      // svgContainer.addEventListener('click', function () {
+      //   console.log("I'm pressed")
+      //   const selectedColor = colorPicker.value;
+      //   svgContainer.querySelector('path').style.fill = selectedColor;
+      // });
+    }
     else{
+      combiningFunction(id);
       end = uploadedPaths[id].querySelector('path').getAttribute('d');
       // console.log('SVG 2 d value:', end);
     }
 
+    deleteButton.addEventListener("click", () => {
+      dzContainer.innerHTML = "";
+      svgContainer.innerHTML = "";
+      uploadedPaths[1] = null;
+      uploadedPaths[2] = null;
+  });
+    
     // console.log('SVG 1 d value:', start);
     // console.log('SVG 2 d value:', end);
 
@@ -167,8 +223,8 @@ function upload(file, dzContainer, id) {
 
     const preview = SVG().addTo(dzContainer).size("100%", "100%");
     preview.svg(svgContent);
+
     };
     reader.readAsText(file);
 
   }
-
