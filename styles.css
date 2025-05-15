@@ -73,3 +73,14 @@ body {
     -webkit-transition: .2s; 
     transition: opacity .2s;
   }
+  #morphing-GUI{
+    display: block;
+  }
+
+  #drawable-GUI{
+    display: none;
+  }
+
+  #motion-GUI{
+    display: none;
+  }

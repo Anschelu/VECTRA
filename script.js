@@ -15,6 +15,41 @@ let path = null;
 let start = null;
 let end = null;
 
+document.getElementById("scriptDropdown").addEventListener("change", function() {
+  const selected = this.value;
+  const morphing_GUI = document.getElementById("morphing-GUI");
+  morphing_GUI.style.display = "none";
+
+  switch (selected) {
+    case "morphing":
+      morphing_GUI.style.display = "block";
+      morphing();
+      break;
+    case "drawable":
+      drawable();
+      break;
+    case "motionPath":
+      motion();
+      break;
+    default:
+      break;
+  }
+});
+
+
+function morphing(){
+  upload();
+}
+
+function drawable(){
+  console.log("drawable")
+}
+
+function motion(){
+  console.log("motionPath")
+}
+
+
 function animate() {
   if (animation) animation.pause();
 
