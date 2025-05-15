@@ -1,24 +1,32 @@
 var checkLoop= document.getElementById("checkLoop");
 var deleteButton= document.getElementById("delete-button");
+var animateButton= document.getElementById("animate-button");
 var pauseAnimation = document.getElementById('pauseAnimation')
 var slider = document.getElementById("myRange");
 const maxVal = parseInt(document.getElementById("myRange").max);
 const max = maxVal*1.2;
 let animation = null;
 let animationSpeed = slider ? parseFloat(slider.value) : 0.001;
-let uploadedPaths = {
-  1: null,
-  2: null  
-};
+let uploadedPaths =[];
+let uploadedSVGPaths =[];
 let interpolator = null;
+let interP = [];
 let path = null;
 let start = null;
 let end = null;
+const maxSVG = 6; 
+let time = 0; 
+let currentID = 0;
 
+//Choose Mode
 document.getElementById("scriptDropdown").addEventListener("change", function() {
   const selected = this.value;
   const morphing_GUI = document.getElementById("morphing-GUI");
+  const drawable_GUI = document.getElementById("drawable-GUI");
+  const motion_GUI = document.getElementById("motion-GUI");
   morphing_GUI.style.display = "none";
+  drawable_GUI.style.display = "none";
+  motion_GUI.style.display = "none";
 
   switch (selected) {
     case "morphing":
@@ -26,9 +34,11 @@ document.getElementById("scriptDropdown").addEventListener("change", function() 
       morphing();
       break;
     case "drawable":
+      drawable_GUI.style.display = "block";
       drawable();
       break;
     case "motionPath":
+      motion_GUI.style.display = "block";
       motion();
       break;
     default:
@@ -36,9 +46,9 @@ document.getElementById("scriptDropdown").addEventListener("change", function() 
   }
 });
 
-
+//debug 
 function morphing(){
-  upload();
+  console.log("morphing")
 }
 
 function drawable(){
@@ -49,13 +59,17 @@ function motion(){
   console.log("motionPath")
 }
 
-
-function animate() {
+function animate(pathsArray) {
   if (animation) animation.pause();
 
   const shouldLoop = checkLoop.checked;
   console.log("Animating with loop:", shouldLoop);
 
+  playNext(0, shouldLoop, pathsArray);
+}
+
+function playNext(index, shouldLoop, pathsArray) {
+  const currentInterpolator = interP[index];
   animation = anime({
     targets: {},
     duration: max - animationSpeed,
@@ -64,15 +78,38 @@ function animate() {
     direction: 'alternate',
     update: function(anim) {
       const t = anim.progress / 100;
-      if (path && interpolator) {
-        path.setAttribute('d', interpolator(t));
+      path.setAttribute('d', currentInterpolator(t));
+    },
+    complete: function() {
+      index++;
+      if (index < pathsArray.length) {
+        playNext(index, shouldLoop, pathsArray);
+      } else if (shouldLoop) {
+        playNext(0, shouldLoop, pathsArray);
       }
     }
   });
 }
 
-function morphingAnimation(start, end) {
-  interpolator = flubber.interpolate(start, end, { maxSegmentLength: 1 });
+
+
+//pass array of paths 
+function morphingAnimation(uploadedSVGPaths) {
+
+  //go through array and set more animations
+
+  for (let i = 0; i < uploadedSVGPaths.length; i++){
+    console.log("hii I reached this function :)");
+  // interpolator = flubber.interpolate(start, end, { maxSegmentLength: 1 });
+  if (i === (uploadedSVGPaths.length-1)){
+    interP[i]= flubber.interpolate(uploadedSVGPaths[i], uploadedSVGPaths[0], { maxSegmentLength: 1 });
+    console.log("hii I'm last :)");
+  }
+  else{
+  interP[i]= flubber.interpolate(uploadedSVGPaths[i], uploadedSVGPaths[i+1], { maxSegmentLength: 1 });
+  console.log("hii I was here :)" + i);
+}
+}
 
   const svg = document.querySelector("#path-01");
   if (!svg) {
@@ -85,17 +122,14 @@ function morphingAnimation(start, end) {
     console.error("No <path> found in #path-01.");
     return;
   }
-
-  animate(); 
+  console.log("hii I'm animating now:)");
+  animate(uploadedSVGPaths); 
 }
 
 if (checkLoop) {
   checkLoop.addEventListener('change', function () {
-    if (uploadedPaths[1] && uploadedPaths[2]) {
-      animate();
-    } else {
-      window.loopPreference = this.checked;
-    }
+    if (!uploadedSVGPaths || uploadedSVGPaths.length < 2) return;
+    animate(uploadedSVGPaths);
   });
 }
 
@@ -116,23 +150,34 @@ document.querySelector('#myRange').addEventListener('input', function() {
 });
 
 //Drag and Drop function 
-const dropZoneMSG = document.querySelector("#dropzone h4");
+const dropzone = document.querySelector('.dropzone');
 const input = document.querySelector("input[type='file']");
 const colorPicker = document.getElementById("colorPicker");
+const previewList = document.getElementById("svg-preview-list"); 
 const svgContainer = document.getElementById("svg-container");
 
 
-const dropzones = document.querySelectorAll('.dropzone');
-dropzones.forEach((dz, index) => setupDropzone(dz, index + 1));
 
-function setupDropzone(dropzone, id) {
+//add dropzone when one is added?
+
+function setupDropzone(dropzone) {
 
 dropzone.addEventListener("click", () => {
     input.click();
     input.onchange = (e) => {
       const file = e.target.files[0];
-      rightFiles(file, dropzone, id); 
-      upload(file, dropzone, id);
+      rightFiles(file, dropzone, currentID); 
+      upload(file, dropzone, currentID);
+    };
+  });
+  dropzone.addEventListener("click", () => {
+    input.click();
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (rightFiles(file, dropzone)) {
+        upload(file, dropzone, currentID);
+        currentID++;
+      }
     };
   });
 
@@ -142,14 +187,16 @@ dropzone.addEventListener("dragover", (e) => {
 
 dropzone.addEventListener("drop", (e) => {
   e.preventDefault();
+  handleFile(e.dataTransfer.files[0]);
   const file = e.dataTransfer.files[0];
-  if (rightFiles(file, dropzone)) {
-    upload(file, dropzone, id);
+  if (rightFiles(file, dropzone, currentID)) {
+    upload(file, dropzone, currentID);
   }
 });
 }
 
-function rightFiles(file, dropzone) {
+
+function rightFiles(file, dropzone, currentID) {
   const msg = dropzone.querySelector("p");
     if (!file) {
       if (msg) msg.textContent = "Error: No file selected";
@@ -161,6 +208,23 @@ function rightFiles(file, dropzone) {
       throw new Error("Not an SVG file");
     }
   }
+
+// function rightFiles(file, dropzone) {
+//   const msg = dropzone.querySelector("p");
+//   if (!file) {
+//     if (msg) msg.textContent = "Error: No file selected";
+//     console.error("No file selected");
+//     return false;
+//   }
+
+//   if (file.type !== "image/svg+xml") {
+//     if (msg) msg.textContent = "Error: Not an SVG file";
+//     console.error("Not an SVG file");
+//     return false;
+//   }
+
+//   return true;
+// }
 
 function upload(file, dzContainer, id) {
 
@@ -179,43 +243,46 @@ function upload(file, dzContainer, id) {
     const newId = `path-0${id}`;
     importedSVG.setAttribute("id", newId);
 
-    
     uploadedPaths[id] = importedSVG;
-    
-    if (id === 1){
-      svgContainer.innerHTML = "";
-
-      const clonedSVG = document.importNode(importedSVG, true);
-      svgContainer.appendChild(clonedSVG);
-      start = uploadedPaths[id].querySelector('path').getAttribute('d'); 
-      console.log('SVG 1 d value:', start);
-      Draggable.create("#path-01", {
-        onClick: function () {
-          const selectedColor = colorPicker.value;
-        svgContainer.querySelector('path').style.fill = selectedColor;
-        }
-       });
-    }
-    else{
-      end = uploadedPaths[id].querySelector('path').getAttribute('d');
-    }
 
     deleteButton.addEventListener("click", () => {
       dzContainer.innerHTML = "";
       svgContainer.innerHTML = "";
-      uploadedPaths[1] = null;
-      uploadedPaths[2] = null;
-  });
+      for (let i = 1; i <= maxSVG; i++) {
+        uploadedPaths[i] = null;
+      }
+      uploadedSVGPaths = [];
+    currentID = 1;
+    });
 
-    if (uploadedPaths[1] && uploadedPaths[2]) {
-      console.log(start);
-      morphingAnimation(start, end);
+
+    if (id === 1){
+      svgContainer.innerHTML = "";
+      const clonedSVG = document.importNode(importedSVG, true);
+      svgContainer.appendChild(clonedSVG);
+      uploadedSVGPaths[id-1] = uploadedPaths[id].querySelector('path').getAttribute('d'); 
+    }
+    else if (id < maxSVG){
+      uploadedSVGPaths[id-1] = uploadedPaths[id].querySelector('path').getAttribute('d');
     }
 
-    const preview = SVG().addTo(dzContainer).size("100%", "100%");
+    console.log(uploadedSVGPaths[id-1] + " id: " + id);
+    
+    const preview = SVG().addTo(previewList).size("100%", "100%");
     preview.svg(svgContent);
+    
+  };
+  reader.readAsText(file);
+  
+}
 
-    };
-    reader.readAsText(file);
+animateButton.addEventListener("click", () => {
+if (uploadedPaths[1] === null || uploadedPaths[2] === null){
+  console.log("upload at least 2 shapes")
+}
+else{
+morphingAnimation(uploadedSVGPaths);
+}
+});
 
-  }
+setupDropzone(dropzone);
