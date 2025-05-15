@@ -127,23 +127,6 @@ function rightFiles(file, dropzone) {
     }
   }
 
-  function combiningFunction(id){
-    const paths = uploadedPaths[id].querySelectorAll('path');
-  
-    let combinedD = "";
-  paths.forEach(p => {
-   combinedD += p.getAttribute("d") + " ";
-  p.remove();
-   });
-  
-   const newPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
-   newPath.setAttribute("d", combinedD.trim());
-   newPath.setAttribute("stroke", "#000"); // Or use `fillSVG`
-   newPath.setAttribute("id", "path-01");
-   svgContainer.querySelector("svg").appendChild(newPath);
-  return newPath;
-  }
-
 function upload(file, dzContainer, id) {
 
    dzContainer.innerHTML = "";
@@ -164,46 +147,22 @@ function upload(file, dzContainer, id) {
     
     uploadedPaths[id] = importedSVG;
     
-    // console.log("hiii" + id);
-
-    
-    
-  
-      // console.log("combinedD" + combinedD)
-    
-      // newPath.setAttribute("d", combinedD.trim());
-      // newPath.setAttribute("stroke", newStroke);
-    
-      // svgContainer.appendChild(newPath);
-    // }
-    
     if (id === 1){
       svgContainer.innerHTML = "";
+
       const clonedSVG = document.importNode(importedSVG, true);
       svgContainer.appendChild(clonedSVG);
-      
-      combiningFunction(id);
-      start = newPath.querySelector('path').getAttribute('d'); 
-      fillSVG = uploadedPaths[id].getAttribute('stroke'); 
+      start = uploadedPaths[id].querySelector('path').getAttribute('d'); 
       console.log('SVG 1 d value:', start);
-    
-       Draggable.create("#path-01", {
+      Draggable.create("#path-01", {
         onClick: function () {
           const selectedColor = colorPicker.value;
         svgContainer.querySelector('path').style.fill = selectedColor;
         }
        });
-      
-      // svgContainer.addEventListener('click', function () {
-      //   console.log("I'm pressed")
-      //   const selectedColor = colorPicker.value;
-      //   svgContainer.querySelector('path').style.fill = selectedColor;
-      // });
     }
     else{
-      combiningFunction(id);
       end = uploadedPaths[id].querySelector('path').getAttribute('d');
-      // console.log('SVG 2 d value:', end);
     }
 
     deleteButton.addEventListener("click", () => {
@@ -212,9 +171,6 @@ function upload(file, dzContainer, id) {
       uploadedPaths[1] = null;
       uploadedPaths[2] = null;
   });
-    
-    // console.log('SVG 1 d value:', start);
-    // console.log('SVG 2 d value:', end);
 
     if (uploadedPaths[1] && uploadedPaths[2]) {
       console.log(start);
