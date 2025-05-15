@@ -15,8 +15,8 @@ let path = null;
 let start = null;
 let end = null;
 const maxSVG = 6; 
-let time = 0; 
 let currentID = 0;
+let id = -1;
 
 //Choose Mode
 document.getElementById("scriptDropdown").addEventListener("change", function() {
@@ -111,9 +111,9 @@ function morphingAnimation(uploadedSVGPaths) {
 }
 }
 
-  const svg = document.querySelector("#path-01");
+  const svg = document.querySelector("#path-00");
   if (!svg) {
-    console.error("SVG element with id #path-01 not found.");
+    console.error("SVG element with id #path-00 not found.");
     return;
   }
 
@@ -166,18 +166,8 @@ dropzone.addEventListener("click", () => {
     input.click();
     input.onchange = (e) => {
       const file = e.target.files[0];
-      rightFiles(file, dropzone, currentID); 
-      upload(file, dropzone, currentID);
-    };
-  });
-  dropzone.addEventListener("click", () => {
-    input.click();
-    input.onchange = (e) => {
-      const file = e.target.files[0];
-      if (rightFiles(file, dropzone)) {
-        upload(file, dropzone, currentID);
-        currentID++;
-      }
+      rightFiles(file, dropzone); 
+      upload(file, dropzone);
     };
   });
 
@@ -189,14 +179,14 @@ dropzone.addEventListener("drop", (e) => {
   e.preventDefault();
   handleFile(e.dataTransfer.files[0]);
   const file = e.dataTransfer.files[0];
-  if (rightFiles(file, dropzone, currentID)) {
-    upload(file, dropzone, currentID);
+  if (rightFiles(file, dropzone)) {
+    upload(file, dropzone);
   }
 });
 }
 
 
-function rightFiles(file, dropzone, currentID) {
+function rightFiles(file, dropzone) {
   const msg = dropzone.querySelector("p");
     if (!file) {
       if (msg) msg.textContent = "Error: No file selected";
@@ -209,25 +199,9 @@ function rightFiles(file, dropzone, currentID) {
     }
   }
 
-// function rightFiles(file, dropzone) {
-//   const msg = dropzone.querySelector("p");
-//   if (!file) {
-//     if (msg) msg.textContent = "Error: No file selected";
-//     console.error("No file selected");
-//     return false;
-//   }
+function upload(file, dzContainer) {
 
-//   if (file.type !== "image/svg+xml") {
-//     if (msg) msg.textContent = "Error: Not an SVG file";
-//     console.error("Not an SVG file");
-//     return false;
-//   }
-
-//   return true;
-// }
-
-function upload(file, dzContainer, id) {
-
+    id = id +1;
    dzContainer.innerHTML = "";
    
    const reader = new FileReader();
@@ -241,6 +215,7 @@ function upload(file, dzContainer, id) {
     const importedSVG = svgDoc.documentElement;
 
     const newId = `path-0${id}`;
+    console.log(id);
     importedSVG.setAttribute("id", newId);
 
     uploadedPaths[id] = importedSVG;
@@ -248,26 +223,28 @@ function upload(file, dzContainer, id) {
     deleteButton.addEventListener("click", () => {
       dzContainer.innerHTML = "";
       svgContainer.innerHTML = "";
-      for (let i = 1; i <= maxSVG; i++) {
+      for (let i = 0; i <= maxSVG-1; i++) {
         uploadedPaths[i] = null;
       }
       uploadedSVGPaths = [];
-    currentID = 1;
+      previewList.innerHTML = "";
+     id = -1;
     });
 
 
-    if (id === 1){
+    if (id === 0){
       svgContainer.innerHTML = "";
       const clonedSVG = document.importNode(importedSVG, true);
       svgContainer.appendChild(clonedSVG);
-      uploadedSVGPaths[id-1] = uploadedPaths[id].querySelector('path').getAttribute('d'); 
+      uploadedSVGPaths[id] = uploadedPaths[id].querySelector('path').getAttribute('d'); 
     }
-    else if (id < maxSVG){
-      uploadedSVGPaths[id-1] = uploadedPaths[id].querySelector('path').getAttribute('d');
+    else if (id < maxSVG-1){
+      uploadedSVGPaths[id] = uploadedPaths[id].querySelector('path').getAttribute('d');
     }
 
-    console.log(uploadedSVGPaths[id-1] + " id: " + id);
+    console.log(uploadedSVGPaths[id] + " id: " + id);
     
+
     const preview = SVG().addTo(previewList).size("100%", "100%");
     preview.svg(svgContent);
     
@@ -277,12 +254,13 @@ function upload(file, dzContainer, id) {
 }
 
 animateButton.addEventListener("click", () => {
-if (uploadedPaths[1] === null || uploadedPaths[2] === null){
+if (uploadedPaths[0] === null || uploadedPaths[1] === null){
   console.log("upload at least 2 shapes")
 }
 else{
 morphingAnimation(uploadedSVGPaths);
 }
+
 });
 
 setupDropzone(dropzone);

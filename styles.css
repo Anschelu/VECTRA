@@ -73,6 +73,11 @@ body {
     -webkit-transition: .2s; 
     transition: opacity .2s;
   }
+
+  #svg-preview-list{
+    display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  }
   #morphing-GUI{
     display: block;
   }
