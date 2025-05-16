@@ -45,8 +45,10 @@ document.getElementById("scriptDropdown").addEventListener("change", function() 
   }
 });
 
-const draw = SVG().addTo('#drawingArea').size(600, 400);
-let pathp = draw.path().fill('none').stroke({ width: 2, color: '#000' });
+function setupDrawing(){
+var drawingArea= document.getElementById("drawingArea");
+let draw = SVG().addTo('#drawingArea').size(400, 400);
+let pathp = draw.path().fill('none').stroke({ width: 20, color: '#000' });
 
 let drawing = false;
 let points = [];
@@ -74,23 +76,44 @@ document.getElementById('savePath').addEventListener('click', () => {
 
   uploadedSVGPaths.push(d);
 
+  id = id+1;
+  console.log(id);
   const tempSVG = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  tempSVG.setAttribute("id", `path-0${++id}`);
-  tempSVG.setAttribute("width", "600");
-  tempSVG.setAttribute("height", "400");
+  tempSVG.setAttribute("id", `path-0${id}`);
+  tempSVG.setAttribute("width", "100%");
+  tempSVG.setAttribute("height", "100%");
 
-  const tempPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  tempPath.setAttribute("d", d);
-  tempPath.setAttribute("fill", "none");
-  tempPath.setAttribute("stroke", "black");
-  tempPath.setAttribute("stroke-width", "2");
+  const pathnew = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  pathnew.setAttribute("d", d);
+  pathnew.setAttribute("fill", "none");
+  pathnew.setAttribute("stroke", "black");
+  pathnew.setAttribute("stroke-width", "2");
 
-  tempSVG.appendChild(tempPath);
-  svgContainer.innerHTML = "";
+  
+  // tempSVG.appendChild(tempPath);
+  tempSVG.appendChild(pathnew);
   svgContainer.appendChild(tempSVG);
-  const preview = SVG().addTo(previewList).size("100%", "100%");
-    preview.svg(tempSVG);
-});
+
+  previewList.appendChild(tempSVG);
+  console.log(tempSVG)
+  console.log(pathnew)
+  // uploadedPaths[id] = tempSVG;
+  // uploadedSVGPaths[id] = d;
+  // const serializer = new XMLSerializer();
+  // const svgString = serializer.serializeToString(tempSVG);
+  // const preview = SVG().addTo(previewList).size("100%", "100%");
+  // preview.svg(uploadedSVGPaths);
+  //   drawingArea.innerHTML="";
+  //   setupDrawing();
+
+    deleteButton.addEventListener("click", () => {
+      drawingArea.innerHTML ="";
+      resetUploads(svgContainer, previewList);
+      setupDrawing();
+    });
+});}
+
+
 
 
 function resetGUI(svgContainer, previewList) {
@@ -99,6 +122,8 @@ function resetGUI(svgContainer, previewList) {
   document.getElementById("motion-GUI").style.display = "none";
   resetUploads(svgContainer, previewList);
 }
+
+setupDrawing();
 
 //debug 
 function morphing(){
@@ -306,7 +331,7 @@ function rightFiles(file) {
   }
 
 function upload(file) {
-
+  console.log("hiii hell ya");
 
   switch (currentID) {
     case 1:
@@ -440,33 +465,37 @@ function createTracingElement(importedSVG){
 
 
 //starting page and overlay 
+//DON'T DELETE, ACTIVATE WHEN FINISHED
 
-const instructions = [
-  "This tool lets you draw or animate SVG paths. Let's get started!",
-  "Choose a mode from the dropdown (Morphing, Drawable, Motion Path).",
-  "Upload an SVG or draw directly in Drawable mode.",
-  "Only similar SVG's are morphable",
-  "Click 'Animate' to see your path in action.",
-  "You're ready! Enjoy creating with the tool!"
-];
+// const instructions = [
+//   "",
+//   "This tool lets you draw or animate SVG paths. Let's get started!",
+//   "Choose a mode from the dropdown (Morphing, Drawable, Motion Path).",
+//   "Upload an SVG or draw directly in Drawable mode.",
+//   "Only similar SVG's are morphable",
+//   "Click 'Animate' to see your path in action.",
+//   "You're ready! Enjoy creating with the tool!"
+// ];
 
-let currentStep = 0;
+// let currentStep = 0;
 
-const instructionText = document.getElementById("instructionText");
-const main = document.getElementById("mainApp");
-const nextBtn = document.getElementById("nextBtn");
-const overlay = document.getElementById("welcomeOverlay");
+// const instructionText = document.getElementById("instructionText");
+// const main = document.getElementById("mainApp");
+// const nextBtn = document.getElementById("nextBtn");
+// const overlay = document.getElementById("welcomeOverlay");
+// const overlayText = document.querySelector("#welcomeOverlay h2");
 
-nextBtn.addEventListener("click", () => {
-  currentStep++;
-  if (currentStep < instructions.length) {
-    overlay.style.display = "block";
-    main.style.display = "none";
-    instructionText.textContent = instructions[currentStep];
-    nextBtn.textContent = currentStep === instructions.length - 1 ? "Start" : "OK";
-  } else {
-    overlay.style.display = "none";
-    main.style.display = "block";
-  }
-});
+// nextBtn.addEventListener("click", () => {
+//   currentStep++;
+//   if (currentStep < instructions.length) {
+//     overlayText.style.fontSize = "48px"
+//     overlay.style.display = "block";
+//     main.style.display = "none";
+//     instructionText.textContent = instructions[currentStep];
+//     nextBtn.textContent = currentStep === instructions.length - 1 ? "Start" : "OK";
+//   } else {
+//     overlay.style.display = "none";
+//     main.style.display = "block";
+//   }
+// });
 

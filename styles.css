@@ -1,13 +1,19 @@
 @font-face {
-  font-family: 'Montserrat-SemiBold.woff';
-  src: url("../Montserrat-SemiBold.woff") format('woff');
+  font-family: 'Montserrat-SemiBoldItalic.woff';
+  src: url("../Montserrat-SemiBoldItalic.woff") format('woff');
+}
+
+@font-face {
+  font-family: 'Montserrat-Light.woff';
+  src: url("../Montserrat-Light.woff") format('woff');
 }
 
 body {
-  font-family: "Montserrat-Medium", Helvetica, sans-serif;
+  font-family: "Montserrat-Light", Helvetica, sans-serif;
     margin: 0;
     position: relative;
     background-color: white;
+    height: 100%;
   }
 
   h3{
@@ -95,40 +101,53 @@ body {
     display: none;
   }
 
+  #drawingArea{
+    position: absolute;
+  }
+
 
 /* welcoming page */
   #welcomeOverlay {
-    font-family: "Montserrat-Medium", Helvetica, sans-serif;
+    font-family: "Montserrat-BoldItalic", Helvetica, sans-serif;
     position: fixed;
-    top: 0;
-    left: 0;
+    /* top: 0;
+    left: 0; */
     width: 100%;
     height: 100%;
     color: black;
     display: flex;
-    justify-content: center;
-    align-items: center;
+    justify-content: center !important;
+    align-items: center !important;
     z-index: 1000;
     flex-direction: column;
   }
 
-  /* .instruction-box {
-    max-width: 100%;
-    padding: 20px;
-    border-radius: 10px;
-    background: #222;
+  #welcomeOverlay h2{
+    font-size: 200px;
+    line-height: 0.8;
+  }
+
+  .instruction-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     text-align: center;
-  } */
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+  }
 
   .instruction-box h2 {
     margin-bottom: 10px;
   }
 
   .instruction-box p {
+    font-family: "Montserrat-Light", Helvetica, sans-serif;
     margin: 0 0 20px 0;
   }
 
   .instruction-box button {
+    font-family: "Montserrat-Light", Helvetica, sans-serif;
     padding: 10px 20px;
     border: none;
     background: #DBA5FF;
@@ -136,6 +155,8 @@ body {
     border-radius: 16px;
     cursor: pointer;
     font-size: 32px;
+    justify-content: center;
+    align-items: center;
   }
 
   .instruction-box button:hover {
@@ -143,5 +164,26 @@ body {
   }
 
   #mainApp{
-    display: none;
+    /* display: none; */
+    display: block;
+    height: 100%;
+  }
+
+  .page-header{
+    display: flex;
+    font-size: 21px;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .page-header h2{
+    font-family: "Montserrat-BoldItalic", Helvetica, sans-serif;
+    font-size: 18px;
+    padding: 10px;
+    margin: 0px;
+  }
+
+  #pageLayout{
+    display: flex;
+    flex-direction: column;
   }
