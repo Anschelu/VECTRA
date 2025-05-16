@@ -438,3 +438,35 @@ function createTracingElement(importedSVG){
       importedSVG.appendChild(carGroup);
 }
 
+
+//starting page and overlay 
+
+const instructions = [
+  "This tool lets you draw or animate SVG paths. Let's get started!",
+  "Choose a mode from the dropdown (Morphing, Drawable, Motion Path).",
+  "Upload an SVG or draw directly in Drawable mode.",
+  "Only similar SVG's are morphable",
+  "Click 'Animate' to see your path in action.",
+  "You're ready! Enjoy creating with the tool!"
+];
+
+let currentStep = 0;
+
+const instructionText = document.getElementById("instructionText");
+const main = document.getElementById("mainApp");
+const nextBtn = document.getElementById("nextBtn");
+const overlay = document.getElementById("welcomeOverlay");
+
+nextBtn.addEventListener("click", () => {
+  currentStep++;
+  if (currentStep < instructions.length) {
+    overlay.style.display = "block";
+    main.style.display = "none";
+    instructionText.textContent = instructions[currentStep];
+    nextBtn.textContent = currentStep === instructions.length - 1 ? "Start" : "OK";
+  } else {
+    overlay.style.display = "none";
+    main.style.display = "block";
+  }
+});
+
