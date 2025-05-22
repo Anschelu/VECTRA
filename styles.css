@@ -164,8 +164,8 @@ body {
   }
 
   #mainApp{
-    /* display: none; */
-    display: block;
+    display: none;
+    /* display: block; */
     height: 100%;
   }
 
