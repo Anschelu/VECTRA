@@ -77,8 +77,16 @@ function setupDrawing() {
   document.getElementById('savePath').addEventListener('click', () => {
 
     id = id +1; 
+
     let myDrawing = document.querySelector("#drawingArea svg")
     // *** parse mydrawing like it was an uploaded svg.. then its treated the same
+
+    
+    const pathData = myDrawing.querySelector('path')?.getAttribute('d');
+    uploadedSVGPaths[id] = pathData;
+
+    const newId = `path-0${id}`;
+    myDrawing.setAttribute("id", newId);
     
     svgContainer.appendChild(document.importNode(myDrawing, true));
     
@@ -87,7 +95,6 @@ function setupDrawing() {
   
     const preview = SVG().addTo(previewList).viewbox(0, 0, 400, 400);
     preview.path(d).fill('none').stroke({ width: 20, color: '#000' });
-  
 
   // myDrawing.innerHTML = ""; 
     
