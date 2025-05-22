@@ -1,21 +1,25 @@
-var checkLoop= document.getElementById("checkLoop");
-var deleteButton= document.getElementById("delete-button");
-var deleteButtonDraw= document.getElementById("delete-button-draw");
-var animateButton= document.getElementById("animate-button");
+var checkLoop = document.getElementById("checkLoop");
+var deleteButton = document.getElementById("delete-button");
+var deleteButtonDraw = document.getElementById("delete-button-draw");
+var animateButton = document.getElementById("animate-button");
 var pauseAnimation = document.getElementById('pauseAnimation')
 var slider = document.getElementById("myRange");
 const maxVal = parseInt(document.getElementById("myRange").max);
-const max = maxVal*1.2;
+const max = maxVal * 1.2;
 let animation = null;
 let animationSpeed = slider ? parseFloat(slider.value) : 0.001;
-let uploadedPaths =[];
-let uploadedSVGPaths =[];
+let uploadedPaths = [];
+let uploadedSVGPaths = [];
+let svgs = []
+// svgs.push({svg:svgCode, path:mPath})  // *** just save your upload/draw and a fancy js obj array..
+// svgs[0].path
+let svgsSelected = 0 // clickable index
 let interpolator = null;
 let interP = [];
 let path = null;
 let start = null;
 let end = null;
-let maxSVG; 
+let maxSVG;
 let currentID = 1;
 let id = -1;
 
@@ -23,9 +27,9 @@ const morphing_GUI = document.getElementById("morphing-GUI");
 const drawable_GUI = document.getElementById("drawable-GUI");
 const motion_GUI = document.getElementById("motion-GUI");
 //Choose Mode
-document.getElementById("scriptDropdown").addEventListener("change", function() {
+document.getElementById("scriptDropdown").addEventListener("change", function () {
   const selected = this.value;
-  resetGUI(svgContainer, previewList);
+  // resetGUI(svgContainer, previewList);
 
   switch (selected) {
     case "morphing":
@@ -45,73 +49,55 @@ document.getElementById("scriptDropdown").addEventListener("change", function() 
   }
 });
 
-function setupDrawing(){
-var drawingArea= document.getElementById("drawingArea");
-let draw = SVG().addTo('#drawingArea').size(400, 400);
-let pathp = draw.path().fill('none').stroke({ width: 20, color: '#000' });
+function setupDrawing() {
+  var drawingArea = document.getElementById("drawingArea");
+  let draw = SVG().addTo('#drawingArea').size(400, 400);
+  let pathp = draw.path().fill('none').stroke({ width: 20, color: '#000' });
 
-let drawing = false;
-let points = [];
+  let drawing = false;
+  let points = [];
 
-draw.on('mousedown', function (e) {
-  drawing = true;
-  points = [];
-  pathp.plot('');
-});
+  draw.on('mousedown', function (e) {
+    drawing = true;
+    points = [];
+    pathp.plot('');
+  });
 
-draw.on('mousemove', function (e) {
-  if (!drawing) return;
-  const point = draw.point(e.clientX, e.clientY);
-  points.push([point.x, point.y]);
-  pathp.plot(`M ${points.map(p => p.join(',')).join(' L ')}`);
-});
+  draw.on('mousemove', function (e) {
+    if (!drawing) return;
+    const point = draw.point(e.clientX, e.clientY);
+    points.push([point.x, point.y]);
+    pathp.plot(`M ${points.map(p => p.join(',')).join(' L ')}`);
+  });
 
-draw.on('mouseup', function () {
-  drawing = false;
-});
+  draw.on('mouseup', function () {
+    drawing = false;
+  });
 
-document.getElementById('savePath').addEventListener('click', () => {
-  const d = pathp.attr('d');
-  console.log("Saved path:", d);
+  document.getElementById('savePath').addEventListener('click', () => {
 
-  uploadedSVGPaths.push(d);
-
-  id = id+1;
-  console.log(id);
-  const tempSVG = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  tempSVG.setAttribute("id", `path-0${id}`);
-  tempSVG.setAttribute("width", "100%");
-  tempSVG.setAttribute("height", "100%");
-
-  const pathnew = document.createElementNS("http://www.w3.org/2000/svg", "path");
-  pathnew.setAttribute("d", d);
-  pathnew.setAttribute("fill", "none");
-  pathnew.setAttribute("stroke", "black");
-  pathnew.setAttribute("stroke-width", "2");
-
+    id = id +1; 
+    let myDrawing = document.querySelector("#drawingArea svg")
+    // *** parse mydrawing like it was an uploaded svg.. then its treated the same
+    
+    svgContainer.appendChild(document.importNode(myDrawing, true));
+    
+    const pathElement = myDrawing.querySelector('path');
+    const d = pathElement.getAttribute('d');
   
-  // tempSVG.appendChild(tempPath);
-  tempSVG.appendChild(pathnew);
-  svgContainer.appendChild(tempSVG);
+    const preview = SVG().addTo(previewList).viewbox(0, 0, 400, 400);
+    preview.path(d).fill('none').stroke({ width: 20, color: '#000' });
+  
 
-  previewList.appendChild(tempSVG);
-  console.log(tempSVG)
-  console.log(pathnew)
-  // uploadedPaths[id] = tempSVG;
-  // uploadedSVGPaths[id] = d;
-  // const serializer = new XMLSerializer();
-  // const svgString = serializer.serializeToString(tempSVG);
-  // const preview = SVG().addTo(previewList).size("100%", "100%");
-  // preview.svg(uploadedSVGPaths);
-  //   drawingArea.innerHTML="";
-  //   setupDrawing();
-
+  // myDrawing.innerHTML = ""; 
+    
     deleteButton.addEventListener("click", () => {
-      drawingArea.innerHTML ="";
+      drawingArea.innerHTML = "";
       resetUploads(svgContainer, previewList);
       setupDrawing();
     });
-});}
+  });
+}
 
 
 
@@ -120,49 +106,49 @@ function resetGUI(svgContainer, previewList) {
   document.getElementById("morphing-GUI").style.display = "none";
   document.getElementById("drawable-GUI").style.display = "none";
   document.getElementById("motion-GUI").style.display = "none";
-  resetUploads(svgContainer, previewList);
+  //resetUploads(svgContainer, previewList); // **** dont reset my uploads!!
 }
 
 setupDrawing();
 
 //debug 
-function morphing(){
+function morphing() {
   console.log("morphing")
   currentID = 1;
 }
 
-function drawable(){
+function drawable() {
   currentID = 2;
+}
+
+function drawableAnimation() {
+  const svgDraw = document.querySelector("#path-00"); // querySelectorAll([id^="#path-")[0] // *** collect all available, then filter
+  path = svgDraw.querySelector("path");
+  anime({
+    targets: path,
+    strokeDashoffset: [anime.setDashoffset, 0],
+    easing: 'easeInOutQuad',
+    duration: 2000,
+    delay: 0,
+    direction: 'alternate',
+    loop: true
+  });
+}
+
+
+
+function motionPathAnimation() {
+  const svgMotion = document.querySelector("#path-00");
+  if (!svgMotion) return;
+  const path = svgMotion.querySelector("path");
+  const car = svgMotion.querySelector("#car");
+
+  if (!path || !car) {
+    console.error("Pfad oder Auto nicht gefunden.");
+    return;
   }
 
-  function drawableAnimation(uploadedSVGPaths){
-    const svgDraw = document.querySelector("#path-00");
-    path = svgDraw.querySelector("path");
-    anime({
-      targets: path,
-      strokeDashoffset: [anime.setDashoffset, 0],
-      easing: 'easeInOutQuad',
-      duration: 2000,
-      delay: 0,
-      direction: 'alternate',
-      loop: true
-    });
-  }
-
-
-
-  function motionPathAnimation() {
-    const svgMotion = document.querySelector("#path-00");
-    if (!svgMotion) return;
-    const path = svgMotion.querySelector("path");
-    const car = svgMotion.querySelector("#car");
-  
-    if (!path || !car) {
-      console.error("Pfad oder Auto nicht gefunden.");
-      return;
-    }
-  
-    const pathLength = path.getTotalLength();
+  const pathLength = path.getTotalLength();
 
   anime({
     targets: { progress: 0 },
@@ -172,7 +158,7 @@ function drawable(){
     draw: '0 1',
     loop: true,
     direction: 'alternate',
-    update: function(anim) {
+    update: function (anim) {
       const progress = anim.animations[0].currentValue / 100;
       const point = path.getPointAtLength(progress * pathLength);
       const nextPoint = path.getPointAtLength(Math.min(progress * pathLength + 1, pathLength));
@@ -183,23 +169,23 @@ function drawable(){
     }
   });
 }
-  
 
-function motion(){
+
+function motion() {
   currentID = 3;
   console.log("motionPath")
 }
 
-function animate(pathsArray) {
+function animate() {
   if (animation) animation.pause();
 
   const shouldLoop = checkLoop.checked;
   console.log("Animating with loop:", shouldLoop);
 
-  playNext(0, shouldLoop, pathsArray);
+  playNext(0, shouldLoop, uploadedSVGPaths);
 }
 
-function playNext(index, shouldLoop, pathsArray) {
+function playNext(index, shouldLoop, uploadedSVGPaths) {
   const currentInterpolator = interP[index];
   animation = anime({
     targets: {},
@@ -207,16 +193,16 @@ function playNext(index, shouldLoop, pathsArray) {
     easing: 'easeOutQuad',
     loop: shouldLoop,
     direction: 'alternate',
-    update: function(anim) {
+    update: function (anim) {
       const t = anim.progress / 100;
       path.setAttribute('d', currentInterpolator(t));
     },
-    complete: function() {
+    complete: function () {
       index++;
-      if (index < pathsArray.length) {
-        playNext(index, shouldLoop, pathsArray);
+      if (index < uploadedSVGPaths.length) {
+        playNext(index, shouldLoop, uploadedSVGPaths);
       } else if (shouldLoop) {
-        playNext(0, shouldLoop, pathsArray);
+        playNext(0, shouldLoop, uploadedSVGPaths);
       }
     }
   });
@@ -225,22 +211,22 @@ function playNext(index, shouldLoop, pathsArray) {
 
 
 //pass array of paths 
-function morphingAnimation(uploadedSVGPaths) {
+function morphingAnimation() {
 
   //go through array and set more animations
 
-  for (let i = 0; i < uploadedSVGPaths.length; i++){
+  for (let i = 0; i < uploadedSVGPaths.length; i++) {
     console.log("hii I reached this function :)");
-  // interpolator = flubber.interpolate(start, end, { maxSegmentLength: 1 });
-  if (i === (uploadedSVGPaths.length-1)){
-    interP[i]= flubber.interpolate(uploadedSVGPaths[i], uploadedSVGPaths[0], { maxSegmentLength: 1 });
-    console.log("hii I'm last :)");
+    // interpolator = flubber.interpolate(start, end, { maxSegmentLength: 1 });
+    if (i === (uploadedSVGPaths.length - 1)) {
+      interP[i] = flubber.interpolate(uploadedSVGPaths[i], uploadedSVGPaths[0], { maxSegmentLength: 1 });
+      console.log("hii I'm last :)");
+    }
+    else {
+      interP[i] = flubber.interpolate(uploadedSVGPaths[i], uploadedSVGPaths[i + 1], { maxSegmentLength: 1 });
+      console.log("hii I was here :)" + i);
+    }
   }
-  else{
-  interP[i]= flubber.interpolate(uploadedSVGPaths[i], uploadedSVGPaths[i+1], { maxSegmentLength: 1 });
-  console.log("hii I was here :)" + i);
-}
-}
 
   const svg = document.querySelector("#path-00");
   if (!svg) {
@@ -254,13 +240,13 @@ function morphingAnimation(uploadedSVGPaths) {
     return;
   }
   console.log("hii I'm animating now:)");
-  animate(uploadedSVGPaths); 
+  animate();
 }
 
-if (checkLoop) {
+if (checkLoop) { // **** maybe no if needed
   checkLoop.addEventListener('change', function () {
     if (!uploadedSVGPaths || uploadedSVGPaths.length < 2) return;
-    animate(uploadedSVGPaths);
+    animate();
   });
 }
 
@@ -274,17 +260,17 @@ pauseAnimation.addEventListener('change', () => {
   }
 });
 
-document.querySelector('#myRange').addEventListener('input', function() {
+document.querySelector('#myRange').addEventListener('input', function () {
   animationSpeed = this.value;
   var speedAnimation = max - animationSpeed;
-    animation.duration = speedAnimation;
+  animation.duration = speedAnimation;
 });
 
 //Drag and Drop function 
 const dropzone = document.querySelector('.dropzone');
 const input = document.querySelector("input[type='file']");
 const colorPicker = document.getElementById("colorPicker");
-const previewList = document.getElementById("svg-preview-list"); 
+const previewList = document.getElementById("svg-preview-list");
 const svgContainer = document.getElementById("svg-container");
 
 
@@ -293,55 +279,55 @@ const svgContainer = document.getElementById("svg-container");
 
 function setupDropzone(dropzone) {
 
-dropzone.addEventListener("click", () => {
+  dropzone.addEventListener("click", () => {
     input.click();
     input.onchange = (e) => {
       const file = e.target.files[0];
-      rightFiles(file); 
+      rightFiles(file);
       upload(file);
     };
   });
 
-// dropzone.addEventListener("dragover", (e) => {
-//     e.preventDefault(); 
-// });
+  // dropzone.addEventListener("dragover", (e) => {
+  //     e.preventDefault(); 
+  // });
 
-// dropzone.addEventListener("drop", (e) => {
-//   e.preventDefault();
-//   handleFile(e.dataTransfer.files[0]);
-//   const file = e.dataTransfer.files[0];
-//   if (rightFiles(file, dropzone)) {
-//     upload(file, dropzone);
-//   }
-// });
+  // dropzone.addEventListener("drop", (e) => {
+  //   e.preventDefault();
+  //   handleFile(e.dataTransfer.files[0]);
+  //   const file = e.dataTransfer.files[0];
+  //   if (rightFiles(file, dropzone)) {
+  //     upload(file, dropzone);
+  //   }
+  // });
 }
 
 
 function rightFiles(file) {
   const msg = dropzone.querySelector("p");
-    if (!file) {
-      if (msg) msg.textContent = "Error: No file selected";
-      throw new Error("No file selected");
-    }
-  
-    if (file.type !== "image/svg+xml") {
-      if (msg) msg.textContent = "Error: Not an SVG file";
-      throw new Error("Not an SVG file");
-    }
+  if (!file) {
+    if (msg) msg.textContent = "Error: No file selected";
+    throw new Error("No file selected");
   }
+
+  if (file.type !== "image/svg+xml") {
+    if (msg) msg.textContent = "Error: Not an SVG file";
+    throw new Error("Not an SVG file");
+  }
+}
 
 function upload(file) {
   console.log("hiii hell ya");
 
   switch (currentID) {
     case 1:
-      maxSVG = 6; 
+      maxSVG = 6;
       break;
     case 2:
-      maxSVG = 1; 
+      maxSVG = 1;
       break;
     case 3:
-      maxSVG = 1; 
+      maxSVG = 1;
       break;
     default:
       break;
@@ -355,13 +341,13 @@ function upload(file) {
     return;
   }
 
-  id = id +1;
-   
-   const reader = new FileReader();
-   reader.onload = function(event) {
+  id = id + 1;
 
-     const svgContent = event.target.result;
-     console.log(svgContent);
+  const reader = new FileReader();
+  reader.onload = function (event) {
+
+    const svgContent = event.target.result;
+    //  console.log(svgContent);
 
     const parser = new DOMParser();
     const svgDoc = parser.parseFromString(svgContent, "image/svg+xml");
@@ -382,28 +368,23 @@ function upload(file) {
     if (currentID === 3 && id === 0) {
       createTracingElement(importedSVG);
     }
-      
+
 
     if (pathData) {
       uploadedSVGPaths[id] = pathData;
     }
 
-    if (id === 0){
+    if (id === 0) {
       svgContainer.innerHTML = "";
-      const clonedSVG = document.importNode(importedSVG, true);
-      svgContainer.appendChild(clonedSVG);
+      svgContainer.appendChild(document.importNode(importedSVG, true));;
     }
 
-    console.log(uploadedSVGPaths[id] + " id: " + id);
-
-  
-
-    const preview = SVG().addTo(previewList).size("100%", "100%");
+    const preview = SVG().addTo(previewList).viewbox(0, 0, 400, 400);
     preview.svg(svgContent);
-    
+
   };
   reader.readAsText(file);
-  
+
 }
 
 animateButton.addEventListener("click", () => {
@@ -423,79 +404,79 @@ function resetUploads(svgContainer, previewList) {
   id = -1;
 }
 
-function animationChooser(currentID){
-switch (currentID) {
-  case 1:
-    console.log("option 1")
-    if (uploadedPaths[0] === null || uploadedPaths[1] === null){
-  console.log("upload at least 2 shapes")
-}
-else{
-morphingAnimation(uploadedSVGPaths);
-}
-    break;
-  case 2:
-    console.log("option 2")
-    drawableAnimation(uploadedSVGPaths);
-    break;
-  case 3:
-    motionPathAnimation(uploadedSVGPaths);
-  console.log("option 3")
-    break;
-  default:
-    break;
-}
+function animationChooser(currentID) {
+  switch (currentID) {
+    case 1:
+      console.log("option 1")
+      if (uploadedPaths[0] === null || uploadedPaths[1] === null) {
+        console.log("upload at least 2 shapes")
+      }
+      else {
+        morphingAnimation();
+      }
+      break;
+    case 2:
+      console.log("option 2")
+      drawableAnimation();
+      break;
+    case 3:
+      motionPathAnimation();
+      console.log("option 3")
+      break;
+    default:
+      break;
+  }
 }
 
 
-function createTracingElement(importedSVG){
+function createTracingElement(importedSVG) {
   const carGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-      carGroup.setAttribute("id", "car");
-    
-      const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-      circle.setAttribute("r", 10);
-      circle.setAttribute("fill", "red");
-      circle.setAttribute("cx", "0");
-      circle.setAttribute("cy", "0");
-    
-      carGroup.appendChild(circle);
-  
-      importedSVG.appendChild(carGroup);
+  carGroup.setAttribute("id", "car");
+
+  const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  circle.setAttribute("r", 10);
+  circle.setAttribute("fill", "red");
+  circle.setAttribute("cx", "0");
+  circle.setAttribute("cy", "0");
+
+  carGroup.appendChild(circle);
+
+  importedSVG.appendChild(carGroup);
 }
 
 
 // starting page and overlay 
 // DON'T DELETE, ACTIVATE WHEN FINISHED
 
-const instructions = [
-  "",
-  "This tool lets you draw or animate SVG paths. Let's get started!",
-  "Choose a mode from the dropdown (Morphing, Drawable, Motion Path).",
-  "Upload an SVG or draw directly in Drawable mode.",
-  "Only similar SVG's are morphable",
-  "Click 'Animate' to see your path in action.",
-  "You're ready! Enjoy creating with the tool!"
-];
+// const instructions = [
+//   "",
+//   "This tool lets you draw or animate SVG paths. Let's get started!",
+//   "Choose a mode from the dropdown (Morphing, Drawable, Motion Path).",
+//   "Upload an SVG or draw directly in Drawable mode.",
+//   "Only similar SVG's are morphable",
+//   "Click 'Animate' to see your path in action.",
+//   "You're ready! Enjoy creating with the tool!"
+// ];
 
-let currentStep = 0;
+// let currentStep = 0;
 
-const instructionText = document.getElementById("instructionText");
-const main = document.getElementById("mainApp");
-const nextBtn = document.getElementById("nextBtn");
-const overlay = document.getElementById("welcomeOverlay");
-const overlayText = document.querySelector("#welcomeOverlay h2");
+// const instructionText = document.getElementById("instructionText");
+// const main = document.getElementById("mainApp");
+// const nextBtn = document.getElementById("nextBtn");
+// const overlay = document.getElementById("welcomeOverlay");
+// const overlayText = document.querySelector("#welcomeOverlay h2");
 
-nextBtn.addEventListener("click", () => {
-  currentStep++;
-  if (currentStep < instructions.length) {
-    overlayText.style.fontSize = "48px"
-    overlay.style.display = "block";
-    main.style.display = "none";
-    instructionText.textContent = instructions[currentStep];
-    nextBtn.textContent = currentStep === instructions.length - 1 ? "Start" : "OK";
-  } else {
-    overlay.style.display = "none";
-    main.style.display = "block";
-  }
-});
+// nextBtn.addEventListener("click", () => {
+//   currentStep++;
+//   if (currentStep < instructions.length) {
+//     overlayText.style.fontSize = "48px"
+//     overlay.style.display = "block";
+//     main.style.display = "none";
+//     instructionText.textContent = instructions[currentStep];
+//     nextBtn.textContent = currentStep === instructions.length - 1 ? "Start" : "OK";
+//   } else {
+//     overlay.style.display = "none";
+//     main.style.display = "block";
+//   }
+// });
 

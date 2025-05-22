@@ -10,20 +10,17 @@
 
 <body>
     
-  <div id="welcomeOverlay">
+  <!-- <div id="welcomeOverlay">
     <div class="instruction-box">
       <h2>VEC<br>TRA</h2>
       <p id="instructionText"></p>
       <button id="nextBtn">START</button>
     </div>
-  </div>
+  </div> -->
 
   <div id="mainApp">
     <div class="page-container">
       <div id="pageLayout">
-        <div class="page-header">
-          <h2>VECTRA</h2>
-        </div>
         <div id="svg-container">
         </div>
       </div>
@@ -34,14 +31,16 @@
         <button onclick="closeWindow()" style="float:right;">X</button>
         <div id="externalContent" style="height:95%; overflow:auto;"></div>
       </div>
-      <button onclick="openWindow('<h2>My SVG Preview</h2>')">Open Preview</button>
 
       <button id="savePath">Save Path</button>
 
 
       <div class="gui-container">
+        <div class="page-header">
+          <h2>VECTRA</h2>
+        </div>
 
-        <label for="scriptDropdown">What would you like to do?</label>
+
         <select id="scriptDropdown">
           <option value="morphing">Morphing</option>
           <option value="drawable">Drawable</option>
@@ -79,14 +78,6 @@
 
 
         <div id="drawable-GUI" class="mode-ui">
-          <!-- <div class="dropzone" id="dropzone2"> 
-      <input type="file">
-      <h4>upload</h4>
-    </div>
-      <button type="button" id="animate-button-draw">Animate</button>
-      <button type="button" id="delete-button-draw">Delete</button>
-    <div id="svg-preview-list-draw"></div>
-  </div> -->
         </div>
 
 
