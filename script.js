@@ -8,8 +8,8 @@ const maxVal = parseInt(document.getElementById("myRange").max);
 const max = maxVal * 1.2;
 let animation = null;
 let animationSpeed = slider ? parseFloat(slider.value) : 0.001;
-let uploadedPaths = [];
-let uploadedSVGPaths = [];
+let uploadedPaths = []; //*** replace these with svgs
+let uploadedSVGPaths = []; //*** replace these with svgs
 let svgs = []
 // svgs.push({svg:svgCode, path:mPath})  // *** just save your upload/draw and a fancy js obj array..
 // svgs[0].path
@@ -17,8 +17,6 @@ let svgsSelected = 0 // clickable index
 let interpolator = null;
 let interP = [];
 let path = null;
-let start = null;
-let end = null;
 let maxSVG;
 let currentID = 1;
 let id = -1;
@@ -29,7 +27,7 @@ const motion_GUI = document.getElementById("motion-GUI");
 //Choose Mode
 document.getElementById("scriptDropdown").addEventListener("change", function () {
   const selected = this.value;
-  // resetGUI(svgContainer, previewList);
+  resetGUI(svgContainer);
 
   switch (selected) {
     case "morphing":
@@ -109,7 +107,7 @@ function setupDrawing() {
 
 
 
-function resetGUI(svgContainer, previewList) {
+function resetGUI(svgContainer) {
   document.getElementById("morphing-GUI").style.display = "none";
   document.getElementById("drawable-GUI").style.display = "none";
   document.getElementById("motion-GUI").style.display = "none";
@@ -120,7 +118,6 @@ setupDrawing();
 
 //debug 
 function morphing() {
-  console.log("morphing")
   currentID = 1;
 }
 
@@ -183,37 +180,6 @@ function motion() {
   console.log("motionPath")
 }
 
-function animate() {
-  if (animation) animation.pause();
-
-  const shouldLoop = checkLoop.checked;
-  console.log("Animating with loop:", shouldLoop);
-
-  playNext(0, shouldLoop, uploadedSVGPaths);
-}
-
-function playNext(index, shouldLoop, uploadedSVGPaths) {
-  const currentInterpolator = interP[index];
-  animation = anime({
-    targets: {},
-    duration: max - animationSpeed,
-    easing: 'easeOutQuad',
-    loop: shouldLoop,
-    direction: 'alternate',
-    update: function (anim) {
-      const t = anim.progress / 100;
-      path.setAttribute('d', currentInterpolator(t));
-    },
-    complete: function () {
-      index++;
-      if (index < uploadedSVGPaths.length) {
-        playNext(index, shouldLoop, uploadedSVGPaths);
-      } else if (shouldLoop) {
-        playNext(0, shouldLoop, uploadedSVGPaths);
-      }
-    }
-  });
-}
 
 
 
@@ -257,6 +223,38 @@ if (checkLoop) { // **** maybe no if needed
   });
 }
 
+function animate() {
+  if (animation) animation.pause();
+
+  const shouldLoop = checkLoop.checked;
+  console.log("Animating with loop:", shouldLoop);
+
+  playNext(0, shouldLoop, uploadedSVGPaths);
+}
+
+function playNext(index, shouldLoop, uploadedSVGPaths) {
+  const currentInterpolator = interP[index];
+  animation = anime({
+    targets: {},
+    duration: max - animationSpeed,
+    easing: 'easeOutQuad',
+    loop: shouldLoop,
+    direction: 'alternate',
+    update: function (anim) {
+      const t = anim.progress / 100;
+      path.setAttribute('d', currentInterpolator(t));
+    },
+    complete: function () {
+      index++;
+      if (index < uploadedSVGPaths.length) {
+        playNext(index, shouldLoop, uploadedSVGPaths);
+      } else if (shouldLoop) {
+        playNext(0, shouldLoop, uploadedSVGPaths);
+      }
+    }
+  });
+}
+
 pauseAnimation.addEventListener('change', () => {
   if (pauseAnimation.checked) {
     animation.pause();
@@ -294,19 +292,6 @@ function setupDropzone(dropzone) {
       upload(file);
     };
   });
-
-  // dropzone.addEventListener("dragover", (e) => {
-  //     e.preventDefault(); 
-  // });
-
-  // dropzone.addEventListener("drop", (e) => {
-  //   e.preventDefault();
-  //   handleFile(e.dataTransfer.files[0]);
-  //   const file = e.dataTransfer.files[0];
-  //   if (rightFiles(file, dropzone)) {
-  //     upload(file, dropzone);
-  //   }
-  // });
 }
 
 
@@ -324,28 +309,13 @@ function rightFiles(file) {
 }
 
 function upload(file) {
-  console.log("hiii hell ya");
 
-  switch (currentID) {
-    case 1:
-      maxSVG = 6;
-      break;
-    case 2:
-      maxSVG = 1;
-      break;
-    case 3:
-      maxSVG = 1;
-      break;
-    default:
-      break;
-  }
+  modeChooser();
 
-  console.log(currentID)
-  console.log(maxSVG)
-
-  if (id + 1 >= maxSVG) {
+  if (svgs.length >= maxSVG) {
     alert(`You can only upload a maximum of ${maxSVG} SVG file${maxSVG > 1 ? 's' : ''} in this mode.`);
     return;
+    //***function that deletes the first on the list and adds a new one at the end 
   }
 
   id = id + 1;
@@ -354,8 +324,6 @@ function upload(file) {
   reader.onload = function (event) {
 
     const svgContent = event.target.result;
-    //  console.log(svgContent);
-
     const parser = new DOMParser();
     const svgDoc = parser.parseFromString(svgContent, "image/svg+xml");
     const importedSVG = svgDoc.documentElement;
@@ -451,6 +419,20 @@ function createTracingElement(importedSVG) {
   importedSVG.appendChild(carGroup);
 }
 
+function modeChooser(){
+switch (currentID) {
+  case 1:
+    maxSVG = 6;
+    break;
+  case 2:
+    maxSVG = 1;
+    break;
+  case 3:
+    maxSVG = 1;
+    break;
+  default:
+    break;
+}}
 
 // starting page and overlay 
 // DON'T DELETE, ACTIVATE WHEN FINISHED
@@ -487,3 +469,7 @@ function createTracingElement(importedSVG) {
 //   }
 // });
 
+
+
+//***TODO
+//FIX Code with Array 
