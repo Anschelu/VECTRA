@@ -101,9 +101,14 @@ body {
     display: none;
   }
 
-  #drawingArea{
+  #drawWindow{
     position: absolute;
+    border: 1px solid #ccc;
   }
+
+  /* #drawingArea{
+    position: absolute;
+  } */
 
 
 /* welcoming page */

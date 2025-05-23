@@ -4,22 +4,27 @@ var deleteButtonDraw = document.getElementById("delete-button-draw");
 var animateButton = document.getElementById("animate-button");
 var pauseAnimation = document.getElementById('pauseAnimation')
 var slider = document.getElementById("myRange");
+let savePath = document.getElementById('savePath')
 const maxVal = parseInt(document.getElementById("myRange").max);
 const max = maxVal * 1.2;
 let animation = null;
 let animationSpeed = slider ? parseFloat(slider.value) : 0.001;
 let uploadedPaths = []; //*** replace these with svgs
 let uploadedSVGPaths = []; //*** replace these with svgs
-let svgs = []
+let svgs = [];
+let drawingArea = document.getElementById("drawingArea");
+let drawWindow = document.getElementById("drawWindow");
 // svgs.push({svg:svgCode, path:mPath})  // *** just save your upload/draw and a fancy js obj array..
 // svgs[0].path
 let svgsSelected = 0 // clickable index
 let interpolator = null;
-let interP = [];
-let path = null;
+// let interP = [];
+let pathSVG = null;
 let maxSVG;
 let currentID = 1;
-let id = -1;
+// let index = 0; 
+let interP = [];
+let path = null;
 
 const morphing_GUI = document.getElementById("morphing-GUI");
 const drawable_GUI = document.getElementById("drawable-GUI");
@@ -28,7 +33,6 @@ const motion_GUI = document.getElementById("motion-GUI");
 document.getElementById("scriptDropdown").addEventListener("change", function () {
   const selected = this.value;
   resetGUI(svgContainer);
-
   switch (selected) {
     case "morphing":
       morphing_GUI.style.display = "block";
@@ -48,7 +52,6 @@ document.getElementById("scriptDropdown").addEventListener("change", function ()
 });
 
 function setupDrawing() {
-  var drawingArea = document.getElementById("drawingArea");
   let draw = SVG().addTo('#drawingArea').size(400, 400);
   let pathp = draw.path().fill('none').stroke({ width: 20, color: '#000' });
 
@@ -72,38 +75,20 @@ function setupDrawing() {
     drawing = false;
   });
 
-  document.getElementById('savePath').addEventListener('click', () => {
-
-    id = id +1; 
-
-    let myDrawing = document.querySelector("#drawingArea svg")
-    // *** parse mydrawing like it was an uploaded svg.. then its treated the same
-
-    
-    const pathData = myDrawing.querySelector('path')?.getAttribute('d');
-    uploadedSVGPaths[id] = pathData;
-
-    const newId = `path-0${id}`;
-    myDrawing.setAttribute("id", newId);
-    
-    svgContainer.appendChild(document.importNode(myDrawing, true));
-    
-    const pathElement = myDrawing.querySelector('path');
-    const d = pathElement.getAttribute('d');
-  
-    const preview = SVG().addTo(previewList).viewbox(0, 0, 400, 400);
-    preview.path(d).fill('none').stroke({ width: 20, color: '#000' });
-
-  // myDrawing.innerHTML = ""; 
-    
-    deleteButton.addEventListener("click", () => {
-      drawingArea.innerHTML = "";
-      resetUploads(svgContainer, previewList);
-      setupDrawing();
-    });
-  });
 }
 
+savePath.addEventListener('click', () => {
+
+  let myDrawing = document.querySelector("#drawingArea svg")
+  let svgContent = new XMLSerializer().serializeToString(myDrawing);
+  uploadAndDraw(svgContent);
+});
+
+deleteButton.addEventListener("click", () => {
+  drawingArea.innerHTML = "";
+  resetUploads();
+  setupDrawing();
+});
 
 
 
@@ -177,48 +162,39 @@ function motionPathAnimation() {
 
 function motion() {
   currentID = 3;
-  console.log("motionPath")
 }
 
-
-
-
-//pass array of paths 
 function morphingAnimation() {
 
-  //go through array and set more animations
+  if (svgs.length < 2) {
+    console.error("At least 2 SVGs required for morphing.");
+    return;
+  }
 
-  for (let i = 0; i < uploadedSVGPaths.length; i++) {
-    console.log("hii I reached this function :)");
-    // interpolator = flubber.interpolate(start, end, { maxSegmentLength: 1 });
-    if (i === (uploadedSVGPaths.length - 1)) {
-      interP[i] = flubber.interpolate(uploadedSVGPaths[i], uploadedSVGPaths[0], { maxSegmentLength: 1 });
+  for (let i = 0; i < svgs.length; i++) {
+    if (i === (svgs.length - 1)) {
+      interP[i] = flubber.interpolate(svgs[i].path, svgs[0].path, { maxSegmentLength: 1 });
       console.log("hii I'm last :)");
     }
     else {
-      interP[i] = flubber.interpolate(uploadedSVGPaths[i], uploadedSVGPaths[i + 1], { maxSegmentLength: 1 });
+      interP[i] = flubber.interpolate(svgs[i].path, svgs[i + 1].path, { maxSegmentLength: 1 });
       console.log("hii I was here :)" + i);
     }
   }
 
-  const svg = document.querySelector("#path-00");
-  if (!svg) {
-    console.error("SVG element with id #path-00 not found.");
+  path = document.querySelector("#path-00");
+
+  if (!path) {
+    console.error("No <path> found with ID #path-00.");
     return;
   }
 
-  path = svg.querySelector("path");
-  if (!path) {
-    console.error("No <path> found in #path-01.");
-    return;
-  }
-  console.log("hii I'm animating now:)");
   animate();
 }
 
-if (checkLoop) { // **** maybe no if needed
+if (checkLoop) { 
   checkLoop.addEventListener('change', function () {
-    if (!uploadedSVGPaths || uploadedSVGPaths.length < 2) return;
+    if (!svgs || svgs.length < 2) return;
     animate();
   });
 }
@@ -229,13 +205,12 @@ function animate() {
   const shouldLoop = checkLoop.checked;
   console.log("Animating with loop:", shouldLoop);
 
-  playNext(0, shouldLoop, uploadedSVGPaths);
+  playNext(0, shouldLoop);
 }
 
-function playNext(index, shouldLoop, uploadedSVGPaths) {
-  const currentInterpolator = interP[index];
+function playNext(i, shouldLoop) {
+  const currentInterpolator = interP[i];
   animation = anime({
-    targets: {},
     duration: max - animationSpeed,
     easing: 'easeOutQuad',
     loop: shouldLoop,
@@ -245,11 +220,11 @@ function playNext(index, shouldLoop, uploadedSVGPaths) {
       path.setAttribute('d', currentInterpolator(t));
     },
     complete: function () {
-      index++;
-      if (index < uploadedSVGPaths.length) {
-        playNext(index, shouldLoop, uploadedSVGPaths);
+      i++;
+      if (i < svgs.length) {
+        playNext(i, shouldLoop);
       } else if (shouldLoop) {
-        playNext(0, shouldLoop, uploadedSVGPaths);
+        playNext(0, shouldLoop);
       }
     }
   });
@@ -272,11 +247,11 @@ document.querySelector('#myRange').addEventListener('input', function () {
 });
 
 //Drag and Drop function 
-const dropzone = document.querySelector('.dropzone');
-const input = document.querySelector("input[type='file']");
-const colorPicker = document.getElementById("colorPicker");
-const previewList = document.getElementById("svg-preview-list");
-const svgContainer = document.getElementById("svg-container");
+let dropzone = document.querySelector('.dropzone');
+let input = document.querySelector("input[type='file']");
+let colorPicker = document.getElementById("colorPicker");
+let previewList = document.getElementById("svg-preview-list");
+let svgContainer = document.getElementById("svg-container");
 
 
 
@@ -312,54 +287,84 @@ function upload(file) {
 
   modeChooser();
 
-  if (svgs.length >= maxSVG) {
-    alert(`You can only upload a maximum of ${maxSVG} SVG file${maxSVG > 1 ? 's' : ''} in this mode.`);
-    return;
-    //***function that deletes the first on the list and adds a new one at the end 
-  }
+  //deletes first svg and then moves all the svg's to one gap before
+  limitControl();
 
-  id = id + 1;
+
+  //*** What do I need in svgs Array: PathName, svgContent, Path, 
+  //*** one function for draw and upload possible? 
 
   const reader = new FileReader();
   reader.onload = function (event) {
 
-    const svgContent = event.target.result;
-    const parser = new DOMParser();
-    const svgDoc = parser.parseFromString(svgContent, "image/svg+xml");
-    const importedSVG = svgDoc.documentElement;
+    let svgContent = event.target.result;
 
-    const newId = `path-0${id}`;
-    console.log(id);
-    importedSVG.setAttribute("id", newId);
+    // const parser = new DOMParser();
+    // const svgDoc = parser.parseFromString(svgContent, "image/svg+xml");
+    // const importedSVG = svgDoc.documentElement;
 
-    uploadedPaths[id] = importedSVG;
-
-    deleteButton.addEventListener("click", () => {
-      resetUploads(svgContainer, previewList);
-    });
-
-    const pathData = importedSVG.querySelector('path')?.getAttribute('d');
-
-    if (currentID === 3 && id === 0) {
-      createTracingElement(importedSVG);
-    }
-
-
-    if (pathData) {
-      uploadedSVGPaths[id] = pathData;
-    }
-
-    if (id === 0) {
-      svgContainer.innerHTML = "";
-      svgContainer.appendChild(document.importNode(importedSVG, true));;
-    }
-
-    const preview = SVG().addTo(previewList).viewbox(0, 0, 400, 400);
-    preview.svg(svgContent);
-
+    uploadAndDraw(svgContent);
+    
   };
   reader.readAsText(file);
 
+}
+
+function uploadAndDraw(svgContent){
+
+  let index = svgs.length;
+  
+  // const pathData = importedSVG.querySelector('path')?.getAttribute('d');
+
+  // importedSVG.setAttribute("id", newId);
+
+
+  // svgs.push({svg:svgContent, path:pathData, id:newId}) 
+
+  const newId = `path-0${index}`;
+
+  const parser = new DOMParser();
+  const svgDoc = parser.parseFromString(svgContent, "image/svg+xml");
+  const pathElement = svgDoc.querySelector("path");
+
+  pathElement.setAttribute("id", newId);
+
+  const serializer = new XMLSerializer();
+  svgContent = serializer.serializeToString(svgDoc.documentElement);
+
+
+  const pathData = pathElement?.getAttribute("d");
+
+  svgs.push({ svg: svgContent, path: pathData, id: newId });
+
+  if (currentID === 3 && svgs[0]) {
+    createTracingElement(svgs.svg);
+  }
+
+  if (index === 0) {
+    svgContainer.innerHTML = "";
+    let canvas = SVG().addTo(svgContainer);
+    canvas.svg(svgs[index].svg);
+  }
+  previewSVG(index);
+}
+
+function limitControl(){
+  if (svgs.length >= maxSVG) {
+    svgs.shift(); 
+  
+    previewList.innerHTML = '';
+  
+    svgs.forEach((_, i) => {
+      previewSVG(i);
+    });
+  }
+}
+
+function previewSVG(index){
+  let preview = SVG().addTo(previewList).viewbox(0, 0, 400, 400);
+  console.log(svgs[index].svg)
+  preview.svg(svgs[index].svg);
 }
 
 animateButton.addEventListener("click", () => {
@@ -368,27 +373,19 @@ animateButton.addEventListener("click", () => {
 
 setupDropzone(dropzone);
 
-function resetUploads(svgContainer, previewList) {
-  console.log("getting cleared now, yey");
+function resetUploads() {
+  // console.log("getting cleared now, yey");
   svgContainer.innerHTML = "";
   previewList.innerHTML = "";
-  for (let i = 0; i <= maxSVG - 1; i++) {
-    uploadedPaths[i] = null;
-  }
-  uploadedSVGPaths = [];
-  id = -1;
+  svgs.length = [];
 }
+
 
 function animationChooser(currentID) {
   switch (currentID) {
     case 1:
       console.log("option 1")
-      if (uploadedPaths[0] === null || uploadedPaths[1] === null) {
-        console.log("upload at least 2 shapes")
-      }
-      else {
         morphingAnimation();
-      }
       break;
     case 2:
       console.log("option 2")
@@ -468,8 +465,3 @@ switch (currentID) {
 //     main.style.display = "block";
 //   }
 // });
-
-
-
-//***TODO
-//FIX Code with Array 
