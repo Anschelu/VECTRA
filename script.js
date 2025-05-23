@@ -4,7 +4,7 @@ var deleteButtonDraw = document.getElementById("delete-button-draw");
 var animateButton = document.getElementById("animate-button");
 var pauseAnimation = document.getElementById('pauseAnimation')
 var slider = document.getElementById("myRange");
-let savePath = document.getElementById('savePath')
+// let savePath = document.getElementById('savePath')
 const maxVal = parseInt(document.getElementById("myRange").max);
 const max = maxVal * 1.2;
 let animation = null;
@@ -12,19 +12,16 @@ let animationSpeed = slider ? parseFloat(slider.value) : 0.001;
 let uploadedPaths = []; //*** replace these with svgs
 let uploadedSVGPaths = []; //*** replace these with svgs
 let svgs = [];
-let drawingArea = document.getElementById("drawingArea");
-let drawWindow = document.getElementById("drawWindow");
-// svgs.push({svg:svgCode, path:mPath})  // *** just save your upload/draw and a fancy js obj array..
-// svgs[0].path
 let svgsSelected = 0 // clickable index
 let interpolator = null;
-// let interP = [];
 let pathSVG = null;
 let maxSVG;
 let currentID = 1;
-// let index = 0; 
 let interP = [];
 let path = null;
+const saveDraw = document.getElementById("saveDraw");
+const clearDraw = document.getElementById("clearDraw");
+const closeDraw = document.getElementById("closeDraw");
 
 const morphing_GUI = document.getElementById("morphing-GUI");
 const drawable_GUI = document.getElementById("drawable-GUI");
@@ -51,37 +48,41 @@ document.getElementById("scriptDropdown").addEventListener("change", function ()
   }
 });
 
+var previewDrawing = {}
 function setupDrawing() {
-  let draw = SVG().addTo('#drawingArea').size(400, 400);
-  let pathp = draw.path().fill('none').stroke({ width: 20, color: '#000' });
+  previewDrawing.draw = SVG().addTo('#drawingArea').size(400, 400);
+  previewDrawing.pathp = previewDrawing.draw.path().fill('none').stroke({ width: 20, color: '#000' });
 
-  let drawing = false;
-  let points = [];
+  previewDrawing.drawing = false;
+  previewDrawing.points = [];
 
-  draw.on('mousedown', function (e) {
-    drawing = true;
-    points = [];
-    pathp.plot('');
+  previewDrawing.draw.on('mousedown', function (e) {
+    console.log(e)
+    previewDrawing.drawing = true;
+    previewDrawing.points = [];
+    previewDrawing.pathp.plot('');
   });
 
-  draw.on('mousemove', function (e) {
-    if (!drawing) return;
-    const point = draw.point(e.clientX, e.clientY);
-    points.push([point.x, point.y]);
-    pathp.plot(`M ${points.map(p => p.join(',')).join(' L ')}`);
+  previewDrawing.draw.on('mousemove', function (e) {
+    if (!previewDrawing.drawing) return;
+    const point = previewDrawing.draw.point(e.clientX, e.clientY);
+    previewDrawing.points.push([point.x, point.y]);
+    previewDrawing.pathp.plot(`M ${previewDrawing.points.map(p => p.join(',')).join(' L ')}`);
   });
 
-  draw.on('mouseup', function () {
-    drawing = false;
+  previewDrawing.draw.on('mouseup', function () {
+    previewDrawing.drawing = false;
   });
 
 }
 
-savePath.addEventListener('click', () => {
+saveDraw.addEventListener('click', () => {
 
   let myDrawing = document.querySelector("#drawingArea svg")
   let svgContent = new XMLSerializer().serializeToString(myDrawing);
   uploadAndDraw(svgContent);
+    previewDrawing.points = [];
+    previewDrawing.pathp.plot('');
 });
 
 deleteButton.addEventListener("click", () => {
@@ -111,8 +112,12 @@ function drawable() {
 }
 
 function drawableAnimation() {
-  const svgDraw = document.querySelector("#path-00"); // querySelectorAll([id^="#path-")[0] // *** collect all available, then filter
-  path = svgDraw.querySelector("path");
+  path = document.querySelector("#path-00");
+
+  if (!path) {
+    console.error("No <path> found with ID #path-00.");
+    return;
+  }
   anime({
     targets: path,
     strokeDashoffset: [anime.setDashoffset, 0],
@@ -127,15 +132,10 @@ function drawableAnimation() {
 
 
 function motionPathAnimation() {
-  const svgMotion = document.querySelector("#path-00");
-  if (!svgMotion) return;
-  const path = svgMotion.querySelector("path");
-  const car = svgMotion.querySelector("#car");
+  const path = document.querySelector("#path-00");
+  const car = document.querySelector("#car");
 
-  if (!path || !car) {
-    console.error("Pfad oder Auto nicht gefunden.");
-    return;
-  }
+  if (!path || !car) return;
 
   const pathLength = path.getTotalLength();
 
@@ -144,7 +144,6 @@ function motionPathAnimation() {
     progress: 100,
     duration: 4000,
     easing: 'linear',
-    draw: '0 1',
     loop: true,
     direction: 'alternate',
     update: function (anim) {
@@ -153,7 +152,6 @@ function motionPathAnimation() {
       const nextPoint = path.getPointAtLength(Math.min(progress * pathLength + 1, pathLength));
 
       const angle = Math.atan2(nextPoint.y - point.y, nextPoint.x - point.x) * (180 / Math.PI);
-
       car.setAttribute("transform", `translate(${point.x}, ${point.y}) rotate(${angle})`);
     }
   });
@@ -253,18 +251,15 @@ let colorPicker = document.getElementById("colorPicker");
 let previewList = document.getElementById("svg-preview-list");
 let svgContainer = document.getElementById("svg-container");
 
-
-
-//add dropzone when one is added?
-
 function setupDropzone(dropzone) {
-
   dropzone.addEventListener("click", () => {
     input.click();
     input.onchange = (e) => {
-      const file = e.target.files[0];
-      rightFiles(file);
-      upload(file);
+      const files = Array.from(e.target.files); // Convert FileList to Array
+      files.forEach(file => {
+        rightFiles(file);
+        upload(file);
+      });
     };
   });
 }
@@ -299,10 +294,6 @@ function upload(file) {
 
     let svgContent = event.target.result;
 
-    // const parser = new DOMParser();
-    // const svgDoc = parser.parseFromString(svgContent, "image/svg+xml");
-    // const importedSVG = svgDoc.documentElement;
-
     uploadAndDraw(svgContent);
     
   };
@@ -313,13 +304,6 @@ function upload(file) {
 function uploadAndDraw(svgContent){
 
   let index = svgs.length;
-  
-  // const pathData = importedSVG.querySelector('path')?.getAttribute('d');
-
-  // importedSVG.setAttribute("id", newId);
-
-
-  // svgs.push({svg:svgContent, path:pathData, id:newId}) 
 
   const newId = `path-0${index}`;
 
@@ -337,14 +321,16 @@ function uploadAndDraw(svgContent){
 
   svgs.push({ svg: svgContent, path: pathData, id: newId });
 
-  if (currentID === 3 && svgs[0]) {
-    createTracingElement(svgs.svg);
+  if (currentID === 3) {
+    createTracingElement();
   }
 
   if (index === 0) {
-    svgContainer.innerHTML = "";
-    let canvas = SVG().addTo(svgContainer);
-    canvas.svg(svgs[index].svg);
+    // svgContainer.innerHTML = "";
+    // let canvas = SVG().addTo(svgContainer);
+    // canvas.svg(svgs[index].path);
+
+    svgContainer.innerHTML = svgs[index].svg
   }
   previewSVG(index);
 }
@@ -361,10 +347,22 @@ function limitControl(){
   }
 }
 
-function previewSVG(index){
-  let preview = SVG().addTo(previewList).viewbox(0, 0, 400, 400);
-  console.log(svgs[index].svg)
+// function previewSVG(index){
+//   let preview = SVG().addTo(previewList).viewbox(0, 0, 400, 400);
+//   console.log(svgs[index].svg)
+//   preview.svg(svgs[index].svg);
+// }
+
+function previewSVG(index) {
+  const wrapper = document.createElement("div");
+  wrapper.dataset.index = index;
+  wrapper.style.display = "inline-block";
+  wrapper.style.margin = "10px";
+
+  let preview = SVG().addTo(wrapper).viewbox(0, 0, 400, 400);
   preview.svg(svgs[index].svg);
+
+  previewList.appendChild(wrapper);
 }
 
 animateButton.addEventListener("click", () => {
@@ -372,6 +370,34 @@ animateButton.addEventListener("click", () => {
 });
 
 setupDropzone(dropzone);
+
+Sortable.create(previewList, {
+  animation: 150,
+  ghostClass: 'sortable-ghost',
+  onEnd: function (evt) {
+    const newOrder = Array.from(previewList.children).map(el => parseInt(el.dataset.index));
+    svgs = newOrder.map(i => svgs[i]);
+
+    const parser = new DOMParser();
+    const serializer = new XMLSerializer();
+
+    svgs.forEach((svgObj, index) => {
+      const newId = `path-0${index}`;
+      const svgDoc = parser.parseFromString(svgObj.svg, "image/svg+xml");
+      const pathElement = svgDoc.querySelector("path");
+
+      if (pathElement) {
+        pathElement.setAttribute("id", newId);
+        svgObj.id = newId;
+        svgObj.svg = serializer.serializeToString(svgDoc.documentElement);
+      }
+    });
+    previewList.innerHTML = '';
+    svgs.forEach((_, index) => previewSVG(index));
+    svgContainer.innerHTML = svgs[0].svg;
+  }
+});
+
 
 function resetUploads() {
   // console.log("getting cleared now, yey");
@@ -401,7 +427,8 @@ function animationChooser(currentID) {
 }
 
 
-function createTracingElement(importedSVG) {
+function createTracingElement() {
+  const svg = svgContainer.querySelector("svg");
   const carGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
   carGroup.setAttribute("id", "car");
 
@@ -411,9 +438,9 @@ function createTracingElement(importedSVG) {
   circle.setAttribute("cx", "0");
   circle.setAttribute("cy", "0");
 
+    console.log(svg)
   carGroup.appendChild(circle);
-
-  importedSVG.appendChild(carGroup);
+  svgContainer.appendChild(carGroup); // Append into the loaded SVG
 }
 
 function modeChooser(){
@@ -430,6 +457,34 @@ switch (currentID) {
   default:
     break;
 }}
+
+const drawWindow = document.getElementById("drawWindow");
+const openDrawBtn = document.createElement('button');
+openDrawBtn.textContent = "Open Drawing Tool";
+document.querySelector(".gui-container").appendChild(openDrawBtn);
+
+openDrawBtn.addEventListener("click", () => {
+  drawWindow.style.display = "flex";
+});
+
+closeDraw.addEventListener("click", () => {
+  drawWindow.style.display = "none";
+});
+
+clearDraw.addEventListener("click", () => {
+  previewDrawing.points = [];
+  previewDrawing.pathp.plot('');
+});
+
+// saveDraw.addEventListener("click", () => {
+//   let myDrawing = document.querySelector("#drawingArea svg");
+//   let svgContent = new XMLSerializer().serializeToString(myDrawing);
+//   uploadAndDraw(svgContent);
+//   previewDrawing.points = [];
+//   previewDrawing.pathp.plot('');
+//   drawWindow.style.display = "none"; // optionally close after saving
+// });
+
 
 // starting page and overlay 
 // DON'T DELETE, ACTIVATE WHEN FINISHED
