@@ -59,7 +59,17 @@ document.getElementById("scriptDropdown").addEventListener("change", function ()
 var previewDrawing = {}
 function setupDrawing() {
   previewDrawing.draw = SVG().addTo('#drawingArea').size(400, 400);
-  previewDrawing.pathp = previewDrawing.draw.path().fill('none').stroke({ width: 20, color: '#000' });
+
+  const defs = previewDrawing.draw.defs();
+  defs.element('style').words(`
+    .drawing-path {
+      fill: none;
+      stroke: #000;
+      stroke-width: 20;
+    }
+  `);
+
+  previewDrawing.pathp = previewDrawing.draw.path().addClass('drawing-path');
 
   previewDrawing.drawing = false;
   previewDrawing.points = [];
@@ -124,7 +134,7 @@ function drawable() {
 }
 
 function drawableAnimation() {
-  path = document.querySelector("#path-00");
+  path = document.querySelector("#path-00"); // 
 
   if (!path) {
     console.error("No <path> found with ID #path-00.");
@@ -301,29 +311,36 @@ animateButton.addEventListener("click", () => {
   }, 100);
 });
 
-
+//hieeer
 function uploadAndDraw(svgContent) {
-  const uploadIndicator = document.createElement('div');
-  uploadIndicator.textContent = 'Processing SVG...';
-  uploadIndicator.className = 'upload-indicator fade-in';
-  document.body.appendChild(uploadIndicator);
 
   setTimeout(() => {
-    let index = svgs.length;
-    const newId = `path-0${index}`;
+    
+    console.log(svgs.length)
 
     const parser = new DOMParser();
     const svgDoc = parser.parseFromString(svgContent, "image/svg+xml");
     const pathElement = svgDoc.querySelector("path");
 
-    pathElement.setAttribute("id", newId);
 
+    let index = svgs.length;
+    const newId = `path-0${index}`;
+
+    if (pathElement) {
+      pathElement.setAttribute("id", newId);
+    }
+  
     const serializer = new XMLSerializer();
     svgContent = serializer.serializeToString(svgDoc.documentElement);
 
-    const pathData = pathElement?.getAttribute("d");
+    let style = svgDoc.querySelector('style')?.textContent;
 
-    svgs.push({ svg: svgContent, path: pathData, id: newId });
+    console.log(style);
+    
+    const pathData = pathElement?.getAttribute("d");
+  
+    svgs.push({ svg: svgContent, path: pathData, id: newId, style: style});
+    limitControl();
     
 
     if (currentID === 3) {
@@ -333,11 +350,13 @@ function uploadAndDraw(svgContent) {
     if (index === 0) {
       svgContainer.innerHTML = svgs[index].svg;
     }
-    previewSVG(index);
 
-    uploadIndicator.classList.add('fade-out');
+    if(index < maxSVG){
+      //console.log(index);
+      previewSVG(index); 
+    }
+    
     setTimeout(() => {
-      document.body.removeChild(uploadIndicator);
     }, 300);
   }, 50);
 }
@@ -444,7 +463,6 @@ document.querySelector('#myRange').addEventListener('input', function () {
 //Drag and Drop function 
 let dropzone = document.querySelector('.dropzone');
 let input = document.querySelector("input[type='file']");
-let colorPicker = document.getElementById("colorPicker");
 let previewList = document.getElementById("svg-preview-list");
 let svgContainer = document.getElementById("svg-container");
 
@@ -452,7 +470,7 @@ function setupDropzone(dropzone) {
   dropzone.addEventListener("click", () => {
     input.click();
     input.onchange = (e) => {
-      const files = Array.from(e.target.files); 
+      let files = Array.from(e.target.files); 
       files.forEach(file => {
         rightFiles(file);
         upload(file);
@@ -476,10 +494,10 @@ function rightFiles(file) {
 
 function upload(file) {
   modeChooser();
-  limitControl();
 
   const reader = new FileReader();
   reader.onload = function (event) {
+    
     let svgContent = event.target.result;
     uploadAndDraw(svgContent);
     
@@ -491,8 +509,26 @@ function upload(file) {
 }
 
 function limitControl() {
-  if (svgs.length >= maxSVG) {
+  if (svgs.length > maxSVG) {
     svgs.shift();
+
+      const newOrder = Array.from(previewList.children).map(el => parseInt(el.dataset.index));
+      svgs = newOrder.map(i => svgs[i]);
+  
+      const parser = new DOMParser();
+      const serializer = new XMLSerializer();
+
+    svgs.forEach((svgObj, index) => {
+      const newId = `path-0${index}`;
+      const svgDoc = parser.parseFromString(svgObj.svg, "image/svg+xml");
+      const pathElement = svgDoc.querySelector("path");
+
+      if (pathElement) {
+        pathElement.setAttribute("id", newId);
+        svgObj.id = newId;
+        svgObj.svg = serializer.serializeToString(svgDoc.documentElement);
+      }
+    });
 
     previewList.innerHTML = '';
 
@@ -690,3 +726,68 @@ nextBtn.addEventListener("click", () => {
 });
 
 loopInstructions();
+
+
+function changeSVGFillColor(newColor) {
+  if (!svgs || svgs.length === 0) {
+    console.log("No SVGs uploaded yet");
+    return;
+  }
+
+  const parser = new DOMParser();
+  const serializer = new XMLSerializer();
+
+  svgs.forEach((svgObj, index) => {
+    const svgDoc = parser.parseFromString(svgObj.svg, "image/svg+xml");
+    
+    const elementsWithFill = svgDoc.querySelectorAll('[fill]');
+    const pathElements = svgDoc.querySelectorAll('path');
+    const allShapes = svgDoc.querySelectorAll('circle, rect, ellipse, polygon, polyline, line');
+    
+    elementsWithFill.forEach(element => {
+      element.setAttribute('fill', newColor);
+    });
+  
+    pathElements.forEach(element => {
+      element.setAttribute('fill', newColor);
+    });
+    
+    allShapes.forEach(element => {
+      element.setAttribute('fill', newColor);
+    });
+    
+    const styleElements = svgDoc.querySelectorAll('style');
+    styleElements.forEach(styleEl => {
+      let cssText = styleEl.textContent;
+      cssText = cssText.replace(/fill\s*:\s*[^;]+/g, `fill: ${newColor}`);
+      styleEl.textContent = cssText;
+    });
+    
+    svgObj.svg = serializer.serializeToString(svgDoc.documentElement);
+    svgObj.style = svgDoc.querySelector('style')?.textContent || svgObj.style;
+  });
+  
+  if (svgs.length > 0) {
+    svgContainer.innerHTML = svgs[0].svg;
+  }
+  
+  previewList.innerHTML = '';
+  svgs.forEach((_, index) => previewSVG(index));
+  isAnimationReady = false;
+  isAnimationRunning = false;
+  updateAnimateButton();
+  
+  console.log(`Changed fill color to ${newColor} for ${svgs.length} SVG(s)`);
+}
+
+function setupFillColorChanger() {
+  const colorPicker = document.getElementById('fillColorPicker');
+  const changeBtn = document.getElementById('changeFillBtn');
+
+
+    colorPicker.addEventListener('input', (e) => {
+      changeSVGFillColor(e.target.value);
+    });
+  }
+
+setupFillColorChanger();
