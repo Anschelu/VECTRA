@@ -1,9 +1,9 @@
-var checkLoop = document.getElementById("checkLoop");
-var deleteButton = document.getElementById("delete-button");
-var deleteButtonDraw = document.getElementById("delete-button-draw");
-var animateButton = document.getElementById("animate-button");
-var pauseAnimation = document.getElementById('pauseAnimation')
-var slider = document.getElementById("myRange");
+let checkLoop = document.getElementById("checkLoop");
+let deleteButton = document.getElementById("delete-button");
+let deleteButtonDraw = document.getElementById("delete-button-draw");
+let animateButton = document.getElementById("animate-button");
+let pauseAnimation = document.getElementById('pauseAnimation')
+let slider = document.getElementById("myRange");
 // let savePath = document.getElementById('savePath')
 const maxVal = parseInt(document.getElementById("myRange").max);
 const max = maxVal * 1.2;
@@ -22,6 +22,8 @@ let path = null;
 const saveDraw = document.getElementById("saveDraw");
 const clearDraw = document.getElementById("clearDraw");
 const closeDraw = document.getElementById("closeDraw");
+let isCalculating = false;
+let loadingElement = null;
 
 const morphing_GUI = document.getElementById("morphing-GUI");
 const drawable_GUI = document.getElementById("drawable-GUI");
@@ -162,33 +164,164 @@ function motion() {
   currentID = 3;
 }
 
+//version03 
+// Create loading element with CSS classes
+
+
+function createLoadingElement() {
+  if (!loadingElement) {
+    loadingElement = document.createElement('div');
+    document.body.appendChild(loadingElement);
+  }
+}
+
+function showLoading() {
+  createLoadingElement();
+  loadingElement.style.display = 'block';
+  loadingElement.classList.add('fade-in');
+  isCalculating = true;
+}
+
+function hideLoading() {
+  if (loadingElement) {
+    loadingElement.classList.add('fade-out');
+    setTimeout(() => {
+      loadingElement.style.display = 'none';
+      loadingElement.classList.remove('fade-in', 'fade-out');
+    }, 300);
+  }
+  isCalculating = false;
+}
+
 function morphingAnimation() {
+  if (isCalculating) {
+    console.log("Animation is already being calculated...");
+    return;
+  }
 
   if (svgs.length < 2) {
     console.error("At least 2 SVGs required for morphing.");
     return;
   }
 
-  for (let i = 0; i < svgs.length; i++) {
-    if (i === (svgs.length - 1)) {
-      interP[i] = flubber.interpolate(svgs[i].path, svgs[0].path, { maxSegmentLength: 1 });
-      console.log("hii I'm last :)");
-    }
-    else {
-      interP[i] = flubber.interpolate(svgs[i].path, svgs[i + 1].path, { maxSegmentLength: 1 });
-      console.log("hii I was here :)" + i);
-    }
-  }
+  showLoading();
 
-  path = document.querySelector("#path-00");
+  setTimeout(() => {
+    try {
+      interP = [];
 
-  if (!path) {
-    console.error("No <path> found with ID #path-00.");
+      for (let i = 0; i < svgs.length; i++) {
+        console.log(`Calculating interpolation ${i + 1}/${svgs.length}...`);
+        
+        if (i === (svgs.length - 1)) {
+          interP[i] = flubber.interpolate(svgs[i].path, svgs[0].path, { maxSegmentLength: 1 });
+          console.log("Last interpolation completed");
+        } else {
+          interP[i] = flubber.interpolate(svgs[i].path, svgs[i + 1].path, { maxSegmentLength: 1 });
+          console.log(`Interpolation ${i} completed`);
+        }
+      }
+
+      path = document.querySelector("#path-00");
+
+      if (!path) {
+        console.error("No <path> found with ID #path-00.");
+        hideLoading();
+        return;
+      }
+
+      console.log("All interpolations calculated, starting animation...");
+      hideLoading();
+      animate();
+
+    } catch (error) {
+      console.error("Error during animation calculation:", error);
+      hideLoading();
+      alert("Error calculating animation. Please check your SVG files.");
+    }
+  }, 100);
+}
+
+animateButton.addEventListener("click", () => {
+  if (isCalculating) {
+    console.log("Please wait, animation is being calculated...");
     return;
   }
 
-  animate();
+  animateButton.classList.add('button-loading');
+  animateButton.textContent = "Calculating";
+  
+  setTimeout(() => {
+    animationChooser(currentID);
+    setTimeout(() => {
+      animateButton.classList.remove('button-loading');
+      animateButton.textContent = "Animate";
+    }, 500);
+  }, 100);
+});
+
+function uploadAndDraw(svgContent) {
+  const uploadIndicator = document.createElement('div');
+  uploadIndicator.textContent = 'Processing SVG...';
+  uploadIndicator.className = 'upload-indicator fade-in';
+  document.body.appendChild(uploadIndicator);
+
+  setTimeout(() => {
+    let index = svgs.length;
+    const newId = `path-0${index}`;
+
+    const parser = new DOMParser();
+    const svgDoc = parser.parseFromString(svgContent, "image/svg+xml");
+    const pathElement = svgDoc.querySelector("path");
+
+    pathElement.setAttribute("id", newId);
+
+    const serializer = new XMLSerializer();
+    svgContent = serializer.serializeToString(svgDoc.documentElement);
+
+    const pathData = pathElement?.getAttribute("d");
+
+    svgs.push({ svg: svgContent, path: pathData, id: newId });
+
+    if (currentID === 3) {
+      createTracingElement();
+    }
+
+    if (index === 0) {
+      svgContainer.innerHTML = svgs[index].svg;
+    }
+    previewSVG(index);
+
+    uploadIndicator.classList.add('fade-out');
+    setTimeout(() => {
+      document.body.removeChild(uploadIndicator);
+    }, 300);
+  }, 50);
 }
+
+function showSimpleLoading(message = 'Loading...') {
+  const existingLoader = document.querySelector('.simple-loader');
+  if (existingLoader) return;
+
+  const loader = document.createElement('div');
+  loader.textContent = message;
+  loader.className = 'simple-loader fade-in';
+  document.body.appendChild(loader);
+}
+
+function hideSimpleLoading() {
+  const loader = document.querySelector('.simple-loader');
+  if (loader) {
+    loader.classList.add('fade-out');
+    setTimeout(() => {
+      if (loader.parentNode) {
+        document.body.removeChild(loader);
+      }
+    }, 300);
+  }
+}
+
+//code from before 
 
 if (checkLoop) { 
   checkLoop.addEventListener('change', function () {
@@ -491,12 +624,10 @@ clearDraw.addEventListener("click", () => {
 
 // const instructions = [
 //   "",
-//   "This tool lets you draw or animate SVG paths. Let's get started!",
-//   "Choose a mode from the dropdown (Morphing, Drawable, Motion Path).",
-//   "Upload an SVG or draw directly in Drawable mode.",
-//   "Only similar SVG's are morphable",
-//   "Click 'Animate' to see your path in action.",
-//   "You're ready! Enjoy creating with the tool!"
+//   "Upload an SVG or use the draw function",
+//   "Choose your own settings and see your path in action.",
+//   "Be aware that only similar SVG's are morphable",
+//   "Export your own creation as Video, Path or Path Animation!"
 // ];
 
 // let currentStep = 0;
@@ -520,3 +651,39 @@ clearDraw.addEventListener("click", () => {
 //     main.style.display = "block";
 //   }
 // });
+
+const instructions = [
+  "Upload an SVG or use the draw function",
+  "Choose your own settings and see your path in action.",
+  "Be aware that only similar SVG's are morphable",
+  "Export your own creation as Video, Path or Path Animation!"
+];
+
+let currentStep = 0;
+let autoAdvanceTimer;
+let running = true;
+
+const instructionText = document.getElementById("instructionText");
+const main = document.getElementById("mainApp");
+const nextBtn = document.getElementById("nextBtn");
+const overlay = document.getElementById("welcomeOverlay");
+const overlayText = document.querySelector("#welcomeOverlay h2");
+
+function loopInstructions() {
+  if (!running) return;
+
+  instructionText.textContent = instructions[currentStep];
+
+  currentStep = (currentStep + 1) % instructions.length;
+
+  autoAdvanceTimer = setTimeout(loopInstructions, 2000); 
+}
+
+nextBtn.addEventListener("click", () => {
+  running = false;
+  clearTimeout(autoAdvanceTimer);
+  overlay.style.display = "none";
+  main.style.display = "block";
+});
+
+loopInstructions();
