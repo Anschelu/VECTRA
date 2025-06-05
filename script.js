@@ -165,8 +165,6 @@ function motion() {
 }
 
 //version03 
-// Create loading element with CSS classes
-
 
 function createLoadingElement() {
   if (!loadingElement) {
