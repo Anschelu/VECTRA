@@ -53,18 +53,9 @@
             <label for="myRange">speed</label>
             <input type="range" min="1000" max="3000" value="2000" step="10" class="slider" id="myRange">
           </div>
-          <div class="slidecontainer">
-            <label for="myTimeline">timeline</label>
-            <input type="range" id="timelineSlider" min="0" max="100" step="0.1" value="0">
-          </div>
-          <input type="color" id="colorPicker" value="#0000ff">
           <div>
-            <label for="checkLoop">Bounce</label>
+            <label for="checkLoop">Loop</label>
             <input type="checkbox" id="checkLoop">
-          </div>
-          <div>
-            <label for="pauseAnimation">Pause</label>
-            <input type="checkbox" id="pauseAnimation">
           </div>
         </div>
         <div id="upload-zone">
@@ -73,16 +64,14 @@
             <h4>upload</h4>
           </div>
           <button type="button" id="animate-button">Animate</button>
-          <button type="button" id="delete-button">Delete</button>
+          <button type="button" id="delete-button">Clear</button>
         </div>
         <div id="svg-preview-list"></div>
+        <div id="trash-area" class="trash-area">Delete</div>
 
 
         <div id="drawable-GUI" class="mode-ui">
         </div>
-
-
-
         <div id="motion-GUI" class="mode-ui">
         </div>
       </div>

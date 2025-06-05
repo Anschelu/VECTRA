@@ -2,19 +2,13 @@ let checkLoop = document.getElementById("checkLoop");
 let deleteButton = document.getElementById("delete-button");
 let deleteButtonDraw = document.getElementById("delete-button-draw");
 let animateButton = document.getElementById("animate-button");
-let pauseAnimation = document.getElementById('pauseAnimation')
 let slider = document.getElementById("myRange");
-// let savePath = document.getElementById('savePath')
 const maxVal = parseInt(document.getElementById("myRange").max);
 const max = maxVal * 1.2;
 let animation = null;
 let animationSpeed = slider ? parseFloat(slider.value) : 0.001;
-let uploadedPaths = []; //*** replace these with svgs
-let uploadedSVGPaths = []; //*** replace these with svgs
 let svgs = [];
-let svgsSelected = 0 // clickable index
 let interpolator = null;
-let pathSVG = null;
 let maxSVG;
 let currentID = 1;
 let interP = [];
@@ -24,14 +18,26 @@ const clearDraw = document.getElementById("clearDraw");
 const closeDraw = document.getElementById("closeDraw");
 let isCalculating = false;
 let loadingElement = null;
+let bounceInterP = [];
+let isAnimationReady = false;
+let isAnimationRunning = false;
+let currentAnimationIndex = 0;
+let isAnimationPaused = false;
+let animationCompleted = false;
+
 
 const morphing_GUI = document.getElementById("morphing-GUI");
 const drawable_GUI = document.getElementById("drawable-GUI");
 const motion_GUI = document.getElementById("motion-GUI");
+
 //Choose Mode
 document.getElementById("scriptDropdown").addEventListener("change", function () {
   const selected = this.value;
   resetGUI(svgContainer);
+  isAnimationReady = false;
+  isAnimationRunning = false;
+  updateAnimateButton();
+  
   switch (selected) {
     case "morphing":
       morphing_GUI.style.display = "block";
@@ -79,27 +85,31 @@ function setupDrawing() {
 }
 
 saveDraw.addEventListener('click', () => {
-
   let myDrawing = document.querySelector("#drawingArea svg")
   let svgContent = new XMLSerializer().serializeToString(myDrawing);
+  modeChooser();       
+  limitControl(); 
   uploadAndDraw(svgContent);
-    previewDrawing.points = [];
-    previewDrawing.pathp.plot('');
+  previewDrawing.points = [];
+  previewDrawing.pathp.plot('');
+  isAnimationReady = false;
+  isAnimationRunning = false;
+  updateAnimateButton();
 });
 
 deleteButton.addEventListener("click", () => {
   drawingArea.innerHTML = "";
   resetUploads();
   setupDrawing();
+  isAnimationReady = false;
+  isAnimationRunning = false;
+  updateAnimateButton();
 });
-
-
 
 function resetGUI(svgContainer) {
   document.getElementById("morphing-GUI").style.display = "none";
   document.getElementById("drawable-GUI").style.display = "none";
   document.getElementById("motion-GUI").style.display = "none";
-  //resetUploads(svgContainer, previewList); // **** dont reset my uploads!!
 }
 
 setupDrawing();
@@ -120,7 +130,7 @@ function drawableAnimation() {
     console.error("No <path> found with ID #path-00.");
     return;
   }
-  anime({
+  animation = anime({
     targets: path,
     strokeDashoffset: [anime.setDashoffset, 0],
     easing: 'easeInOutQuad',
@@ -129,9 +139,10 @@ function drawableAnimation() {
     direction: 'alternate',
     loop: true
   });
+  
+  isAnimationRunning = true;
+  updateAnimateButton();
 }
-
-
 
 function motionPathAnimation() {
   const path = document.querySelector("#path-00");
@@ -141,7 +152,7 @@ function motionPathAnimation() {
 
   const pathLength = path.getTotalLength();
 
-  anime({
+  animation = anime({
     targets: { progress: 0 },
     progress: 100,
     duration: 4000,
@@ -157,14 +168,14 @@ function motionPathAnimation() {
       car.setAttribute("transform", `translate(${point.x}, ${point.y}) rotate(${angle})`);
     }
   });
+  
+  isAnimationRunning = true;
+  updateAnimateButton();
 }
-
 
 function motion() {
   currentID = 3;
 }
-
-//version03 
 
 function createLoadingElement() {
   if (!loadingElement) {
@@ -210,7 +221,7 @@ function morphingAnimation() {
 
       for (let i = 0; i < svgs.length; i++) {
         console.log(`Calculating interpolation ${i + 1}/${svgs.length}...`);
-        
+
         if (i === (svgs.length - 1)) {
           interP[i] = flubber.interpolate(svgs[i].path, svgs[0].path, { maxSegmentLength: 1 });
           console.log("Last interpolation completed");
@@ -219,15 +230,6 @@ function morphingAnimation() {
           console.log(`Interpolation ${i} completed`);
         }
       }
-
-      for (let i = 0; i < svgs.length - 1; i++) {
-        bounceInterpolators.push(flubber.interpolate(svgs[i].path, svgs[i + 1].path, { maxSegmentLength: 1 }));
-    }
-    
-    for (let i = svgs.length - 1; i > 0; i--) {
-        bounceInterpolators.push(flubber.interpolate(svgs[i].path, svgs[i - 1].path, { maxSegmentLength: 1 }));
-    }
-    
 
       path = document.querySelector("#path-00");
 
@@ -239,6 +241,7 @@ function morphingAnimation() {
 
       console.log("All interpolations calculated, starting animation...");
       hideLoading();
+      isAnimationReady = true;
       animate();
 
     } catch (error) {
@@ -249,23 +252,55 @@ function morphingAnimation() {
   }, 100);
 }
 
+function updateAnimateButton() {
+  if (isAnimationRunning) {
+    animateButton.textContent = "Pause";
+  } else {
+    animateButton.textContent = "Animate";
+  }
+}
+
 animateButton.addEventListener("click", () => {
   if (isCalculating) {
-    console.log("Please wait, animation is being calculated...");
+    return;
+  }
+
+  if (isAnimationRunning) {
+    if (animation) {
+      animation.pause();
+      isAnimationRunning = false;
+      isAnimationPaused = true;
+      updateAnimateButton();
+    }
+    return;
+  }
+
+  if (isAnimationReady) {
+    if (isAnimationPaused && !animationCompleted) {
+      if (animation) {
+        animation.play();
+        isAnimationRunning = true;
+        isAnimationPaused = false;
+        updateAnimateButton();
+      }
+    } else {
+      animate();
+    }
     return;
   }
 
   animateButton.classList.add('button-loading');
   animateButton.textContent = "Calculating";
-  
+
   setTimeout(() => {
     animationChooser(currentID);
     setTimeout(() => {
       animateButton.classList.remove('button-loading');
-      animateButton.textContent = "Animate";
+      updateAnimateButton();
     }, 500);
   }, 100);
 });
+
 
 function uploadAndDraw(svgContent) {
   const uploadIndicator = document.createElement('div');
@@ -289,6 +324,7 @@ function uploadAndDraw(svgContent) {
     const pathData = pathElement?.getAttribute("d");
 
     svgs.push({ svg: svgContent, path: pathData, id: newId });
+    
 
     if (currentID === 3) {
       createTracingElement();
@@ -328,129 +364,81 @@ function hideSimpleLoading() {
   }
 }
 
-
-if (checkLoop) { 
+if (checkLoop) {
   checkLoop.addEventListener('change', function () {
     if (!svgs || svgs.length < 2) return;
-    animate();
+    
+    if (animation) {
+      animation.pause();
+    }
+    isAnimationReady = false;
+    isAnimationRunning = false;
+    isAnimationPaused = false;
+    animationCompleted = false;
+    currentAnimationIndex = 0;
+    updateAnimateButton();
+    // animate();
   });
 }
-
-// function animate() {
-//   if (animation) animation.pause();
-
-//   const shouldLoop = checkLoop.checked;
-//   console.log("Animating with loop:", shouldLoop);
-
-//   playNext(0, shouldLoop);
-// }
-
-// function playNext(i, shouldLoop) {
-//   const currentInterpolator = interP[i];
-//   animation = anime({
-//     duration: max - animationSpeed,
-//     easing: 'easeOutQuad',
-//     loop: shouldLoop,
-//     direction: 'alternate',
-//     update: function (anim) {
-//       const t = anim.progress / 100;
-//       path.setAttribute('d', currentInterpolator(t));
-//     },
-//     complete: function () {
-//       i++;
-//       if (i < svgs.length) {
-//         playNext(i, shouldLoop);
-//       } else if (shouldLoop) {
-//         playNext(0, shouldLoop);
-//       }
-//     }
-//   });
-// }
 
 function animate() {
   if (animation) animation.pause();
+
   const shouldLoop = checkLoop.checked;
   console.log("Animating with loop:", shouldLoop);
-  
-  if (shouldLoop) {
-      animateWithBounceLoop();
-  } else {
-      playSequence(0, false);
+
+  if (animationCompleted || (!isAnimationPaused && currentAnimationIndex === 0)) {
+    currentAnimationIndex = 0;
+    animationCompleted = false;
   }
+
+  playNext(currentAnimationIndex, shouldLoop);
+  isAnimationRunning = true;
+  isAnimationPaused = false;
+  updateAnimateButton();
 }
 
-let bounceInterpolators = [];
 
-function animateWithBounceLoop() {
-  
-  let currentIndex = 0;
-  
-  function playNextBounce() {
-      if (currentIndex >= bounceInterpolators.length) {
-          currentIndex = 0; 
-      }
-      
-      const currentInterpolator = bounceInterpolators[currentIndex];
-      
-      animation = anime({
-          duration: max - animationSpeed,
-          easing: 'easeOutQuad',
-          loop: false,
-          update: function (anim) {
-              const t = anim.progress / 100;
-              path.setAttribute('d', currentInterpolator(t));
-          },
-          complete: function () {
-              currentIndex++;
-              playNextBounce();
-          }
-      });
-  }
-  playNextBounce();
-}
 
-function playSequence(i, shouldLoop) {
+function playNext(i, shouldLoop) {
   if (i >= interP.length) {
-      if (shouldLoop) {
-          playSequence(0, shouldLoop);
-      }
-      return;
+    return; 
   }
-  
+
+  currentAnimationIndex = i;
   const currentInterpolator = interP[i];
+  
   animation = anime({
-      duration: max - animationSpeed,
-      easing: 'easeOutQuad',
-      loop: false,
-      update: function (anim) {
-          const t = anim.progress / 100;
-          path.setAttribute('d', currentInterpolator(t));
-      },
-      complete: function () {
-          playSequence(i + 1, shouldLoop);
+    duration: max - animationSpeed,
+    easing: 'easeOutQuad',
+    loop: false,
+    direction: 'alternate',
+    update: function (anim) {
+      const t = anim.progress / 100;
+      path.setAttribute('d', currentInterpolator(t));
+    },
+    complete: function () {
+      if (i + 1 < interP.length) {
+        playNext(i + 1, shouldLoop); 
+      } else if (shouldLoop) {
+        currentAnimationIndex = 0; 
+        playNext(0, shouldLoop); 
+      } else {
+        isAnimationRunning = false;
+        animationCompleted = true;
+        currentAnimationIndex = 0; 
+        updateAnimateButton();
       }
+    }
   });
 }
-
-
-
-
-// normal
-
-pauseAnimation.addEventListener('change', () => {
-  if (pauseAnimation.checked) {
-    animation.pause();
-    console.log("animation paused")
-  } else {
-    animation.play();
-    console.log("animation started")
-  }
-});
 
 document.querySelector('#myRange').addEventListener('input', function () {
   animationSpeed = this.value;
   var speedAnimation = max - animationSpeed;
-  animation.duration = speedAnimation;
+  if (animation) {
+    animation.duration = speedAnimation;
+  }
 });
 
 //Drag and Drop function 
@@ -464,7 +452,7 @@ function setupDropzone(dropzone) {
   dropzone.addEventListener("click", () => {
     input.click();
     input.onchange = (e) => {
-      const files = Array.from(e.target.files); // Convert FileList to Array
+      const files = Array.from(e.target.files); 
       files.forEach(file => {
         rightFiles(file);
         upload(file);
@@ -472,7 +460,6 @@ function setupDropzone(dropzone) {
     };
   });
 }
-
 
 function rightFiles(file) {
   const msg = dropzone.querySelector("p");
@@ -488,78 +475,36 @@ function rightFiles(file) {
 }
 
 function upload(file) {
-
   modeChooser();
-
-  //deletes first svg and then moves all the svg's to one gap before
   limitControl();
-
-
-  //*** What do I need in svgs Array: PathName, svgContent, Path, 
-  //*** one function for draw and upload possible? 
 
   const reader = new FileReader();
   reader.onload = function (event) {
-
     let svgContent = event.target.result;
-
     uploadAndDraw(svgContent);
     
+    isAnimationReady = false;
+    isAnimationRunning = false;
+    updateAnimateButton();
   };
   reader.readAsText(file);
-
 }
 
-function uploadAndDraw(svgContent){
-
-  let index = svgs.length;
-
-  const newId = `path-0${index}`;
-
-  const parser = new DOMParser();
-  const svgDoc = parser.parseFromString(svgContent, "image/svg+xml");
-  const pathElement = svgDoc.querySelector("path");
-
-  pathElement.setAttribute("id", newId);
-
-  const serializer = new XMLSerializer();
-  svgContent = serializer.serializeToString(svgDoc.documentElement);
-
-
-  const pathData = pathElement?.getAttribute("d");
-
-  svgs.push({ svg: svgContent, path: pathData, id: newId });
-
-  if (currentID === 3) {
-    createTracingElement();
-  }
-
-  if (index === 0) {
-    // svgContainer.innerHTML = "";
-    // let canvas = SVG().addTo(svgContainer);
-    // canvas.svg(svgs[index].path);
-
-    svgContainer.innerHTML = svgs[index].svg
-  }
-  previewSVG(index);
-}
-
-function limitControl(){
+function limitControl() {
   if (svgs.length >= maxSVG) {
-    svgs.shift(); 
-    
+    svgs.shift();
+
     previewList.innerHTML = '';
-    
+
     svgs.forEach((_, i) => {
       previewSVG(i);
     });
-    
+
     if (svgs.length > 0) {
       svgContainer.innerHTML = svgs[0].svg;
     }
   }
 }
-
 
 function previewSVG(index) {
   const wrapper = document.createElement("div");
@@ -573,13 +518,44 @@ function previewSVG(index) {
   previewList.appendChild(wrapper);
 }
 
-animateButton.addEventListener("click", () => {
-  animationChooser(currentID);
-});
-
 setupDropzone(dropzone);
 
+Sortable.create(document.getElementById("trash-area"), {
+  group: 'shared', 
+  animation: 150,
+  onAdd: function (evt) {
+    const item = evt.item;
+    const index = parseInt(item.dataset.index);
+
+    if (!isNaN(index)) {
+      svgs.splice(index, 1);
+    }
+
+    item.remove(); 
+
+    previewList.innerHTML = '';
+    svgs.forEach((_, i) => previewSVG(i));
+    
+    svgContainer.innerHTML = svgs.length > 0 ? svgs[0].svg : '';
+    
+    isAnimationReady = false;
+    isAnimationRunning = false;
+    updateAnimateButton();
+  }
+});
+
+function resetUploads() {
+  svgContainer.innerHTML = "";
+  previewList.innerHTML = "";
+  svgs.length = 0;
+  
+  isAnimationReady = false;
+  isAnimationRunning = false;
+  updateAnimateButton();
+}
+
 Sortable.create(previewList, {
+  group: 'shared', 
   animation: 150,
   ghostClass: 'sortable-ghost',
   onEnd: function (evt) {
@@ -602,23 +578,19 @@ Sortable.create(previewList, {
     });
     previewList.innerHTML = '';
     svgs.forEach((_, index) => previewSVG(index));
-    svgContainer.innerHTML = svgs[0].svg;
+    svgContainer.innerHTML = svgs.length > 0 ? svgs[0].svg : '';
+    
+    isAnimationReady = false;
+    isAnimationRunning = false;
+    updateAnimateButton();
   }
 });
-
-
-function resetUploads() {
-  svgContainer.innerHTML = "";
-  previewList.innerHTML = "";
-  svgs.length = [0];
-}
-
 
 function animationChooser(currentID) {
   switch (currentID) {
     case 1:
       console.log("option 1")
-        morphingAnimation();
+      morphingAnimation();
       break;
     case 2:
       console.log("option 2")
@@ -633,7 +605,6 @@ function animationChooser(currentID) {
   }
 }
 
-
 function createTracingElement() {
   const svg = svgContainer.querySelector("svg");
   const carGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -645,25 +616,26 @@ function createTracingElement() {
   circle.setAttribute("cx", "0");
   circle.setAttribute("cy", "0");
 
-    console.log(svg)
+  console.log(svg)
   carGroup.appendChild(circle);
-  svgContainer.appendChild(carGroup); // Append into the loaded SVG
+  svgContainer.appendChild(carGroup);
 }
 
-function modeChooser(){
-switch (currentID) {
-  case 1:
-    maxSVG = 6;
-    break;
-  case 2:
-    maxSVG = 1;
-    break;
-  case 3:
-    maxSVG = 1;
-    break;
-  default:
-    break;
-}}
+function modeChooser() {
+  switch (currentID) {
+    case 1:
+      maxSVG = 6;
+      break;
+    case 2:
+      maxSVG = 1;
+      break;
+    case 3:
+      maxSVG = 1;
+      break;
+    default:
+      break;
+  }
+}
 
 const drawWindow = document.getElementById("drawWindow");
 const openDrawBtn = document.createElement('button');
@@ -707,7 +679,7 @@ function loopInstructions() {
 
   currentStep = (currentStep + 1) % instructions.length;
 
-  autoAdvanceTimer = setTimeout(loopInstructions, 2000); 
+  autoAdvanceTimer = setTimeout(loopInstructions, 2000);
 }
 
 nextBtn.addEventListener("click", () => {
