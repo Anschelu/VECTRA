@@ -24,6 +24,8 @@ let isAnimationRunning = false;
 let currentAnimationIndex = 0;
 let isAnimationPaused = false;
 let animationCompleted = false;
+let transparentFill = document.getElementById("transparentFill");
+let transparentStroke = document.getElementById("transparentStroke");
 
 
 const morphing_GUI = document.getElementById("morphing-GUI");
@@ -57,17 +59,82 @@ document.getElementById("scriptDropdown").addEventListener("change", function ()
 });
 
 var previewDrawing = {}
+
+
+transparentFill.addEventListener('change', function () {
+  let currentColor;
+  
+  if (transparentFill.checked) {
+    currentColor = getCurrentFillColor() || '#000';
+  } else {
+    currentColor = 'none';
+
+  }
+  changeSVGFillColor(currentColor);
+});
+
+//for stroke
+transparentStroke.addEventListener('change', function () {
+  let currentStrokeColor;
+  
+  if (transparentStroke.checked) {
+    currentStrokeColor = getCurrentFillColor() || '#000';
+  } else {
+
+    currentColor = 'none';
+  }
+
+  changeSVGFillColor(currentStrokeColor);
+});
+
 function setupDrawing() {
   previewDrawing.draw = SVG().addTo('#drawingArea').size(400, 400);
 
   const defs = previewDrawing.draw.defs();
-  defs.element('style').words(`
-    .drawing-path {
-      fill: none;
-      stroke: #000;
-      stroke-width: 20;
+  previewDrawing.styleElement = defs.element('style');
+  
+  // Function to update drawing color
+  // function updateDrawingColor() {
+  // const currentColor = getCurrentFillColor() || '#000';
+
+
+  //   previewDrawing.styleElement.words(`
+  //     .drawing-path {
+  //       fill: ${currentColor};
+  //       stroke: none;
+  //       stroke-width: 20;
+  //     }
+  //   `);
+    
+  //   // Update existing path color if it exists
+  //   if (previewDrawing.pathp) {
+  //     // previewDrawing.pathp.stroke(currentColor);
+  //     previewDrawing.pathp.fill(currentColor);
+  //   }
+  // }
+
+  function updateDrawingColor() {
+    const currentColor = getCurrentFillColor(); 
+  
+    previewDrawing.styleElement.words(`
+      .drawing-path {
+        fill: ${currentColor};
+        stroke: none;
+        stroke-width: 20;
+      }
+    `);
+    
+    // Update existing path color if it exists
+    if (previewDrawing.pathp) {
+      previewDrawing.pathp.fill(currentColor);
     }
-  `);
+  }
+  
+  // Set initial color
+  updateDrawingColor();
+  
+  // Store the update function for later use
+  previewDrawing.updateColor = updateDrawingColor;
 
   previewDrawing.pathp = previewDrawing.draw.path().addClass('drawing-path');
 
@@ -75,7 +142,7 @@ function setupDrawing() {
   previewDrawing.points = [];
 
   previewDrawing.draw.on('mousedown', function (e) {
-    console.log(e)
+    console.log(e);
     previewDrawing.drawing = true;
     previewDrawing.points = [];
     previewDrawing.pathp.plot('');
@@ -91,8 +158,8 @@ function setupDrawing() {
   previewDrawing.draw.on('mouseup', function () {
     previewDrawing.drawing = false;
   });
-
 }
+
 
 saveDraw.addEventListener('click', () => {
   let myDrawing = document.querySelector("#drawingArea svg")
@@ -313,15 +380,18 @@ animateButton.addEventListener("click", () => {
 
 //hieeer
 function uploadAndDraw(svgContent) {
-
   setTimeout(() => {
-    
-    console.log(svgs.length)
+    console.log(svgs.length);
+
+    // Apply current color setting to new SVG
+    const currentColor = getCurrentFillColor();
+    if (currentColor) {
+      svgContent = applySingleSVGColor(svgContent, currentColor);
+    }
 
     const parser = new DOMParser();
     const svgDoc = parser.parseFromString(svgContent, "image/svg+xml");
     const pathElement = svgDoc.querySelector("path");
-
 
     let index = svgs.length;
     const newId = `path-0${index}`;
@@ -342,7 +412,6 @@ function uploadAndDraw(svgContent) {
     svgs.push({ svg: svgContent, path: pathData, id: newId, style: style});
     limitControl();
     
-
     if (currentID === 3) {
       createTracingElement();
     }
@@ -352,7 +421,6 @@ function uploadAndDraw(svgContent) {
     }
 
     if(index < maxSVG){
-      //console.log(index);
       previewSVG(index); 
     }
     
@@ -680,6 +748,7 @@ document.querySelector(".gui-container").appendChild(openDrawBtn);
 
 openDrawBtn.addEventListener("click", () => {
   drawWindow.style.display = "flex";
+  updateDrawingAreaOnOpen();
 });
 
 closeDraw.addEventListener("click", () => {
@@ -725,8 +794,7 @@ nextBtn.addEventListener("click", () => {
   main.style.display = "block";
 });
 
-loopInstructions();
-
+loopInstructions(); 
 
 function changeSVGFillColor(newColor) {
   if (!svgs || svgs.length === 0) {
@@ -746,6 +814,7 @@ function changeSVGFillColor(newColor) {
     
     elementsWithFill.forEach(element => {
       element.setAttribute('fill', newColor);
+      
     });
   
     pathElements.forEach(element => {
@@ -767,6 +836,11 @@ function changeSVGFillColor(newColor) {
     svgObj.style = svgDoc.querySelector('style')?.textContent || svgObj.style;
   });
   
+  // Update the drawing tool color
+  if (previewDrawing && previewDrawing.updateColor) {
+    previewDrawing.updateColor();
+  }
+  
   if (svgs.length > 0) {
     svgContainer.innerHTML = svgs[0].svg;
   }
@@ -780,14 +854,78 @@ function changeSVGFillColor(newColor) {
   console.log(`Changed fill color to ${newColor} for ${svgs.length} SVG(s)`);
 }
 
+
 function setupFillColorChanger() {
   const colorPicker = document.getElementById('fillColorPicker');
-  const changeBtn = document.getElementById('changeFillBtn');
+  const transparentFill = document.getElementById('transparentFill');
 
-
+  if (colorPicker) {
     colorPicker.addEventListener('input', (e) => {
-      changeSVGFillColor(e.target.value);
+      if (transparentFill && transparentFill.checked) {
+        changeSVGFillColor(e.target.value);
+      }
     });
   }
+  
+//   if (transparentFill) {
+//     transparentFill.addEventListener('change', function () {
+//       const currentColor = getCurrentFillColor();
+//       changeSVGFillColor(currentColor);
+//     });
+//   }
+// }
 
 setupFillColorChanger();
+
+
+
+function getCurrentFillColor() {
+  const colorPicker = document.getElementById('fillColorPicker');
+  const transparentFill = document.getElementById('transparentFill');
+  
+  if (!transparentFill || !transparentFill.checked) {
+    return 'none';
+  }
+  
+  return colorPicker ? colorPicker.value : '#000';
+}
+
+
+function applySingleSVGColor(svgContent, color) {
+  if (!color) return svgContent;
+  
+  const parser = new DOMParser();
+  const serializer = new XMLSerializer();
+  const svgDoc = parser.parseFromString(svgContent, "image/svg+xml");
+  
+  const elementsWithFill = svgDoc.querySelectorAll('[fill]');
+  const pathElements = svgDoc.querySelectorAll('path');
+  const allShapes = svgDoc.querySelectorAll('circle, rect, ellipse, polygon, polyline, line');
+  
+  elementsWithFill.forEach(element => {
+    element.setAttribute('fill', color);
+  });
+
+  pathElements.forEach(element => {
+    element.setAttribute('fill', color);
+  });
+  
+  allShapes.forEach(element => {
+    element.setAttribute('fill', color);
+  });
+  
+  const styleElements = svgDoc.querySelectorAll('style');
+  styleElements.forEach(styleEl => {
+    let cssText = styleEl.textContent;
+    cssText = cssText.replace(/fill\s*:\s*[^;]+/g, `fill: ${color}`);
+    styleEl.textContent = cssText;
+  });
+  
+  return serializer.serializeToString(svgDoc.documentElement);
+}
+
+function updateDrawingAreaOnOpen() {
+  if (previewDrawing && previewDrawing.updateColor) {
+    previewDrawing.updateColor();
+  }
+}
