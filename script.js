@@ -220,6 +220,15 @@ function morphingAnimation() {
         }
       }
 
+      for (let i = 0; i < svgs.length - 1; i++) {
+        bounceInterpolators.push(flubber.interpolate(svgs[i].path, svgs[i + 1].path, { maxSegmentLength: 1 }));
+    }
+    
+    for (let i = svgs.length - 1; i > 0; i--) {
+        bounceInterpolators.push(flubber.interpolate(svgs[i].path, svgs[i - 1].path, { maxSegmentLength: 1 }));
+    }
+    
+
       path = document.querySelector("#path-00");
 
       if (!path) {
@@ -319,7 +328,6 @@ function hideSimpleLoading() {
   }
 }
 
-//code from before 
 
 if (checkLoop) { 
   checkLoop.addEventListener('change', function () {
@@ -328,36 +336,106 @@ if (checkLoop) {
   });
 }
 
+// function animate() {
+//   if (animation) animation.pause();
+
+//   const shouldLoop = checkLoop.checked;
+//   console.log("Animating with loop:", shouldLoop);
+
+//   playNext(0, shouldLoop);
+// }
+
+// function playNext(i, shouldLoop) {
+//   const currentInterpolator = interP[i];
+//   animation = anime({
+//     duration: max - animationSpeed,
+//     easing: 'easeOutQuad',
+//     loop: shouldLoop,
+//     direction: 'alternate',
+//     update: function (anim) {
+//       const t = anim.progress / 100;
+//       path.setAttribute('d', currentInterpolator(t));
+//     },
+//     complete: function () {
+//       i++;
+//       if (i < svgs.length) {
+//         playNext(i, shouldLoop);
+//       } else if (shouldLoop) {
+//         playNext(0, shouldLoop);
+//       }
+//     }
+//   });
+// }
+
 function animate() {
   if (animation) animation.pause();
-
   const shouldLoop = checkLoop.checked;
   console.log("Animating with loop:", shouldLoop);
-
-  playNext(0, shouldLoop);
+  
+  if (shouldLoop) {
+      animateWithBounceLoop();
+  } else {
+      playSequence(0, false);
+  }
 }
 
-function playNext(i, shouldLoop) {
+let bounceInterpolators = [];
+
+function animateWithBounceLoop() {
+  
+  let currentIndex = 0;
+  
+  function playNextBounce() {
+      if (currentIndex >= bounceInterpolators.length) {
+          currentIndex = 0; 
+      }
+      
+      const currentInterpolator = bounceInterpolators[currentIndex];
+      
+      animation = anime({
+          duration: max - animationSpeed,
+          easing: 'easeOutQuad',
+          loop: false,
+          update: function (anim) {
+              const t = anim.progress / 100;
+              path.setAttribute('d', currentInterpolator(t));
+          },
+          complete: function () {
+              currentIndex++;
+              playNextBounce();
+          }
+      });
+  }
+  playNextBounce();
+}
+
+function playSequence(i, shouldLoop) {
+  if (i >= interP.length) {
+      if (shouldLoop) {
+          playSequence(0, shouldLoop);
+      }
+      return;
+  }
+  
   const currentInterpolator = interP[i];
   animation = anime({
-    duration: max - animationSpeed,
-    easing: 'easeOutQuad',
-    loop: shouldLoop,
-    direction: 'alternate',
-    update: function (anim) {
-      const t = anim.progress / 100;
-      path.setAttribute('d', currentInterpolator(t));
-    },
-    complete: function () {
-      i++;
-      if (i < svgs.length) {
-        playNext(i, shouldLoop);
-      } else if (shouldLoop) {
-        playNext(0, shouldLoop);
+      duration: max - animationSpeed,
+      easing: 'easeOutQuad',
+      loop: false,
+      update: function (anim) {
+          const t = anim.progress / 100;
+          path.setAttribute('d', currentInterpolator(t));
+      },
+      complete: function () {
+          playSequence(i + 1, shouldLoop);
       }
-    }
   });
 }
+
+
+
+
+// normal
 
 pauseAnimation.addEventListener('change', () => {
   if (pauseAnimation.checked) {
@@ -469,20 +547,19 @@ function uploadAndDraw(svgContent){
 function limitControl(){
   if (svgs.length >= maxSVG) {
     svgs.shift(); 
-  
+    
     previewList.innerHTML = '';
-  
+    
     svgs.forEach((_, i) => {
       previewSVG(i);
     });
+    
+    if (svgs.length > 0) {
+      svgContainer.innerHTML = svgs[0].svg;
+    }
   }
 }
 
-// function previewSVG(index){
-//   let preview = SVG().addTo(previewList).viewbox(0, 0, 400, 400);
-//   console.log(svgs[index].svg)
-//   preview.svg(svgs[index].svg);
-// }
 
 function previewSVG(index) {
   const wrapper = document.createElement("div");
@@ -531,10 +608,9 @@ Sortable.create(previewList, {
 
 
 function resetUploads() {
-  // console.log("getting cleared now, yey");
   svgContainer.innerHTML = "";
   previewList.innerHTML = "";
-  svgs.length = [];
+  svgs.length = [0];
 }
 
 
@@ -606,49 +682,6 @@ clearDraw.addEventListener("click", () => {
   previewDrawing.points = [];
   previewDrawing.pathp.plot('');
 });
-
-// saveDraw.addEventListener("click", () => {
-//   let myDrawing = document.querySelector("#drawingArea svg");
-//   let svgContent = new XMLSerializer().serializeToString(myDrawing);
-//   uploadAndDraw(svgContent);
-//   previewDrawing.points = [];
-//   previewDrawing.pathp.plot('');
-//   drawWindow.style.display = "none"; // optionally close after saving
-// });
-
-
-// starting page and overlay 
-// DON'T DELETE, ACTIVATE WHEN FINISHED
-
-// const instructions = [
-//   "",
-//   "Upload an SVG or use the draw function",
-//   "Choose your own settings and see your path in action.",
-//   "Be aware that only similar SVG's are morphable",
-//   "Export your own creation as Video, Path or Path Animation!"
-// ];
-
-// let currentStep = 0;
-
-// const instructionText = document.getElementById("instructionText");
-// const main = document.getElementById("mainApp");
-// const nextBtn = document.getElementById("nextBtn");
-// const overlay = document.getElementById("welcomeOverlay");
-// const overlayText = document.querySelector("#welcomeOverlay h2");
-
-// nextBtn.addEventListener("click", () => {
-//   currentStep++;
-//   if (currentStep < instructions.length) {
-//     overlayText.style.fontSize = "48px"
-//     overlay.style.display = "block";
-//     main.style.display = "none";
-//     instructionText.textContent = instructions[currentStep];
-//     nextBtn.textContent = currentStep === instructions.length - 1 ? "Start" : "OK";
-//   } else {
-//     overlay.style.display = "none";
-//     main.style.display = "block";
-//   }
-// });
 
 const instructions = [
   "Upload an SVG or use the draw function",
