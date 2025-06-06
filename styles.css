@@ -179,7 +179,7 @@ body {
 
   .instruction-box p {
     font-family: "Montserrat-Light", Helvetica, sans-serif;
-    margin: 0 0 20px 0;
+    margin: 0 0 10px 0;
   }
 
   .instruction-box button {
@@ -358,3 +358,4 @@ body {
   align-items: center;
   font-weight: bold;
 }
+

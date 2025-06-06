@@ -26,8 +26,6 @@ let isAnimationPaused = false;
 let animationCompleted = false;
 let transparentFill = document.getElementById("transparentFill");
 let transparentStroke = document.getElementById("transparentStroke");
-
-
 const morphing_GUI = document.getElementById("morphing-GUI");
 const drawable_GUI = document.getElementById("drawable-GUI");
 const motion_GUI = document.getElementById("motion-GUI");
@@ -61,30 +59,31 @@ document.getElementById("scriptDropdown").addEventListener("change", function ()
 var previewDrawing = {}
 
 
+//transparent Filling
 transparentFill.addEventListener('change', function () {
-  let currentColor;
+  let currentFillColor;
   
   if (transparentFill.checked) {
-    currentColor = getCurrentFillColor() || '#000';
+    currentFillColor = getCurrentFillColor() || '#000';
   } else {
-    currentColor = 'none';
+    currentFillColor = 'none';
 
   }
-  changeSVGFillColor(currentColor);
+  changeSVGFillColor(currentFillColor);
 });
 
-//for stroke
+//transparent Stroke
 transparentStroke.addEventListener('change', function () {
   let currentStrokeColor;
   
   if (transparentStroke.checked) {
-    currentStrokeColor = getCurrentFillColor() || '#000';
+    currentStrokeColor = getCurrentStrokeColor() || '#000';
   } else {
 
-    currentColor = 'none';
+    currentStrokeColor = 'none';
   }
 
-  changeSVGFillColor(currentStrokeColor);
+  changeSVGStrokeColor(currentStrokeColor);
 });
 
 function setupDrawing() {
@@ -92,41 +91,25 @@ function setupDrawing() {
 
   const defs = previewDrawing.draw.defs();
   previewDrawing.styleElement = defs.element('style');
-  
-  // Function to update drawing color
-  // function updateDrawingColor() {
-  // const currentColor = getCurrentFillColor() || '#000';
 
-
-  //   previewDrawing.styleElement.words(`
-  //     .drawing-path {
-  //       fill: ${currentColor};
-  //       stroke: none;
-  //       stroke-width: 20;
-  //     }
-  //   `);
-    
-  //   // Update existing path color if it exists
-  //   if (previewDrawing.pathp) {
-  //     // previewDrawing.pathp.stroke(currentColor);
-  //     previewDrawing.pathp.fill(currentColor);
-  //   }
-  // }
 
   function updateDrawingColor() {
-    const currentColor = getCurrentFillColor(); 
+    const currentFillColor = getCurrentFillColor(); 
+    const currentStrokeColor = getCurrentStrokeColor(); 
+    const currentStrokeWidth = getCurrentStrokeWidth();; 
   
     previewDrawing.styleElement.words(`
       .drawing-path {
-        fill: ${currentColor};
-        stroke: none;
-        stroke-width: 20;
+        fill: ${currentFillColor};
+        stroke: ${currentStrokeColor};
+        stroke-width: ${currentStrokeWidth};
       }
     `);
     
     // Update existing path color if it exists
     if (previewDrawing.pathp) {
-      previewDrawing.pathp.fill(currentColor);
+      previewDrawing.pathp.stroke({ color: currentStrokeColor, width: currentStrokeWidth });
+      previewDrawing.pathp.fill(currentFillColor);
     }
   }
   
@@ -213,7 +196,7 @@ function drawableAnimation() {
     easing: 'easeInOutQuad',
     duration: 2000,
     delay: 0,
-    direction: 'alternate',
+    direction: 'normal',
     loop: true
   });
   
@@ -329,6 +312,8 @@ function morphingAnimation() {
   }, 100);
 }
 
+//|| ev.keyCode === 9
+
 function updateAnimateButton() {
   if (isAnimationRunning) {
     animateButton.textContent = "Pause";
@@ -383,12 +368,23 @@ function uploadAndDraw(svgContent) {
   setTimeout(() => {
     console.log(svgs.length);
 
-    // Apply current color setting to new SVG
-    const currentColor = getCurrentFillColor();
-    if (currentColor) {
-      svgContent = applySingleSVGColor(svgContent, currentColor);
+    const currentFillColor = getCurrentFillColor();
+    const currentStrokeColor = getCurrentStrokeColor();
+    const currentStrokeWidth = getCurrentStrokeWidth();
+
+    if (currentFillColor) {
+      svgContent = applySingleSVGColor(svgContent, currentFillColor, 1);
     }
 
+    if (currentStrokeColor) {
+      svgContent = applySingleSVGColor(svgContent, currentStrokeColor, 2);
+    }
+
+    if (currentStrokeWidth) {
+      svgContent = applySingleSVGColor(svgContent, getCurrentStrokeWidth(), 3);
+    }
+
+  
     const parser = new DOMParser();
     const svgDoc = parser.parseFromString(svgContent, "image/svg+xml");
     const pathElement = svgDoc.querySelector("path");
@@ -468,55 +464,382 @@ if (checkLoop) {
   });
 }
 
+// function animate() {
+//   if (animation) animation.pause();
+
+//   const shouldLoop = checkLoop.checked;
+//   console.log("Animating with loop:", shouldLoop);
+
+//   if (animationCompleted || (!isAnimationPaused && currentAnimationIndex === 0)) {
+//     currentAnimationIndex = 0;
+//     animationCompleted = false;
+//   }
+
+//   playNext(currentAnimationIndex, shouldLoop);
+//   isAnimationRunning = true;
+//   isAnimationPaused = false;
+//   updateAnimateButton();
+// }
+
+const timeline = document.getElementById('timeline');
+let isTimelineDragging = false;
+let wasAnimationRunning = false;
+
+// Timeline Event Listener für Interaktion
+timeline.addEventListener('input', function() {
+    if (!isTimelineDragging) {
+        isTimelineDragging = true;
+        wasAnimationRunning = isAnimationRunning;
+        
+        // Animation pausieren während Timeline-Interaktion
+        if (animation) {
+            animation.pause();
+        }
+    }
+    
+    // Animation basierend auf Timeline-Position aktualisieren
+    updateAnimationFromTimeline(this.value);
+});
+
+timeline.addEventListener('change', function() {
+    isTimelineDragging = false;
+    
+    // Animation wieder starten wenn sie vorher lief
+    if (wasAnimationRunning) {
+        resumeAnimationFromTimeline(this.value);
+    }
+});
+
+// Enter-Taste für Pause/Play
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+        toggleAnimation();
+    }
+});
+
+function updateAnimationFromTimeline(timelineValue) {
+    const progress = parseFloat(timelineValue);
+    
+    // Berechne welche Animation und Position basierend auf Timeline
+    const totalAnimations = interP.length;
+    const progressPerAnimation = 100 / totalAnimations;
+    
+    const animationIndex = Math.floor(progress / progressPerAnimation);
+    const localProgress = (progress % progressPerAnimation) / progressPerAnimation;
+    
+    // Stelle sicher, dass Index im gültigen Bereich liegt
+    const safeIndex = Math.min(animationIndex, interP.length - 1);
+    const safeProgress = Math.max(0, Math.min(1, localProgress));
+    
+    // Aktualisiere Animation direkt
+    if (interP[safeIndex]) {
+        const selectedEasing = document.getElementById('easingSelect').value;
+        const easingFunction = easingFunctions[selectedEasing] || (t => t);
+        const easedProgress = easingFunction(safeProgress);
+        
+        path.setAttribute('d', interP[safeIndex](easedProgress));
+        currentAnimationIndex = safeIndex;
+    }
+}
+
+function resumeAnimationFromTimeline(timelineValue) {
+    const progress = parseFloat(timelineValue);
+    const totalAnimations = interP.length;
+    const progressPerAnimation = 100 / totalAnimations;
+    
+    const animationIndex = Math.floor(progress / progressPerAnimation);
+    const localProgress = (progress % progressPerAnimation) / progressPerAnimation;
+    
+    currentAnimationIndex = Math.min(animationIndex, interP.length - 1);
+    
+    // Starte Animation von aktueller Position
+    playNextFromProgress(currentAnimationIndex, localProgress * 100, checkLoop.checked);
+}
+
+function toggleAnimation() {
+    if (isAnimationRunning) {
+        pauseAnimation();
+    } else {
+        resumeAnimation();
+    }
+}
+
+function pauseAnimation() {
+    if (animation) {
+        animation.pause();
+    }
+    isAnimationRunning = false;
+    isAnimationPaused = true;
+    updateAnimateButton();
+}
+
+function resumeAnimation() {
+    if (animation && isAnimationPaused) {
+        animation.play();
+        isAnimationRunning = true;
+        isAnimationPaused = false;
+    } else {
+        animate();
+    }
+    updateAnimateButton();
+}
+
 function animate() {
   if (animation) animation.pause();
-
+  
   const shouldLoop = checkLoop.checked;
   console.log("Animating with loop:", shouldLoop);
-
+  
   if (animationCompleted || (!isAnimationPaused && currentAnimationIndex === 0)) {
-    currentAnimationIndex = 0;
-    animationCompleted = false;
+      currentAnimationIndex = 0;
+      animationCompleted = false;
+      timeline.value = 0;
   }
-
+  
   playNext(currentAnimationIndex, shouldLoop);
   isAnimationRunning = true;
   isAnimationPaused = false;
   updateAnimateButton();
 }
 
+const easingFunctions = {
+  easeOutQuad: t => t * (2 - t),
+  linear: t => t,
+  easeInQuad: t => t * t,
+  easeInOutSine: t => -(Math.cos(Math.PI * t) - 1) / 2,
+};
+
+// function playNext(i, shouldLoop) {
+//   if (i >= interP.length) {
+//     return; 
+//   }
+
+//   currentAnimationIndex = i;
+//   const currentInterpolator = interP[i];
+
+//   const selectedEasing = document.getElementById('easingSelect').value;
+//   const easingFunction = easingFunctions[selectedEasing] || (t => t); 
+  
+//   animation = anime({
+//     duration: max - animationSpeed,
+//     easing: 'linear',
+//     loop: false,
+//     direction: 'alternate',
+//     update: function (anim) {
+//       const t = anim.progress / 100;
+//       const easedT = easingFunction(t);
+//       path.setAttribute('d', currentInterpolator(easedT));
+//       document.getElementById('timeline').value = anim.progress;
+//     },
+//     complete: function () {
+//       if (i + 1 < interP.length) {
+//         playNext(i + 1, shouldLoop); 
+//       } else if (shouldLoop) {
+//         currentAnimationIndex = 0; 
+//         playNext(0, shouldLoop); 
+//       } else {
+//         isAnimationRunning = false;
+//         animationCompleted = true;
+//         currentAnimationIndex = 0; 
+//         updateAnimateButton();
+//       }
+//     }
+//   });
+// }
+
+const timelineStyle = `
+    #timeline {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 8px;
+        border-radius: 4px;
+        background: #ddd;
+        outline: none;
+        cursor: pointer;
+    }
+    
+    #timeline::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #007bff;
+        cursor: grab;
+        border: 2px solid #fff;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    #timeline::-webkit-slider-thumb:active {
+        cursor: grabbing;
+        transform: scale(1.1);
+    }
+    
+    #timeline::-moz-range-thumb {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #007bff;
+        cursor: grab;
+        border: 2px solid #fff;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    #timeline::-moz-range-thumb:active {
+        cursor: grabbing;
+        transform: scale(1.1);
+    }
+`;
 
 
-function playNext(i, shouldLoop) {
-  if (i >= interP.length) {
-    return; 
+if (!document.getElementById('timeline-styles')) {
+  const styleSheet = document.createElement('style');
+  styleSheet.id = 'timeline-styles';
+  styleSheet.textContent = timelineStyle;
+  document.head.appendChild(styleSheet);
+}
+
+// Timeline Event Listener für Interaktion
+timeline.addEventListener('input', function() {
+  if (!isTimelineDragging) {
+      isTimelineDragging = true;
+      wasAnimationRunning = isAnimationRunning;
+      
+      // Animation pausieren während Timeline-Interaktion
+      if (animation) {
+          animation.pause();
+      }
   }
+  
+  // Animation basierend auf Timeline-Position aktualisieren
+  updateAnimationFromTimeline(this.value);
+});
 
+timeline.addEventListener('change', function() {
+  isTimelineDragging = false;
+  
+  // Animation wieder starten wenn sie vorher lief
+  if (wasAnimationRunning) {
+      resumeAnimationFromTimeline(this.value);
+  }
+});
+
+animateButton.addEventListener('keydown', function(event) {
+  if (event.key === 'Enter') {
+      event.preventDefault();
+      toggleAnimation();
+  }
+});
+
+// Optional: Enter auch aktivieren wenn Button fokussiert ist
+animateButton.addEventListener('focus', function() {
+  document.addEventListener('keydown', handleAnimateKeydown);
+});
+
+animateButton.addEventListener('blur', function() {
+  document.removeEventListener('keydown', handleAnimateKeydown);
+});
+
+function handleAnimateKeydown(event) {
+  if (event.key === 'Enter') {
+      event.preventDefault();
+      toggleAnimation();
+  }
+}
+
+function playNextFromProgress(i, startProgress, shouldLoop) {
+  if (i >= interP.length) return;
+  
   currentAnimationIndex = i;
   const currentInterpolator = interP[i];
+  const selectedEasing = document.getElementById('easingSelect').value;
+  const easingFunction = easingFunctions[selectedEasing] || (t => t);
+  
+  // Berechne verbleibende Duration basierend auf startProgress
+  const remainingProgress = 100 - startProgress;
+  const remainingDuration = (max - animationSpeed) * (remainingProgress / 100);
   
   animation = anime({
-    duration: max - animationSpeed,
-    easing: 'easeOutQuad',
-    loop: false,
-    direction: 'alternate',
-    update: function (anim) {
-      const t = anim.progress / 100;
-      path.setAttribute('d', currentInterpolator(t));
-    },
-    complete: function () {
-      if (i + 1 < interP.length) {
-        playNext(i + 1, shouldLoop); 
-      } else if (shouldLoop) {
-        currentAnimationIndex = 0; 
-        playNext(0, shouldLoop); 
-      } else {
-        isAnimationRunning = false;
-        animationCompleted = true;
-        currentAnimationIndex = 0; 
-        updateAnimateButton();
+      duration: remainingDuration,
+      easing: 'linear',
+      loop: false,
+      direction: 'alternate',
+      update: function(anim) {
+          const currentProgress = startProgress + (anim.progress * remainingProgress / 100);
+          const t = currentProgress / 100;
+          const easedT = easingFunction(t);
+          
+          path.setAttribute('d', currentInterpolator(easedT));
+          
+          // Aktualisiere Timeline (nur wenn nicht manuell gesteuert)
+          if (!isTimelineDragging) {
+              const totalAnimations = interP.length;
+              const progressPerAnimation = 100 / totalAnimations;
+              const globalProgress = (i * progressPerAnimation) + (currentProgress * progressPerAnimation / 100);
+              timeline.value = globalProgress;
+          }
+      },
+      complete: function() {
+          if (i + 1 < interP.length) {
+              playNext(i + 1, shouldLoop);
+          } else if (shouldLoop) {
+              currentAnimationIndex = 0;
+              timeline.value = 0;
+              playNext(0, shouldLoop);
+          } else {
+              isAnimationRunning = false;
+              animationCompleted = true;
+              currentAnimationIndex = 0;
+              timeline.value = 100;
+              updateAnimateButton();
+          }
       }
-    }
+  });
+}
+
+function playNext(i, shouldLoop) {
+  if (i >= interP.length) return;
+  
+  currentAnimationIndex = i;
+  const currentInterpolator = interP[i];
+  const selectedEasing = document.getElementById('easingSelect').value;
+  const easingFunction = easingFunctions[selectedEasing] || (t => t);
+  
+  animation = anime({
+      duration: max - animationSpeed,
+      easing: 'linear',
+      loop: false,
+      direction: 'alternate',
+      update: function(anim) {
+          const t = anim.progress / 100;
+          const easedT = easingFunction(t);
+          
+          path.setAttribute('d', currentInterpolator(easedT));
+          
+          // Aktualisiere Timeline nur wenn nicht manuell gesteuert
+          if (!isTimelineDragging) {
+              const totalAnimations = interP.length;
+              const progressPerAnimation = 100 / totalAnimations;
+              const globalProgress = (i * progressPerAnimation) + (anim.progress * progressPerAnimation / 100);
+              timeline.value = globalProgress;
+          }
+      },
+      complete: function() {
+          if (i + 1 < interP.length) {
+              playNext(i + 1, shouldLoop);
+          } else if (shouldLoop) {
+              currentAnimationIndex = 0;
+              timeline.value = 0;
+              playNext(0, shouldLoop);
+          } else {
+              isAnimationRunning = false;
+              animationCompleted = true;
+              currentAnimationIndex = 0;
+              timeline.value = 100;
+              updateAnimateButton();
+          }
+      }
   });
 }
 
@@ -770,7 +1093,6 @@ const instructions = [
 let currentStep = 0;
 let autoAdvanceTimer;
 let running = true;
-
 const instructionText = document.getElementById("instructionText");
 const main = document.getElementById("mainApp");
 const nextBtn = document.getElementById("nextBtn");
@@ -836,7 +1158,6 @@ function changeSVGFillColor(newColor) {
     svgObj.style = svgDoc.querySelector('style')?.textContent || svgObj.style;
   });
   
-  // Update the drawing tool color
   if (previewDrawing && previewDrawing.updateColor) {
     previewDrawing.updateColor();
   }
@@ -854,44 +1175,138 @@ function changeSVGFillColor(newColor) {
   console.log(`Changed fill color to ${newColor} for ${svgs.length} SVG(s)`);
 }
 
+function changeSVGStrokeColor(newColor) {
+  if (!svgs || svgs.length === 0) {
+    console.log("No SVGs uploaded yet");
+    return;
+  }
+
+  const parser = new DOMParser();
+  const serializer = new XMLSerializer();
+
+  svgs.forEach((svgObj, index) => {
+    const svgDoc = parser.parseFromString(svgObj.svg, "image/svg+xml");
+    
+    const elementsWithFill = svgDoc.querySelectorAll('[stroke]');
+    const pathElements = svgDoc.querySelectorAll('path');
+    const allShapes = svgDoc.querySelectorAll('circle, rect, ellipse, polygon, polyline, line');
+    
+    elementsWithFill.forEach(element => {
+      element.setAttribute('stroke', newColor);
+      
+    });
+  
+    pathElements.forEach(element => {
+      element.setAttribute('stroke', newColor);
+    });
+    
+    allShapes.forEach(element => {
+      element.setAttribute('stroke', newColor);
+    });
+    
+    const styleElements = svgDoc.querySelectorAll('style');
+    styleElements.forEach(styleEl => {
+      let cssText = styleEl.textContent;
+      cssText = cssText.replace(/stroke\s*:\s*[^;]+/g, `stroke: ${newColor}`);
+      styleEl.textContent = cssText;
+    });
+    
+    svgObj.svg = serializer.serializeToString(svgDoc.documentElement);
+    svgObj.style = svgDoc.querySelector('style')?.textContent || svgObj.style;
+  });
+  
+  if (previewDrawing && previewDrawing.updateColor) {
+    previewDrawing.updateColor();
+  }
+  
+  if (svgs.length > 0) {
+    svgContainer.innerHTML = svgs[0].svg;
+  }
+  
+  previewList.innerHTML = '';
+  svgs.forEach((_, index) => previewSVG(index));
+  isAnimationReady = false;
+  isAnimationRunning = false;
+  updateAnimateButton();
+  
+  console.log(`Changed stroke color to ${newColor} for ${svgs.length} SVG(s)`);
+}
 
 function setupFillColorChanger() {
-  const colorPicker = document.getElementById('fillColorPicker');
+  const colorPickerFill = document.getElementById('fillColorPicker');
   const transparentFill = document.getElementById('transparentFill');
 
-  if (colorPicker) {
-    colorPicker.addEventListener('input', (e) => {
+  if (colorPickerFill) {
+    colorPickerFill.addEventListener('input', (e) => {
       if (transparentFill && transparentFill.checked) {
         changeSVGFillColor(e.target.value);
       }
     });
   }
   
-//   if (transparentFill) {
-//     transparentFill.addEventListener('change', function () {
-//       const currentColor = getCurrentFillColor();
-//       changeSVGFillColor(currentColor);
-//     });
-//   }
-// }
+  if (transparentFill) {
+    transparentFill.addEventListener('change', function () {
+      const currentFillColor = getCurrentFillColor();
+      changeSVGFillColor(currentFillColor);
+    });
+  }
+}
+
+function setupStrokeColorChanger() {
+  const colorPickerStroke = document.getElementById('strokeColorPicker');
+  const transparentStroke = document.getElementById('transparentStroke');
+
+  if (colorPickerStroke) {
+    colorPickerStroke.addEventListener('input', (e) => {
+      if (transparentStroke && transparentStroke.checked) {
+        changeSVGStrokeColor(e.target.value);
+      
+      }
+    });
+  }
+  
+  if (transparentStroke) {
+    transparentStroke.addEventListener('change', function () {
+      const currentStrokeColor = getCurrentStrokeColor();
+      changeSVGStrokeColor(currentStrokeColor);
+    });
+  }
+}
 
 setupFillColorChanger();
+setupStrokeColorChanger();
 
 
 
 function getCurrentFillColor() {
-  const colorPicker = document.getElementById('fillColorPicker');
+  const colorPickerFill = document.getElementById('fillColorPicker');
   const transparentFill = document.getElementById('transparentFill');
   
   if (!transparentFill || !transparentFill.checked) {
     return 'none';
   }
   
-  return colorPicker ? colorPicker.value : '#000';
+  return colorPickerFill ? colorPickerFill.value : '#000';
+}
+
+function getCurrentStrokeColor() {
+  const colorPickerStroke = document.getElementById('strokeColorPicker');
+  const transparentStroke = document.getElementById('transparentStroke');
+  
+  if (!transparentStroke || !transparentStroke.checked) {
+    return 'none';
+  }
+  
+  return colorPickerStroke ? colorPickerStroke.value : '#000';
+}
+
+function getCurrentStrokeWidth() {
+  const strokeWidthSlider = document.getElementById('strokeWidthSlider');
+  return strokeWidthSlider ? strokeWidthSlider.value || '1' : '1';
 }
 
 
-function applySingleSVGColor(svgContent, color) {
+function applySingleSVGColor(svgContent, color, number) {
   if (!color) return svgContent;
   
   const parser = new DOMParser();
@@ -899,9 +1314,12 @@ function applySingleSVGColor(svgContent, color) {
   const svgDoc = parser.parseFromString(svgContent, "image/svg+xml");
   
   const elementsWithFill = svgDoc.querySelectorAll('[fill]');
+  const elementsWithStroke = svgDoc.querySelectorAll('[stroke]');
   const pathElements = svgDoc.querySelectorAll('path');
   const allShapes = svgDoc.querySelectorAll('circle, rect, ellipse, polygon, polyline, line');
   
+
+  if (number == 1){
   elementsWithFill.forEach(element => {
     element.setAttribute('fill', color);
   });
@@ -920,6 +1338,38 @@ function applySingleSVGColor(svgContent, color) {
     cssText = cssText.replace(/fill\s*:\s*[^;]+/g, `fill: ${color}`);
     styleEl.textContent = cssText;
   });
+}
+
+if (number == 2){
+  elementsWithFill.forEach(element => {
+    element.setAttribute('stroke', color);
+  });
+
+  pathElements.forEach(element => {
+    element.setAttribute('stroke', color);
+  });
+  
+  allShapes.forEach(element => {
+    element.setAttribute('stroke', color);
+  });
+  
+  const styleElements = svgDoc.querySelectorAll('style');
+  styleElements.forEach(styleEl => {
+    let cssText = styleEl.textContent;
+    cssText = cssText.replace(/stroke\s*:\s*[^;]+/g, `stroke: ${color}`);
+    styleEl.textContent = cssText;
+  });
+}
+
+if (number == 3){
+  pathElements.forEach(el => el.setAttribute('stroke-width', color));
+  allShapes.forEach(el => el.setAttribute('stroke-width', color));
+  const styleElements = svgDoc.querySelectorAll('style');
+  styleElements.forEach(styleEl => {
+    styleEl.textContent = styleEl.textContent.replace(/stroke-width\s*:\s*[^;]+/g, `stroke-width: ${color}`);
+  });
+}
+
   
   return serializer.serializeToString(svgDoc.documentElement);
 }
@@ -929,3 +1379,79 @@ function updateDrawingAreaOnOpen() {
     previewDrawing.updateColor();
   }
 }
+
+
+function changeSVGStrokeWidth(newWidth) {
+  if (!svgs || svgs.length === 0) {
+    console.log("No SVGs uploaded yet");
+    return;
+  }
+
+  const parser = new DOMParser();
+  const serializer = new XMLSerializer();
+
+  svgs.forEach((svgObj, index) => {
+    const svgDoc = parser.parseFromString(svgObj.svg, "image/svg+xml");
+    
+    const elementsWithStroke = svgDoc.querySelectorAll('[stroke]');
+    const pathElements = svgDoc.querySelectorAll('path');
+    const allShapes = svgDoc.querySelectorAll('circle, rect, ellipse, polygon, polyline, line');
+    
+    elementsWithStroke.forEach(element => {
+      element.setAttribute('stroke-width', newWidth);
+    });
+  
+    pathElements.forEach(element => {
+      element.setAttribute('stroke-width', newWidth);
+    });
+    
+    allShapes.forEach(element => {
+      element.setAttribute('stroke-width', newWidth);
+    });
+    
+    const styleElements = svgDoc.querySelectorAll('style');
+    styleElements.forEach(styleEl => {
+      let cssText = styleEl.textContent;
+      cssText = cssText.replace(/stroke-width\s*:\s*[^;]+/g, `stroke-width: ${newWidth}`);
+      styleEl.textContent = cssText;
+    });
+    
+    svgObj.svg = serializer.serializeToString(svgDoc.documentElement);
+    svgObj.style = svgDoc.querySelector('style')?.textContent || svgObj.style;
+  });
+  
+  if (svgs.length > 0) {
+    svgContainer.innerHTML = svgs[0].svg;
+  }
+  
+  previewList.innerHTML = '';
+  svgs.forEach((_, index) => previewSVG(index));
+  
+  console.log(`Changed stroke width to ${newWidth} for ${svgs.length} SVG(s)`);
+}
+
+function setupStrokeWidthControl() {
+  const strokeWidthSlider = document.getElementById('strokeWidthSlider');
+
+  if (strokeWidthSlider) {
+    strokeWidthSlider.addEventListener('input', (e) => {
+      const width = e.target.value;
+      changeSVGStrokeWidth(width);
+      if (previewDrawing && previewDrawing.updateColor) {
+        previewDrawing.updateColor();
+      }
+    });
+  }
+}
+
+setupStrokeWidthControl();
+
+//export
+// const svgData = document.querySelector('svg').outerHTML;
+// const blob = new Blob([svgData], { type: 'image/svg+xml' });
+// const url = URL.createObjectURL(blob);
+
+// const link = document.createElement('a');
+// link.href = url;
+// link.download = 'animation.svg';
+// link.click();
