@@ -29,7 +29,6 @@ let transparentStroke = document.getElementById("transparentStroke");
 const morphing_GUI = document.getElementById("morphing-GUI");
 const drawable_GUI = document.getElementById("drawable-GUI");
 const motion_GUI = document.getElementById("motion-GUI");
-let svgContainer = document.getElementById("svg-container");
 
 //Choose Mode
 document.getElementById("scriptDropdown").addEventListener("change", function () {
@@ -88,10 +87,7 @@ transparentStroke.addEventListener('change', function () {
 });
 
 function setupDrawing() {
-
-  let containerWidth = svgContainer.offsetWidth;
-  let containerHeight = svgContainer.offsetHeight;
-  previewDrawing.draw = SVG().addTo('#drawingArea').size(containerWidth, containerHeight);
+  previewDrawing.draw = SVG().addTo('#drawingArea').size(400, 400);
 
   const defs = previewDrawing.draw.defs();
   previewDrawing.styleElement = defs.element('style');
@@ -913,7 +909,7 @@ document.querySelector('#myRange').addEventListener('input', function () {
 let dropzone = document.querySelector('.dropzone');
 let input = document.querySelector("input[type='file']");
 let previewList = document.getElementById("svg-preview-list");
-
+let svgContainer = document.getElementById("svg-container");
 
 function setupDropzone(dropzone) {
   dropzone.addEventListener("click", () => {
@@ -997,10 +993,9 @@ function previewSVG(index) {
   wrapper.style.display = "inline-block";
   wrapper.style.margin = "10px";
 
-  let containerWidth = svgContainer.offsetWidth;
-  let containerHeight = svgContainer.offsetHeight;
+  
 
-  let preview = SVG().addTo(wrapper).viewbox(0, 0, containerWidth, containerHeight);
+  let preview = SVG().addTo(wrapper).viewbox(0, 0, 400, 400);
   preview.svg(svgs[index].svg);
 
   previewList.appendChild(wrapper);
