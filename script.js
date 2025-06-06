@@ -105,18 +105,15 @@ function setupDrawing() {
         stroke-width: ${currentStrokeWidth};
       }
     `);
-    
-    // Update existing path color if it exists
+  
     if (previewDrawing.pathp) {
       previewDrawing.pathp.stroke({ color: currentStrokeColor, width: currentStrokeWidth });
       previewDrawing.pathp.fill(currentFillColor);
     }
   }
   
-  // Set initial color
   updateDrawingColor();
   
-  // Store the update function for later use
   previewDrawing.updateColor = updateDrawingColor;
 
   previewDrawing.pathp = previewDrawing.draw.path().addClass('drawing-path');
@@ -312,8 +309,6 @@ function morphingAnimation() {
   }, 100);
 }
 
-//|| ev.keyCode === 9
-
 function updateAnimateButton() {
   if (isAnimationRunning) {
     animateButton.textContent = "Pause";
@@ -460,57 +455,29 @@ if (checkLoop) {
     animationCompleted = false;
     currentAnimationIndex = 0;
     updateAnimateButton();
-    // animate();
   });
 }
-
-// function animate() {
-//   if (animation) animation.pause();
-
-//   const shouldLoop = checkLoop.checked;
-//   console.log("Animating with loop:", shouldLoop);
-
-//   if (animationCompleted || (!isAnimationPaused && currentAnimationIndex === 0)) {
-//     currentAnimationIndex = 0;
-//     animationCompleted = false;
-//   }
-
-//   playNext(currentAnimationIndex, shouldLoop);
-//   isAnimationRunning = true;
-//   isAnimationPaused = false;
-//   updateAnimateButton();
-// }
-
 const timeline = document.getElementById('timeline');
 let isTimelineDragging = false;
 let wasAnimationRunning = false;
-
-// Timeline Event Listener für Interaktion
 timeline.addEventListener('input', function() {
     if (!isTimelineDragging) {
         isTimelineDragging = true;
         wasAnimationRunning = isAnimationRunning;
-        
-        // Animation pausieren während Timeline-Interaktion
         if (animation) {
             animation.pause();
         }
     }
-    
-    // Animation basierend auf Timeline-Position aktualisieren
     updateAnimationFromTimeline(this.value);
 });
 
 timeline.addEventListener('change', function() {
     isTimelineDragging = false;
-    
-    // Animation wieder starten wenn sie vorher lief
     if (wasAnimationRunning) {
         resumeAnimationFromTimeline(this.value);
     }
 });
 
-// Enter-Taste für Pause/Play
 document.addEventListener('keydown', function(event) {
     if (event.key === 'Enter') {
         toggleAnimation();
@@ -518,71 +485,87 @@ document.addEventListener('keydown', function(event) {
 });
 
 function updateAnimationFromTimeline(timelineValue) {
-    const progress = parseFloat(timelineValue);
-    
-    // Berechne welche Animation und Position basierend auf Timeline
-    const totalAnimations = interP.length;
-    const progressPerAnimation = 100 / totalAnimations;
-    
-    const animationIndex = Math.floor(progress / progressPerAnimation);
-    const localProgress = (progress % progressPerAnimation) / progressPerAnimation;
-    
-    // Stelle sicher, dass Index im gültigen Bereich liegt
-    const safeIndex = Math.min(animationIndex, interP.length - 1);
-    const safeProgress = Math.max(0, Math.min(1, localProgress));
-    
-    // Aktualisiere Animation direkt
-    if (interP[safeIndex]) {
-        const selectedEasing = document.getElementById('easingSelect').value;
-        const easingFunction = easingFunctions[selectedEasing] || (t => t);
-        const easedProgress = easingFunction(safeProgress);
-        
-        path.setAttribute('d', interP[safeIndex](easedProgress));
-        currentAnimationIndex = safeIndex;
-    }
+  const progress = parseFloat(timelineValue);
+  
+  const totalAnimations = interP.length;
+  const progressPerAnimation = 100 / totalAnimations;
+  
+  const animationIndex = Math.floor(progress / progressPerAnimation);
+  const localProgress = (progress % progressPerAnimation) / progressPerAnimation;
+  
+  const safeIndex = Math.min(animationIndex, interP.length - 1);
+  const safeProgress = Math.max(0, Math.min(1, localProgress));
+  
+  if (interP[safeIndex]) {
+      const selectedEasing = document.getElementById('easingSelect').value;
+      const easingFunction = easingFunctions[selectedEasing] || (t => t);
+      const easedProgress = easingFunction(safeProgress);
+      
+      path.setAttribute('d', interP[safeIndex](easedProgress));
+      currentAnimationIndex = safeIndex;
+  }
+}
+
+function onParameterChange() {
+  if (isTimelineDragging) {
+      updateAnimationFromTimeline(timeline.value);
+  } else if (isAnimationRunning) {
+      const currentProgress = timeline.value;
+      if (animation) {
+          animation.pause();
+      }
+      resumeAnimationFromTimeline(currentProgress);
+  }
 }
 
 function resumeAnimationFromTimeline(timelineValue) {
-    const progress = parseFloat(timelineValue);
-    const totalAnimations = interP.length;
-    const progressPerAnimation = 100 / totalAnimations;
-    
-    const animationIndex = Math.floor(progress / progressPerAnimation);
-    const localProgress = (progress % progressPerAnimation) / progressPerAnimation;
-    
-    currentAnimationIndex = Math.min(animationIndex, interP.length - 1);
-    
-    // Starte Animation von aktueller Position
-    playNextFromProgress(currentAnimationIndex, localProgress * 100, checkLoop.checked);
+  const progress = parseFloat(timelineValue);
+  const totalAnimations = interP.length;
+  const progressPerAnimation = 100 / totalAnimations;
+  
+  const animationIndex = Math.floor(progress / progressPerAnimation);
+  const localProgress = (progress % progressPerAnimation) / progressPerAnimation;
+  
+  currentAnimationIndex = Math.min(animationIndex, interP.length - 1);
+  
+  playNextFromProgress(currentAnimationIndex, localProgress * 100, checkLoop.checked);
 }
 
+
 function toggleAnimation() {
-    if (isAnimationRunning) {
-        pauseAnimation();
-    } else {
-        resumeAnimation();
-    }
+  if (isAnimationRunning) {
+      pauseAnimation();
+  } else {
+      resumeAnimation();
+  }
 }
 
 function pauseAnimation() {
-    if (animation) {
-        animation.pause();
-    }
-    isAnimationRunning = false;
-    isAnimationPaused = true;
-    updateAnimateButton();
+  if (animation) {
+      animation.pause();
+  }
+  isAnimationRunning = false;
+  isAnimationPaused = true;
+  updateAnimateButton();
 }
 
 function resumeAnimation() {
-    if (animation && isAnimationPaused) {
-        animation.play();
-        isAnimationRunning = true;
-        isAnimationPaused = false;
-    } else {
-        animate();
-    }
-    updateAnimateButton();
+  if (animation && isAnimationPaused) {
+      animation.play();
+      isAnimationRunning = true;
+      isAnimationPaused = false;
+  } else {
+      const currentProgress = parseFloat(timeline.value);
+      if (currentProgress >= 100) {
+          timeline.value = 0;
+          animate();
+      } else {
+          resumeAnimationFromTimeline(currentProgress);
+      }
+  }
+  updateAnimateButton();
 }
+
 
 function animate() {
   if (animation) animation.pause();
@@ -593,7 +576,9 @@ function animate() {
   if (animationCompleted || (!isAnimationPaused && currentAnimationIndex === 0)) {
       currentAnimationIndex = 0;
       animationCompleted = false;
-      timeline.value = 0;
+      if (!timelineUpdateLock) {
+          timeline.value = 0;
+      }
   }
   
   playNext(currentAnimationIndex, shouldLoop);
@@ -609,147 +594,65 @@ const easingFunctions = {
   easeInOutSine: t => -(Math.cos(Math.PI * t) - 1) / 2,
 };
 
-// function playNext(i, shouldLoop) {
-//   if (i >= interP.length) {
-//     return; 
-//   }
 
-//   currentAnimationIndex = i;
-//   const currentInterpolator = interP[i];
-
-//   const selectedEasing = document.getElementById('easingSelect').value;
-//   const easingFunction = easingFunctions[selectedEasing] || (t => t); 
-  
-//   animation = anime({
-//     duration: max - animationSpeed,
-//     easing: 'linear',
-//     loop: false,
-//     direction: 'alternate',
-//     update: function (anim) {
-//       const t = anim.progress / 100;
-//       const easedT = easingFunction(t);
-//       path.setAttribute('d', currentInterpolator(easedT));
-//       document.getElementById('timeline').value = anim.progress;
-//     },
-//     complete: function () {
-//       if (i + 1 < interP.length) {
-//         playNext(i + 1, shouldLoop); 
-//       } else if (shouldLoop) {
-//         currentAnimationIndex = 0; 
-//         playNext(0, shouldLoop); 
-//       } else {
-//         isAnimationRunning = false;
-//         animationCompleted = true;
-//         currentAnimationIndex = 0; 
-//         updateAnimateButton();
-//       }
-//     }
-//   });
-// }
-
-const timelineStyle = `
-    #timeline {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 100%;
-        height: 8px;
-        border-radius: 4px;
-        background: #ddd;
-        outline: none;
-        cursor: pointer;
-    }
-    
-    #timeline::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        background: #007bff;
-        cursor: grab;
-        border: 2px solid #fff;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-    
-    #timeline::-webkit-slider-thumb:active {
-        cursor: grabbing;
-        transform: scale(1.1);
-    }
-    
-    #timeline::-moz-range-thumb {
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        background: #007bff;
-        cursor: grab;
-        border: 2px solid #fff;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-    
-    #timeline::-moz-range-thumb:active {
-        cursor: grabbing;
-        transform: scale(1.1);
-    }
-`;
-
-
-if (!document.getElementById('timeline-styles')) {
-  const styleSheet = document.createElement('style');
-  styleSheet.id = 'timeline-styles';
-  styleSheet.textContent = timelineStyle;
-  document.head.appendChild(styleSheet);
+function handleParameterChange() {
+  if (isAnimationRunning) {
+      timelineUpdateLock = true;
+      const currentProgress = parseFloat(timeline.value);
+      updateAnimationFromTimeline(currentProgress);
+      timelineUpdateLock = false;
+  }
 }
 
-// Timeline Event Listener für Interaktion
-timeline.addEventListener('input', function() {
-  if (!isTimelineDragging) {
-      isTimelineDragging = true;
-      wasAnimationRunning = isAnimationRunning;
-      
-      // Animation pausieren während Timeline-Interaktion
-      if (animation) {
-          animation.pause();
-      }
-  }
-  
-  // Animation basierend auf Timeline-Position aktualisieren
-  updateAnimationFromTimeline(this.value);
+let timelineUpdateLock = false;
+
+timeline.addEventListener('mousedown', function() {
+    isTimelineDragging = true;
+    wasAnimationRunning = isAnimationRunning;
+    if (animation) {
+        animation.pause();
+    }
+    timelineUpdateLock = true;
 });
 
-timeline.addEventListener('change', function() {
-  isTimelineDragging = false;
-  
-  // Animation wieder starten wenn sie vorher lief
-  if (wasAnimationRunning) {
-      resumeAnimationFromTimeline(this.value);
-  }
+timeline.addEventListener('mouseup', function() {
+    isTimelineDragging = false;
+    timelineUpdateLock = false;
+    if (wasAnimationRunning) {
+        resumeAnimationFromTimeline(this.value);
+    }
+});
+
+timeline.addEventListener('input', function() {
+    updateAnimationFromTimeline(this.value);
 });
 
 animateButton.addEventListener('keydown', function(event) {
-  if (event.key === 'Enter') {
-      event.preventDefault();
-      toggleAnimation();
-  }
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        toggleAnimation();
+    }
 });
 
-// Optional: Enter auch aktivieren wenn Button fokussiert ist
-animateButton.addEventListener('focus', function() {
-  document.addEventListener('keydown', handleAnimateKeydown);
+timeline.addEventListener('click', function(event) {
+    if (!isTimelineDragging) {
+        const rect = timeline.getBoundingClientRect();
+        const clickPosition = (event.clientX - rect.left) / rect.width;
+        const newValue = clickPosition * 100;
+        
+        timeline.value = newValue;
+        updateAnimationFromTimeline(newValue);
+        if (isAnimationRunning) {
+            resumeAnimationFromTimeline(newValue);
+        }
+    }
 });
-
-animateButton.addEventListener('blur', function() {
-  document.removeEventListener('keydown', handleAnimateKeydown);
-});
-
-function handleAnimateKeydown(event) {
-  if (event.key === 'Enter') {
-      event.preventDefault();
-      toggleAnimation();
-  }
-}
 
 function playNextFromProgress(i, startProgress, shouldLoop) {
   if (i >= interP.length) return;
+  
+  // Stoppe vorherige Animation
+  if (animation) animation.pause();
   
   currentAnimationIndex = i;
   const currentInterpolator = interP[i];
@@ -773,11 +676,11 @@ function playNextFromProgress(i, startProgress, shouldLoop) {
           path.setAttribute('d', currentInterpolator(easedT));
           
           // Aktualisiere Timeline (nur wenn nicht manuell gesteuert)
-          if (!isTimelineDragging) {
+          if (!timelineUpdateLock && !isTimelineDragging) {
               const totalAnimations = interP.length;
               const progressPerAnimation = 100 / totalAnimations;
               const globalProgress = (i * progressPerAnimation) + (currentProgress * progressPerAnimation / 100);
-              timeline.value = globalProgress;
+              timeline.value = Math.min(100, globalProgress);
           }
       },
       complete: function() {
@@ -785,21 +688,32 @@ function playNextFromProgress(i, startProgress, shouldLoop) {
               playNext(i + 1, shouldLoop);
           } else if (shouldLoop) {
               currentAnimationIndex = 0;
-              timeline.value = 0;
+              if (!timelineUpdateLock) {
+                  timeline.value = 0;
+              }
               playNext(0, shouldLoop);
           } else {
               isAnimationRunning = false;
               animationCompleted = true;
               currentAnimationIndex = 0;
-              timeline.value = 100;
+              if (!timelineUpdateLock) {
+                  timeline.value = 100;
+              }
               updateAnimateButton();
           }
       }
   });
+  
+  isAnimationRunning = true;
+  isAnimationPaused = false;
+  updateAnimateButton();
 }
 
 function playNext(i, shouldLoop) {
   if (i >= interP.length) return;
+  
+  // Stoppe vorherige Animation
+  if (animation) animation.pause();
   
   currentAnimationIndex = i;
   const currentInterpolator = interP[i];
@@ -816,13 +730,11 @@ function playNext(i, shouldLoop) {
           const easedT = easingFunction(t);
           
           path.setAttribute('d', currentInterpolator(easedT));
-          
-          // Aktualisiere Timeline nur wenn nicht manuell gesteuert
-          if (!isTimelineDragging) {
+          if (!timelineUpdateLock && !isTimelineDragging) {
               const totalAnimations = interP.length;
               const progressPerAnimation = 100 / totalAnimations;
               const globalProgress = (i * progressPerAnimation) + (anim.progress * progressPerAnimation / 100);
-              timeline.value = globalProgress;
+              timeline.value = Math.min(100, globalProgress);
           }
       },
       complete: function() {
@@ -830,18 +742,23 @@ function playNext(i, shouldLoop) {
               playNext(i + 1, shouldLoop);
           } else if (shouldLoop) {
               currentAnimationIndex = 0;
-              timeline.value = 0;
+              if (!timelineUpdateLock) {
+                  timeline.value = 0;
+              }
               playNext(0, shouldLoop);
           } else {
               isAnimationRunning = false;
               animationCompleted = true;
               currentAnimationIndex = 0;
-              timeline.value = 100;
+              if (!timelineUpdateLock) {
+                  timeline.value = 100;
+              }
               updateAnimateButton();
           }
       }
   });
 }
+
 
 document.querySelector('#myRange').addEventListener('input', function () {
   animationSpeed = this.value;
@@ -1065,9 +982,7 @@ function modeChooser() {
 }
 
 const drawWindow = document.getElementById("drawWindow");
-const openDrawBtn = document.createElement('button');
-openDrawBtn.textContent = "Open Drawing Tool";
-document.querySelector(".gui-container").appendChild(openDrawBtn);
+const openDrawBtn = document.getElementById("drawBtn");
 
 openDrawBtn.addEventListener("click", () => {
   drawWindow.style.display = "flex";
@@ -1446,12 +1361,62 @@ function setupStrokeWidthControl() {
 
 setupStrokeWidthControl();
 
-//export
-// const svgData = document.querySelector('svg').outerHTML;
-// const blob = new Blob([svgData], { type: 'image/svg+xml' });
-// const url = URL.createObjectURL(blob);
 
-// const link = document.createElement('a');
-// link.href = url;
-// link.download = 'animation.svg';
-// link.click();
+let exportIndexSVG = 0;
+let exportIndexPNG = 0;
+let exportIndexMP4 = 0;
+
+//SVG EXPORT
+function exportSVGContainer() {
+  const svgElement = document.querySelector("#svg-container svg");
+  const serializer = new XMLSerializer();
+  const svgString = serializer.serializeToString(svgElement);
+  const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+  const url = URL.createObjectURL(svgBlob);
+  return { svgElement, url };
+}
+
+document.getElementById("export-btn-svg").addEventListener("click", () => {
+  const { url } = exportSVGContainer();
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `vectra${exportIndexSVG++}.svg`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+});
+
+//PNG EXPORT
+document.getElementById("export-btn-png").addEventListener("click", () => {
+  const { svgElement, url } = exportSVGContainer();
+  const svgWidth = svgElement.getAttribute('width') || svgElement.viewBox.baseVal.width || 1920;
+  const svgHeight = svgElement.getAttribute('height') || svgElement.viewBox.baseVal.height || 1080;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = svgWidth;
+  canvas.height = svgHeight;
+  const ctx = canvas.getContext("2d");
+
+  const img = new Image();
+  img.onload = () => {
+    ctx.drawImage(img, 0, 0, svgWidth, svgHeight);
+    canvas.toBlob((blob) => {
+      const pngUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = pngUrl;
+      a.download = `vectra${exportIndexPNG++}.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(pngUrl);
+      URL.revokeObjectURL(url);
+    }, "image/png");
+  };
+  img.onerror = () => console.error("Failed to load SVG for PNG export.");
+  img.src = url;
+});
+
+// VIDEO EXPORT
+
+

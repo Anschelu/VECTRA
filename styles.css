@@ -50,7 +50,7 @@ body {
 
   .slidecontainer {
     width: 100%; 
-    height: 200px;
+    height: 40px;
   }
 
   .spaceing{
@@ -107,14 +107,7 @@ body {
     display: none;
   }
 
-  /* #drawWindow{
-    position: absolute;
-    border: 1px solid #ccc;
-  } */
 
-  /* #drawingArea{
-    position: absolute;
-  } */
 
   #drawWindow {
     position: fixed;
@@ -358,4 +351,3 @@ body {
   align-items: center;
   font-weight: bold;
 }
-
