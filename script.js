@@ -107,9 +107,34 @@ function setupDrawing() {
   }
   
 //Pop Up GUI
-document.getElementById("toggle-export").addEventListener("click", function () {
+
+document.querySelector("#toggle-upload h4").addEventListener("click", function () {
+  document.getElementById("upload").classList.toggle("open");
+});
+
+document.querySelector("#toggle-export").addEventListener("click", function () {
   document.getElementById("export").classList.toggle("open");
 });
+
+document.querySelector("#toggle-animation h4").addEventListener("click", function () {
+  document.getElementById("animation").classList.toggle("open");
+});
+
+document.querySelectorAll('#easingButtons .easing-btn').forEach(button => {
+  button.addEventListener('click', () => {
+    // Update the hidden select
+    document.getElementById('easingSelect').value = button.dataset.value;
+
+    // Optional: Add active styling
+    document.querySelectorAll('.easing-btn').forEach(btn => btn.classList.remove('active'));
+    button.classList.add('active');
+
+    // If you had a change listener on the select, manually trigger it
+    const event = new Event('change');
+    document.getElementById('easingSelect').dispatchEvent(event);
+  });
+});
+
 
   updateDrawingColor();
 
@@ -153,16 +178,13 @@ saveDraw.addEventListener('click', () => {
 });
 
 deleteButton.addEventListener("click", () => {
-  // Stop any running animation
   if (animation) {
       animation.pause();
       animation = null;
   }
   
-  // Reset timeline position
   timeline.value = 0;
   
-  // Reset animation states
   isAnimationReady = false;
   isAnimationRunning = false;
   isTimelineDragging = false;
@@ -258,11 +280,28 @@ function morphingAnimation() {
 
 function updateAnimateButton() {
   if (isAnimationRunning) {
-    animateButton.textContent = "Pause";
+    animateButton.innerHTML = `
+      <svg fill="#000000" width="25px" height="25px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg">
+        <title>pause</title>
+        <path d="M5.92 24.096q0 0.832 0.576 1.408t1.44 0.608h4.032q0.832 0 1.44-0.608t0.576-1.408v-16.16q0-0.832-0.576-1.44t-1.44-0.576h-4.032q-0.832 0-1.44 0.576t-0.576 1.44v16.16zM18.016 24.096q0 0.832 0.608 1.408t1.408 0.608h4.032q0.832 0 1.44-0.608t0.576-1.408v-16.16q0-0.832-0.576-1.44t-1.44-0.576h-4.032q-0.832 0-1.408 0.576t-0.608 1.44v16.16z"></path>
+      </svg>
+    `;
   } else {
-    animateButton.textContent = "Animate";
+    animateButton.innerHTML = `
+      <svg width="25px" height="25px" viewBox="-1 0 12 12" version="1.1" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+          <g transform="translate(-65, -3803)" fill="#000000">
+            <g transform="translate(56, 160)">
+              <path d="M18.074,3650.7335 L12.308,3654.6315 C10.903,3655.5815 9,3654.5835 9,3652.8985 L9,3645.1015 C9,3643.4155 10.903,3642.4185 12.308,3643.3685 L18.074,3647.2665 C19.306,3648.0995 19.306,3649.9005 18.074,3650.7335"></path>
+            </g>
+          </g>
+        </g>
+      </svg>
+    `;
   }
 }
+
+
 
 animateButton.addEventListener("click", () => {
   if (isCalculating) {
@@ -1027,7 +1066,7 @@ function playNext(i, shouldLoop) {
 
 document.querySelector('#myRange').addEventListener('input', function () {
   animationSpeed = this.value;
-  letspeedAnimation = max - animationSpeed;
+  let speedAnimation = max - animationSpeed;
   if (animation) {
     animation.duration = speedAnimation;
   }

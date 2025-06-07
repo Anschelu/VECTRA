@@ -24,11 +24,6 @@
       <div id="pageLayout">
         <div id="svg-container">
         </div>
-
-        <div class="slidecontainer">
-          <label for="timeline"></label>
-          <input type="range" id="timeline" value="0" min="0" max="100" step="0.1" class="slider">
-        </div>
       </div>
 
 
@@ -38,6 +33,8 @@
           <h2>VECTRA</h2>
         </div>
 
+       <div id="toggle-upload" class="category"> <h4 class="category">upload</h4>
+        <div id="upload">
         <div id="upload-zone">
           <div class="dropzone" id="dropzone1">
             <input type="file" multiple style="display: none;">
@@ -47,7 +44,6 @@
               
               <g id="Complete">
               
-              <g id="upload">
               
               <g>
               
@@ -65,8 +61,7 @@
               
               </g>
               
-              </g>
-              
+                      
               </svg>
           </div>
           <button id="drawBtn"><svg width="30px" height="30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -80,23 +75,34 @@
               <button id="closeDraw">Close</button>
             </div>
           </div>
+          <div id="trash-area" class="trash-area"><svg width="30px" height="30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 6H20M16 6L15.7294 5.18807C15.4671 4.40125 15.3359 4.00784 15.0927 3.71698C14.8779 3.46013 14.6021 3.26132 14.2905 3.13878C13.9376 3 13.523 3 12.6936 3H11.3064C10.477 3 10.0624 3 9.70951 3.13878C9.39792 3.26132 9.12208 3.46013 8.90729 3.71698C8.66405 4.00784 8.53292 4.40125 8.27064 5.18807L8 6M18 6V16.2C18 17.8802 18 18.7202 17.673 19.362C17.3854 19.9265 16.9265 20.3854 16.362 20.673C15.7202 21 14.8802 21 13.2 21H10.8C9.11984 21 8.27976 21 7.63803 20.673C7.07354 20.3854 6.6146 19.9265 6.32698 19.362C6 18.7202 6 17.8802 6 16.2V6M14 10V17M10 10V17" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg></div>
+
+            
+          </div>
+       <div id="deleteButton">
+
+          <button type="button" id="delete-button"><svg width="40px" height="40px" viewBox="0 0 24 24" fill="none"
+            xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 8L16 16" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M16 8L8 16" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg><h4>DELETE ALL</h4></button>
         </div>
 
+      </div>
+    </div>
+
         <div id="svg-preview-list">
-          <div></div>
         </div> 
 
-      <button type="button" id="delete-button"><svg width="50px" height="50px" viewBox="0 0 24 24" fill="none"
-          xmlns="http://www.w3.org/2000/svg">
-          <path d="M8 8L16 16" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-          <path d="M16 8L8 16" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-        </svg></button>
+
 
 
     
 
         <div id="morphing-GUI" class="mode-ui">
-          <h4>Styling</h4>
+          <h4 class="category">Styling</h4>
           <label for="transparentFill">Fill</label>
           <input type="checkbox" id="transparentFill" checked>
           <input type="color" id="fillColorPicker" value="#000000">
@@ -111,47 +117,84 @@
             <input type="range" id="strokeWidthSlider" min="0.1" max="200" value="20" step="0.1">
           </div>
 
-          <h4>Animation</h4>
-          <div class="slidecontainer">
-            <label for="myRange">speed</label>
-            <input type="range" min="1000" max="3000" value="2000" step="10" class="slider" id="myRange">
-          </div>
-          <div>
-            <label for="checkLoop">Loop</label>
-            <input type="checkbox" id="checkLoop">
-          </div>
-
-          <label for="easingSelect">Easing:</label>
-          <select id="easingSelect">
-            <option value="easeOutQuad">easeOut</option>
-            <option value="linear">linear</option>
-            <option value="easeInQuad">easeIn</option>
-            <option value="easeInOutSine">easeInOut</option>
-          </select>
-
-          <button type="button" id="animate-button"><svg width="25px" height="25px" viewBox="-1 0 12 12" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-            <defs>
-        
-        </defs>
-            <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                <g id="Dribbble-Light-Preview" transform="translate(-65.000000, -3803.000000)" fill="#000000">
-                    <g id="icons" transform="translate(56.000000, 160.000000)">
-                        <path d="M18.074,3650.7335 L12.308,3654.6315 C10.903,3655.5815 9,3654.5835 9,3652.8985 L9,3645.1015 C9,3643.4155 10.903,3642.4185 12.308,3643.3685 L18.074,3647.2665 C19.306,3648.0995 19.306,3649.9005 18.074,3650.7335" id="play-[#1000]">
-        
-        </path>
+          <div id="toggle-animation" class="category"><h4>Animation</h4> 
+            <div id="animation">
+              <div id="speed-container">
+              <svg fill="#000000" width="30px" height="30px" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg"><path d="M 4.8942 42.0850 C 8.1403 42.0850 11.4863 40.6700 14.1332 37.9400 C 15.9810 38.9388 17.7789 39.8544 20.4590 39.8544 C 23.3888 39.8544 25.2200 39.0886 26.8680 38.1730 C 29.4317 40.7200 32.7443 42.1183 35.9238 42.1183 C 38.5708 42.1183 40.5850 41.0196 40.5850 38.9887 C 40.5850 37.0577 39.1534 36.2586 37.2057 35.7259 C 36.7062 35.5928 36.2068 35.4762 35.7077 35.3431 C 43.0986 35.1932 43.1818 31.4477 48.1426 31.4477 C 52.6541 31.4477 56.0000 29.8829 56.0000 26.7866 C 56.0000 20.1611 52.2045 16.6320 47.7932 16.6320 C 43.2653 16.6320 40.8512 19.4952 39.8857 23.2574 C 39.3365 25.3050 38.3710 26.5868 36.9060 27.3193 L 35.8573 25.3882 C 31.4958 17.2479 27.3674 13.9851 20.6920 13.9685 C 13.4673 13.9851 9.7717 17.1314 4.3948 27.3193 C 2.7634 30.4322 0 31.1148 0 33.0624 C 0 34.4275 1.0488 35.3431 3.1629 35.3431 L 4.8775 35.3431 C 4.1617 35.5428 3.4459 35.7259 2.7967 35.9590 C 1.2319 36.5083 .2331 37.3407 .2331 38.9388 C .2331 40.9697 2.2473 42.0850 4.8942 42.0850 Z M 20.6920 16.6154 C 25.1867 16.6154 28.0499 18.6296 30.3805 21.6094 C 27.6338 23.9233 24.3044 25.2218 20.4923 25.2218 C 16.7301 25.2218 13.4507 23.9899 10.7539 21.7259 C 13.6005 17.9471 16.3971 16.6154 20.6920 16.6154 Z M 40.5018 31.9305 C 39.7361 31.3478 38.8537 30.2491 38.3212 29.3169 C 40.1356 28.6344 41.3507 27.4191 42.0666 24.5725 C 42.8658 21.1433 44.6969 19.1457 47.7932 19.1457 C 50.9727 19.1457 53.6196 22.0755 53.6196 26.3871 C 53.6196 27.9852 51.1725 29.0172 48.6421 29.0172 C 44.7634 29.0172 42.6326 30.5654 40.5018 31.9305 Z M 48.2759 25.1219 C 49.0083 25.1219 49.5909 24.5226 49.5909 23.7901 C 49.5909 23.0577 49.0083 22.4750 48.2759 22.4750 C 47.5433 22.4750 46.9606 23.0577 46.9606 23.7901 C 46.9606 24.5226 47.5433 25.1219 48.2759 25.1219 Z M 33.7098 26.8199 C 34.8584 28.8674 36.3234 31.1980 37.8050 32.6629 C 37.1225 32.6796 36.3401 32.6629 35.5409 32.6629 C 33.0607 32.6629 31.2129 33.1124 29.6647 33.7283 C 28.0499 31.5809 26.8847 28.5345 26.6183 26.2705 C 28.5660 25.5381 30.2307 24.5060 31.6291 23.3573 C 32.3447 24.4394 33.0273 25.6047 33.7098 26.8199 Z M 5.8264 32.6629 C 4.9774 32.6629 4.1118 32.6796 3.3460 32.7295 L 3.2129 32.4964 C 4.3448 31.5476 5.7598 30.3490 6.7586 28.3514 C 7.7408 26.4703 8.6397 24.8722 9.5220 23.4905 C 10.9203 24.6391 12.6350 25.6879 14.6825 26.4037 C 14.3496 28.5844 13.1510 31.6475 11.6195 33.7283 C 10.1046 33.1124 8.2735 32.6629 5.8264 32.6629 Z M 20.4590 37.2075 C 17.5458 37.2075 15.7646 35.8425 13.4673 34.6106 C 15.0155 32.4132 16.1641 29.3835 16.4970 26.9198 C 17.7289 27.2028 19.0606 27.3692 20.4923 27.3692 C 22.0238 27.3692 23.4388 27.1694 24.7539 26.8532 C 25.0036 29.4168 26.1855 32.4465 27.8002 34.6272 C 25.4863 35.8591 23.6219 37.2075 20.4590 37.2075 Z M 2.7134 38.5892 C 2.7134 37.9899 3.1463 37.5904 4.4281 37.2741 C 5.2105 37.0743 7.2913 36.4251 8.8062 35.7093 C 9.9382 35.9590 10.9203 36.3252 11.8026 36.7414 C 9.2557 38.8888 6.9750 39.8544 4.9108 39.8544 C 3.4459 39.8544 2.7134 39.3882 2.7134 38.5892 Z M 36.3902 37.3240 C 37.6717 37.6403 38.1047 38.0398 38.1047 38.6391 C 38.1047 39.4215 37.3721 39.8876 35.9071 39.8876 C 33.8762 39.8876 31.6291 38.9554 29.1320 36.8912 C 29.9810 36.4251 30.8965 36.0256 31.9786 35.7426 C 33.4770 36.4584 35.6078 37.1076 36.3902 37.3240 Z"/></svg>
+              <div class="slidecontainer">
+                <input type="range" min="1000" max="3000" value="2000" step="10" class="slider" id="myRange">
+              </div>
+              <svg width="30px" height="30px" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" stroke-width="3" stroke="#000000" fill="none"><path d="M28.79,44l-9.4-9.4S31.76,5.41,56.77,7C56.77,7,60.25,30.12,28.79,44Z"/><path d="M56,16.82a10.87,10.87,0,0,1-6-3.08,11,11,0,0,1-3.11-6.15"/><circle cx="42.32" cy="21.44" r="5.48"/><path d="M30.61,43.16,30,47.84a.24.24,0,0,0,.33.25l8-3.47A2.32,2.32,0,0,0,39.63,43l1.22-5.83"/><path d="M20,33.29l-4.69.6a.23.23,0,0,1-.24-.32l3.46-7.95a2.33,2.33,0,0,1,1.67-1.35l5.82-1.22"/><path d="M21.49,36.68c-6.55,2.1-6.88,12.47-6.88,12.47s10.08.11,12.59-6.76"/><line x1="10.88" y1="52.82" x2="7.12" y2="56.59" stroke-linecap="round"/><line x1="10.6" y1="45.63" x2="7.41" y2="48.81" stroke-linecap="round"/><line x1="17.94" y1="53.11" x2="14.76" y2="56.3" stroke-linecap="round"/></svg>
+            </div>
+              <div>
+              </div>
+              
+              <div id="easingButtons">
+                <button type="button" data-value="linear" class="easing-btn"><svg width="30px" height="30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M3 20L21 4" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg></button>
+                <button type="button" data-value="easeOutQuad" class="easing-btn"><svg width="30px" height="30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M3 20C3 20 13 4 21 4" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg></button>
+                <button type="button" data-value="easeInQuad" class="easing-btn"><svg width="30px" height="30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M3 20C11 20 21 4 21 4" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg></button>
+                <button type="button" data-value="easeInOutSine" class="easing-btn"><svg width="30px" height="30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M3 20C11 20 13 4 21 4" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg></button>
+              </div>
+              <select id="easingSelect" style="display: none;">
+                <option value="easeOutQuad">easeOut</option>
+                <option value="linear">linear</option>
+                <option value="easeInQuad">easeIn</option>
+                <option value="easeInOutSine">easeInOut</option>
+              </select>
+              
+              <div class="slidecontainer">
+                <label for="timeline"></label>
+                <input type="range" id="timeline" value="0" min="0" max="100" step="0.1" class="slider">
+              </div>
+              
+              <div id="animation_settings">
+              <label class="custom-checkbox">
+                <input type="checkbox" id="checkLoop">
+                <span class="checkbox-style">
+                  <svg width="30px" height="30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8 18H7C5.34315 18 4 16.6569 4 15V9C4 7.34315 5.34315 6 7 6H17C18.6569 6 20 7.34315 20 9V15C20 16.6569 18.6569 18 17 18H12M12 18L15 15M12 18L15 21" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </span>
+              </label>
+              <button type="button" id="animate-button"><svg width="25px" height="25px" viewBox="-1 0 12 12" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                <defs>
+               
+      
+            
+            </defs>
+                <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                    <g id="Dribbble-Light-Preview" transform="translate(-65.000000, -3803.000000)" fill="#000000">
+                        <g id="icons" transform="translate(56.000000, 160.000000)">
+                            <path d="M18.074,3650.7335 L12.308,3654.6315 C10.903,3655.5815 9,3654.5835 9,3652.8985 L9,3645.1015 C9,3643.4155 10.903,3642.4185 12.308,3643.3685 L18.074,3647.2665 C19.306,3648.0995 19.306,3649.9005 18.074,3650.7335" id="play-[#1000]">
+            
+            </path>
+                        </g>
                     </g>
                 </g>
-            </g>
-        </svg></button>
-        
+            </svg></button>
+          </div>
+            </div>
+            </div>
+      
+          
+          
+
+                  
 
         </div>
-        <div id="trash-area" class="trash-area"><svg width="40px" height="40px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M4 6H20M16 6L15.7294 5.18807C15.4671 4.40125 15.3359 4.00784 15.0927 3.71698C14.8779 3.46013 14.6021 3.26132 14.2905 3.13878C13.9376 3 13.523 3 12.6936 3H11.3064C10.477 3 10.0624 3 9.70951 3.13878C9.39792 3.26132 9.12208 3.46013 8.90729 3.71698C8.66405 4.00784 8.53292 4.40125 8.27064 5.18807L8 6M18 6V16.2C18 17.8802 18 18.7202 17.673 19.362C17.3854 19.9265 16.9265 20.3854 16.362 20.673C15.7202 21 14.8802 21 13.2 21H10.8C9.11984 21 8.27976 21 7.63803 20.673C7.07354 20.3854 6.6146 19.9265 6.32698 19.362C6 18.7202 6 17.8802 6 16.2V6M14 10V17M10 10V17" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg></div>
 
-
-          <h4 id="toggle-export">Export</h4>
+    <div id="exportArea">
+          <div id="toggle-export" class="category"><svg width="30px" height="30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M12.7071 14.7071C12.3166 15.0976 11.6834 15.0976 11.2929 14.7071L6.29289 9.70711C5.90237 9.31658 5.90237 8.68342 6.29289 8.29289C6.68342 7.90237 7.31658 7.90237 7.70711 8.29289L12 12.5858L16.2929 8.29289C16.6834 7.90237 17.3166 7.90237 17.7071 8.29289C18.0976 8.68342 18.0976 9.31658 17.7071 9.70711L12.7071 14.7071Z" fill="#000000"/>
+            </svg><h4>Export</h4></div></div>
         <div id="export">
           <button id="export-btn-svg">
             <svg height="50px" width="50px" version="1.1" id="_x32_" xmlns="http://www.w3.org/2000/svg"
@@ -230,8 +273,8 @@
             </svg></button>
         </div>
       </div>
+      </div>
     </div>
-  </div>
   <script src="https://cdn.jsdelivr.net/npm/ccapture.js-npmfixed@1.1.0/build/CCapture.all.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
   <script src="anime.min.js"></script>

@@ -23,14 +23,13 @@ body {
 
 
   h3{
-    font-size: 18px;
+    font-size: 21px;
     margin: 0px;
   }
 
   h4{
-    font-size: 11px;
+    font-size: 16px;
     margin: 0px;
-    padding-bottom: 10px;
   }
 
   .dropzone {
@@ -52,13 +51,6 @@ body {
     display: none;
   }
 
-  /* input{
-    border: 2px solid black;
-    padding: 5px 10px;
-    border-radius: 5px;
-    background-color: lightgreen;
-  } */
-
   .page-container{
     display: flex;
     width: 100vw;
@@ -66,13 +58,14 @@ body {
   }
 
   #upload-zone{
+    margin-top: 10px;
+    margin-bottom: 10px;
     display: flex;
     justify-content: space-between;
   }
 
   .slidecontainer {
     width: 100%; 
-    height: 40px;
   }
 
   .spaceing{
@@ -89,9 +82,8 @@ body {
   }
 
   #svg-container{
-    display: flex;
     width: calc(100vw - 300px);
-    height: 90%;
+    height: 100%;
     align-items: stretch;
     align-items: center;
     justify-content: center;
@@ -222,7 +214,7 @@ body {
 
   .page-header h2{
     font-family: "Montserrat-BoldItalic", Helvetica, sans-serif;
-    font-size: 18px;
+    font-size: 21px;
     padding-bottom: 10px;
     margin: 0px;
   }
@@ -399,6 +391,8 @@ body {
 #export{
   display: flex;
   justify-content: space-between;
+
+  
 }
 
 #export-btn-svg{
@@ -414,21 +408,182 @@ body {
   aspect-ratio: 1/1;
 }
 
+.gui-container #animation_settings button{
+  width:50%;
+  border: none;
+  border-radius: 16px;
+  background-color: #cc80ff;
+  aspect-ratio: 2/1;
+}
+
+
+.custom-checkbox input[type="checkbox"] {
+  display: none;
+}
+
+
+
+.checkbox-icon {
+  width: 60%;
+  height: 60%;
+  transition: transform 0.3s;
+}
+
+.custom-checkbox input:checked + .checkbox-style {
+  background-color: #FFEA00;
+}
+
+.checkbox-style:hover{
+  background-color: #FFEA00;
+}
+
+
+#delete-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px; 
+  font-size: 16px;
+  padding: 10px 16px;
+  cursor: pointer;
+}
+#delete-button svg {
+  flex-shrink: 0; 
+}
+
+#delete-button H4 {
+  padding-bottom: 0; 
+}
+
+#deleteButton button{
+  width:100%;
+  aspect-ratio: 6/1;
+}
+
 .gui-container button:hover{
   cursor: pointer;
   background-color: #FFEA00;
 }
 
-#toggle-export{
-
+.category{
+  border-bottom: solid;
+  padding-top: 20px;
 }
+
+.category:hover{
+cursor: pointer;
+}
+
+h4 svg {
+  align-items: center;     
+  justify-content: center;
+}
+
 
 #export {
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.3s ease;
+  margin-bottom: 10px;
 }
 
 #export.open {
   max-height: 500px;
 }
+
+#upload {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  margin-bottom: 10px;
+}
+
+#upload.open {
+  max-height: 500px;
+}
+
+#animation {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  margin-bottom: 10px;
+}
+
+#animation.open {
+  max-height: 500px;
+}
+
+#uploader{
+  padding-bottom: 20px;
+}
+
+
+#toggle-export{
+  display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 5px;
+      font-size: 16px;
+      cursor: pointer;
+}
+
+.easing-btn.active {
+  background-color: #FFEA00;
+}
+
+#easingButtons{
+  display: flex;
+      flex-direction: row;
+      gap: 5px;
+      cursor: pointer;
+      justify-content: space-between;
+  }
+
+#easingButtons button{
+  width: 25%;
+}
+
+#speed-container{
+  display: flex;
+      flex-direction: row;
+      gap: 5px;
+      cursor: pointer;
+      justify-content: space-between;
+      align-items: center;
+}
+
+#animation_settings {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+  cursor: pointer;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Beide Kinder (Checkbox-Label + Button) sollen 50% haben */
+#animation_settings label,
+#animation_settings button {
+  width: 50%;
+}
+
+/* Checkbox-Stil */
+.checkbox-style {
+  aspect-ratio: 2 / 1;
+  background-color: #cc80ff;
+  border-radius: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background-color 0.3s;
+  cursor: pointer;
+}
+
+/* Button-Stil */
+#animation_settings button {
+  border: none;
+  border-radius: 16px;
+  background-color: #cc80ff;
+  aspect-ratio: 2 / 1;
+}
+
