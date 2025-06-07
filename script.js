@@ -93,11 +93,30 @@ function setupDrawing() {
   previewDrawing.styleElement = defs.element('style');
 
 
+  // function updateDrawingColor() {
+  //   const currentFillColor = getCurrentFillColor();
+  //   const currentStrokeColor = getCurrentStrokeColor();
+  //   const currentStrokeWidth = getCurrentStrokeWidth();;
+
+  //   previewDrawing.styleElement.words(`
+  //     .drawing-path {
+  //       fill: ${currentFillColor};
+  //       stroke: ${currentStrokeColor};
+  //       stroke-width: ${currentStrokeWidth};
+  //     }
+  //   `);
+
+  //   if (previewDrawing.pathp) {
+  //     previewDrawing.pathp.stroke({ color: currentStrokeColor, width: currentStrokeWidth });
+  //     previewDrawing.pathp.fill(currentFillColor);
+  //   }
+  // }
+
   function updateDrawingColor() {
     const currentFillColor = getCurrentFillColor();
     const currentStrokeColor = getCurrentStrokeColor();
-    const currentStrokeWidth = getCurrentStrokeWidth();;
-
+    const currentStrokeWidth = getCurrentStrokeWidth();
+  
     previewDrawing.styleElement.words(`
       .drawing-path {
         fill: ${currentFillColor};
@@ -105,12 +124,15 @@ function setupDrawing() {
         stroke-width: ${currentStrokeWidth};
       }
     `);
-
-    if (previewDrawing.pathp) {
-      previewDrawing.pathp.stroke({ color: currentStrokeColor, width: currentStrokeWidth });
-      previewDrawing.pathp.fill(currentFillColor);
+  
+    const pathEl = document.querySelector("#path-00");
+    if (pathEl) {
+      pathEl.setAttribute("fill", currentFillColor);
+      pathEl.setAttribute("stroke", currentStrokeColor);
+      pathEl.setAttribute("stroke-width", currentStrokeWidth);
     }
   }
+  
 
 
   updateDrawingColor();
@@ -360,202 +382,401 @@ animateButton.addEventListener("click", () => {
 });
 
 //hieeer
-// function uploadAndDraw(svgContent) {
-//   setTimeout(() => {
-//     console.log(svgs.length);
 
-//     const currentFillColor = getCurrentFillColor();
-//     const currentStrokeColor = getCurrentStrokeColor();
-//     const currentStrokeWidth = getCurrentStrokeWidth();
+const NORMALIZED_SIZE = 400;
+const NORMALIZED_VIEWBOX = `0 0 ${NORMALIZED_SIZE} ${NORMALIZED_SIZE}`;
+const PATH_PADDING = 0.8;
 
-//     if (currentFillColor) {
-//       svgContent = applySingleSVGColor(svgContent, currentFillColor, 1);
-//     }
+function normalizePathToCenter(pathData, targetSize = NORMALIZED_SIZE) {
+    if (!pathData) return pathData;
+    
+    try {
+        // Use SVG path parsing instead of DOM manipulation
+        const bounds = getPathBounds(pathData);
+        if (!bounds || bounds.width === 0 || bounds.height === 0) {
+            console.warn('Invalid path bounds:', bounds);
+            return pathData;
+        }
+        
+        const availableSize = targetSize * PATH_PADDING;
+        const scaleX = availableSize / bounds.width;
+        const scaleY = availableSize / bounds.height;
+        const scale = Math.min(scaleX, scaleY);
+        
+        const scaledWidth = bounds.width * scale;
+        const scaledHeight = bounds.height * scale;
+        const translateX = (targetSize - scaledWidth) / 2 - bounds.minX * scale;
+        const translateY = (targetSize - scaledHeight) / 2 - bounds.minY * scale;
+        
+        return transformPath(pathData, translateX, translateY, scale);
+    } catch (error) {
+        console.warn('Path normalization failed:', error);
+        return pathData;
+    }
+}
 
-//     if (currentStrokeColor) {
-//       svgContent = applySingleSVGColor(svgContent, currentStrokeColor, 2);
-//     }
+function getPathBounds(pathData) {
+    const commands = parsePathData(pathData);
+    let minX = Infinity, minY = Infinity;
+    let maxX = -Infinity, maxY = -Infinity;
+    let currentX = 0, currentY = 0;
+    let startX = 0, startY = 0;
 
-//     if (currentStrokeWidth) {
-//       svgContent = applySingleSVGColor(svgContent, getCurrentStrokeWidth(), 3);
-//     }
+    for (const cmd of commands) {
+        const { type, values } = cmd;
+        const isRelative = type.toLowerCase() === type;
+        
+        switch (type.toLowerCase()) {
+            case 'm':
+                currentX = isRelative ? currentX + values[0] : values[0];
+                currentY = isRelative ? currentY + values[1] : values[1];
+                startX = currentX;
+                startY = currentY;
+                updateBounds(currentX, currentY);
+                break;
+                
+            case 'l':
+                currentX = isRelative ? currentX + values[0] : values[0];
+                currentY = isRelative ? currentY + values[1] : values[1];
+                updateBounds(currentX, currentY);
+                break;
+                
+            case 'h':
+                currentX = isRelative ? currentX + values[0] : values[0];
+                updateBounds(currentX, currentY);
+                break;
+                
+            case 'v':
+                currentY = isRelative ? currentY + values[0] : values[0];
+                updateBounds(currentX, currentY);
+                break;
+                
+            case 'c':
+                for (let i = 0; i < values.length; i += 6) {
+                    const x1 = isRelative ? currentX + values[i] : values[i];
+                    const y1 = isRelative ? currentY + values[i + 1] : values[i + 1];
+                    const x2 = isRelative ? currentX + values[i + 2] : values[i + 2];
+                    const y2 = isRelative ? currentY + values[i + 3] : values[i + 3];
+                    const x = isRelative ? currentX + values[i + 4] : values[i + 4];
+                    const y = isRelative ? currentY + values[i + 5] : values[i + 5];
+                    
+                    updateBounds(x1, y1);
+                    updateBounds(x2, y2);
+                    updateBounds(x, y);
+                    
+                    currentX = x;
+                    currentY = y;
+                }
+                break;
+                
+            case 'q':
+                // Quadratic Bézier
+                for (let i = 0; i < values.length; i += 4) {
+                    const x1 = isRelative ? currentX + values[i] : values[i];
+                    const y1 = isRelative ? currentY + values[i + 1] : values[i + 1];
+                    const x = isRelative ? currentX + values[i + 2] : values[i + 2];
+                    const y = isRelative ? currentY + values[i + 3] : values[i + 3];
+                    
+                    updateBounds(x1, y1);
+                    updateBounds(x, y);
+                    
+                    currentX = x;
+                    currentY = y;
+                }
+                break;
+                
+            case 'a':
+                for (let i = 0; i < values.length; i += 7) {
+                    const x = isRelative ? currentX + values[i + 5] : values[i + 5];
+                    const y = isRelative ? currentY + values[i + 6] : values[i + 6];
+                    updateBounds(x, y);
+                    currentX = x;
+                    currentY = y;
+                }
+                break;
+                
+            case 'z':
+                currentX = startX;
+                currentY = startY;
+                break;
+        }
+    }
+    
+    function updateBounds(x, y) {
+        minX = Math.min(minX, x);
+        minY = Math.min(minY, y);
+        maxX = Math.max(maxX, x);
+        maxY = Math.max(maxY, y);
+    }
+    
+    return {
+        minX,
+        minY,
+        width: maxX - minX,
+        height: maxY - minY
+    };
+}
+
+function parsePathData(pathData) {
+    const commands = [];
+    const commandRegex = /([MmLlHhVvCcSsQqTtAaZz])[^MmLlHhVvCcSsQqTtAaZz]*/g;
+    let match;
+    
+    while ((match = commandRegex.exec(pathData)) !== null) {
+        const commandStr = match[0];
+        const type = commandStr[0];
+        const valueStr = commandStr.slice(1).trim();
+        
+        // Extract numbers, handling negative numbers properly
+        const values = valueStr.match(/-?\d*\.?\d+(?:[eE][-+]?\d+)?/g) || [];
+        commands.push({
+            type,
+            values: values.map(Number)
+        });
+    }
+    
+    return commands;
+}
+
+// Transform path with proper command handling
+function transformPath(pathData, translateX, translateY, scale) {
+    const commands = parsePathData(pathData);
+    let result = '';
+    
+    for (const cmd of commands) {
+        const { type, values } = cmd;
+        const isRelative = type.toLowerCase() === type;
+        result += type;
+        
+        switch (type.toLowerCase()) {
+            case 'm':
+            case 'l':
+                for (let i = 0; i < values.length; i += 2) {
+                    const x = values[i] * scale + (isRelative ? 0 : translateX);
+                    const y = values[i + 1] * scale + (isRelative ? 0 : translateY);
+                    result += `${x.toFixed(2)},${y.toFixed(2)} `;
+                }
+                break;
+                
+            case 'h':
+                for (let i = 0; i < values.length; i++) {
+                    const x = values[i] * scale + (isRelative ? 0 : translateX);
+                    result += `${x.toFixed(2)} `;
+                }
+                break;
+                
+            case 'v':
+                for (let i = 0; i < values.length; i++) {
+                    const y = values[i] * scale + (isRelative ? 0 : translateY);
+                    result += `${y.toFixed(2)} `;
+                }
+                break;
+                
+            case 'c':
+                for (let i = 0; i < values.length; i += 6) {
+                    const x1 = values[i] * scale + (isRelative ? 0 : translateX);
+                    const y1 = values[i + 1] * scale + (isRelative ? 0 : translateY);
+                    const x2 = values[i + 2] * scale + (isRelative ? 0 : translateX);
+                    const y2 = values[i + 3] * scale + (isRelative ? 0 : translateY);
+                    const x = values[i + 4] * scale + (isRelative ? 0 : translateX);
+                    const y = values[i + 5] * scale + (isRelative ? 0 : translateY);
+                    result += `${x1.toFixed(2)},${y1.toFixed(2)} ${x2.toFixed(2)},${y2.toFixed(2)} ${x.toFixed(2)},${y.toFixed(2)} `;
+                }
+                break;
+                
+            case 'q':
+                for (let i = 0; i < values.length; i += 4) {
+                    const x1 = values[i] * scale + (isRelative ? 0 : translateX);
+                    const y1 = values[i + 1] * scale + (isRelative ? 0 : translateY);
+                    const x = values[i + 2] * scale + (isRelative ? 0 : translateX);
+                    const y = values[i + 3] * scale + (isRelative ? 0 : translateY);
+                    result += `${x1.toFixed(2)},${y1.toFixed(2)} ${x.toFixed(2)},${y.toFixed(2)} `;
+                }
+                break;
+                
+            case 'a':
+                for (let i = 0; i < values.length; i += 7) {
+                    const rx = values[i] * scale;
+                    const ry = values[i + 1] * scale;
+                    const rotation = values[i + 2]; // Don't scale rotation
+                    const largeArc = values[i + 3];
+                    const sweep = values[i + 4];
+                    const x = values[i + 5] * scale + (isRelative ? 0 : translateX);
+                    const y = values[i + 6] * scale + (isRelative ? 0 : translateY);
+                    result += `${rx.toFixed(2)},${ry.toFixed(2)} ${rotation} ${largeArc},${sweep} ${x.toFixed(2)},${y.toFixed(2)} `;
+                }
+                break;
+                
+            case 's':
+                for (let i = 0; i < values.length; i += 4) {
+                    const x2 = values[i] * scale + (isRelative ? 0 : translateX);
+                    const y2 = values[i + 1] * scale + (isRelative ? 0 : translateY);
+                    const x = values[i + 2] * scale + (isRelative ? 0 : translateX);
+                    const y = values[i + 3] * scale + (isRelative ? 0 : translateY);
+                    result += `${x2.toFixed(2)},${y2.toFixed(2)} ${x.toFixed(2)},${y.toFixed(2)} `;
+                }
+                break;
+                
+            case 't':
+                for (let i = 0; i < values.length; i += 2) {
+                    const x = values[i] * scale + (isRelative ? 0 : translateX);
+                    const y = values[i + 1] * scale + (isRelative ? 0 : translateY);
+                    result += `${x.toFixed(2)},${y.toFixed(2)} `;
+                }
+                break;
+                
+            case 'z':
+                break;
+        }
+    }
+    
+    return result.trim();
+}
+
+function keepOnlyFirstPath(svgContent) {
+  const parser = new DOMParser();
+  const svgDoc = parser.parseFromString(svgContent, "image/svg+xml");
+
+  
+  const pathElements = svgDoc.querySelectorAll("path");
+  
+  if (pathElements.length <= 1) {
+      return svgContent;
+  }
+
+  for (let i = 1; i < pathElements.length; i++) {
+      pathElements[i].remove();
+  }
+  
+  const serializer = new XMLSerializer();
+  return serializer.serializeToString(svgDoc);
+}
 
 
-//     const parser = new DOMParser();
-//     const svgDoc = parser.parseFromString(svgContent, "image/svg+xml");
-//     const pathElement = svgDoc.querySelector("path");
+function createNormalizedSVG(svgContent) {
 
-//     let index = svgs.length;
-//     const newId = `path-0${index}`;
+  const singlePathSVG = keepOnlyFirstPath(svgContent);
+  
+  const parser = new DOMParser();
+  const svgDoc = parser.parseFromString(singlePathSVG, "image/svg+xml");
+  
+  if (svgDoc.documentElement.nodeName === 'parsererror') {
+      console.error('SVG parsing failed');
+      return svgContent;
+  }
+  
+  const svgElement = svgDoc.documentElement;
+  const pathElement = svgDoc.querySelector("path");
+  
+  svgElement.setAttribute('viewBox', NORMALIZED_VIEWBOX);
+  svgElement.setAttribute('width', NORMALIZED_SIZE);
+  svgElement.setAttribute('height', NORMALIZED_SIZE);
+  svgElement.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+  
+  if (pathElement) {
+      const originalPath = pathElement.getAttribute("d");
+      const normalizedPath = normalizePathToCenter(originalPath);
+      pathElement.setAttribute("d", normalizedPath);
+  }
+  
+  const serializer = new XMLSerializer();
+  return serializer.serializeToString(svgDoc);
+}
 
-//     if (pathElement) {
-//       pathElement.setAttribute("id", newId);
-//     }
+// Debug function to test normalization
+function testNormalization(pathData) {
+    console.log('Original:', pathData);
+    const normalized = normalizePathToCenter(pathData);
+    console.log('Normalized:', normalized);
+    return normalized;
+}
 
-//     const serializer = new XMLSerializer();
-//     svgContent = serializer.serializeToString(svgDoc.documentElement);
-
-//     let style = svgDoc.querySelector('style')?.textContent;
-
-//     console.log(style);
-
-//     const pathData = pathElement?.getAttribute("d");
-
-//     svgs.push({ svg: svgContent, path: pathData, id: newId, style: style});
-//     limitControl();
-
-//     if (currentID === 3) {
-//       createTracingElement();
-//     }
-
-//     if (index === 0) {
-//       svgContainer.innerHTML = svgs[index].svg;
-//     }
-
-//     if(index < maxSVG){
-//       previewSVG(index); 
-//     }
-
-//     setTimeout(() => {
-//     }, 300);
-//   }, 50);
-// }
-
-// function uploadAndDraw(svgContent) {
-//   setTimeout(() => {
-//       console.log(svgs.length);
-//       const currentFillColor = getCurrentFillColor();
-//       const currentStrokeColor = getCurrentStrokeColor();
-//       const currentStrokeWidth = getCurrentStrokeWidth();
-
-//       if (currentFillColor) {
-//           svgContent = applySingleSVGColor(svgContent, currentFillColor, 1);
-//       }
-//       if (currentStrokeColor) {
-//           svgContent = applySingleSVGColor(svgContent, currentStrokeColor, 2);
-//       }
-//       if (currentStrokeWidth) {
-//           svgContent = applySingleSVGColor(svgContent, getCurrentStrokeWidth(), 3);
-//       }
-
-//       const parser = new DOMParser();
-//       const svgDoc = parser.parseFromString(svgContent, "image/svg+xml");
-//       const pathElement = svgDoc.querySelector("path");
-//       const svgElement = svgDoc.documentElement;
-
-//       let index = svgs.length;
-//       const newId = `path-0${index}`;
-
-//       if (pathElement) {
-//           pathElement.setAttribute("id", newId);
-//       }
-
-//       // Make SVG responsive - remove fixed width/height and add viewBox
-//       if (svgElement) {
-//           // Get original dimensions for viewBox
-//           const width = svgElement.getAttribute('width') || '100';
-//           const height = svgElement.getAttribute('height') || '100';
-
-//           // Set viewBox to preserve aspect ratio
-//           svgElement.setAttribute('viewBox', `0 0 ${width} ${height}`);
-
-//           // Remove fixed dimensions and make it responsive
-//           svgElement.removeAttribute('width');
-//           svgElement.removeAttribute('height');
-
-//           // Add responsive styling
-//           svgElement.setAttribute('style', 'width: 100%; height: 100%; max-width: 100%; max-height: 100%;');
-
-//           // Preserve aspect ratio
-//           svgElement.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-//       }
-
-//       const serializer = new XMLSerializer();
-//       svgContent = serializer.serializeToString(svgDoc.documentElement);
-
-//       let style = svgDoc.querySelector('style')?.textContent;
-//       console.log(style);
-
-//       const pathData = pathElement?.getAttribute("d");
-//       svgs.push({ svg: svgContent, path: pathData, id: newId, style: style});
-
-//       limitControl();
-
-//       if (currentID === 3) {
-//           createTracingElement();
-//       }
-
-//       if (index === 0) {
-//           svgContainer.innerHTML = svgs[index].svg;
-//       }
-
-//       if(index < maxSVG){
-//           previewSVG(index);
-//       }
-
-//       setTimeout(() => {
-//           // Additional code if needed
-//       }, 300);
-//   }, 50);
-// }
 
 function uploadAndDraw(svgContent) {
-  setTimeout(() => {
-    console.log(svgs.length);
-    const currentFillColor = getCurrentFillColor();
-    const currentStrokeColor = getCurrentStrokeColor();
-    const currentStrokeWidth = getCurrentStrokeWidth();
-
-    if (currentFillColor) {
-      svgContent = applySingleSVGColor(svgContent, currentFillColor, 1);
-    }
-    if (currentStrokeColor) {
-      svgContent = applySingleSVGColor(svgContent, currentStrokeColor, 2);
-    }
-    if (currentStrokeWidth) {
-      svgContent = applySingleSVGColor(svgContent, getCurrentStrokeWidth(), 3);
-    }
-
-    const parser = new DOMParser();
-    const svgDoc = parser.parseFromString(svgContent, "image/svg+xml");
-    const pathElement = svgDoc.querySelector("path");
-    const svgElement = svgDoc.documentElement;
-    
-
-    let index = svgs.length;
-    const newId = `path-0${index}`;
-
-    if (pathElement) {
-      pathElement.setAttribute("id", newId);
-    }
-
-    const serializer = new XMLSerializer();
-    svgContent = serializer.serializeToString(svgDoc.documentElement);
-
-    let style = svgDoc.querySelector('style')?.textContent;
-    console.log(style);
-
-    const pathData = pathElement?.getAttribute("d");
-    svgs.push({ svg: svgContent, path: pathData, id: newId, style: style });
-
-    limitControl();
-
-    if (currentID === 3) {
-      createTracingElement();
-    }
-
-    if (index === 0) {
-      svgContainer.innerHTML = svgs[index].svg;
-    }
-
-    if (index < maxSVG) {
-      previewSVG(index);
-    }
-
     setTimeout(() => {
-    }, 300);
-  }, 50);
+        console.log(svgs.length);
+        const currentFillColor = getCurrentFillColor();
+        const currentStrokeColor = getCurrentStrokeColor();
+        const currentStrokeWidth = getCurrentStrokeWidth();
+        
+        if (currentFillColor) {
+            svgContent = applySingleSVGColor(svgContent, currentFillColor, 1);
+        }
+        if (currentStrokeColor) {
+            svgContent = applySingleSVGColor(svgContent, currentStrokeColor, 2);
+        }
+        if (currentStrokeWidth) {
+            svgContent = applySingleSVGColor(svgContent, getCurrentStrokeWidth(), 3);
+        }
+        
+        // Create normalized version for consistent morphing
+        const normalizedSVG = createNormalizedSVG(svgContent);
+        
+        const parser = new DOMParser();
+        const svgDoc = parser.parseFromString(normalizedSVG, "image/svg+xml");
+        const pathElement = svgDoc.querySelector("path");
+        const svgElement = svgDoc.documentElement;
+        
+        let index = svgs.length;
+        const newId = `path-0${index}`;
+        
+        if (pathElement) {
+            pathElement.setAttribute("id", newId);
+        }
+        
+        const serializer = new XMLSerializer();
+        const finalSVGContent = serializer.serializeToString(svgDoc);
+        
+        let style = svgDoc.querySelector('style')?.textContent;
+        console.log(style);
+        
+        const pathData = pathElement?.getAttribute("d");
+        
+        svgs.push({ 
+            svg: finalSVGContent, // Use normalized SVG
+            path: pathData, // Use normalized path for morphing
+            id: newId, 
+            style: style 
+        });
+        
+        limitControl();
+        
+        if (currentID === 3) {
+            createTracingElement();
+        }
+        
+        if (index === 0) {
+            svgContainer.innerHTML = svgs[index].svg;
+            // Ensure the container has the normalized viewBox
+            setupMorphingContainer();
+        }
+        
+        if (index < maxSVG) {
+            previewSVG(index);
+        }
+        
+        setTimeout(() => {
+            // Additional processing if needed
+        }, 300);
+    }, 50);
 }
+
+function setupMorphingContainer() {
+    if (svgContainer) {
+        const containerSvg = svgContainer.querySelector('svg');
+        if (containerSvg) {
+            containerSvg.setAttribute('viewBox', NORMALIZED_VIEWBOX);
+            containerSvg.setAttribute('width', NORMALIZED_SIZE);
+            containerSvg.setAttribute('height', NORMALIZED_SIZE);
+            containerSvg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+        }
+    }
+}
+
+
+
+
+
 
 function showSimpleLoading(message = 'Loading...') {
   const existingLoader = document.querySelector('.simple-loader');

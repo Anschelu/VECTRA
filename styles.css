@@ -364,7 +364,6 @@ body {
   transform-origin: center center;
 }
 
-/* During animation, constrain the SVG more strictly */
 .responsive-svg.animating {
   width: 100% !important;
   height: 100% !important;
@@ -375,7 +374,6 @@ body {
   left: 0;
 }
 
-/* Or if you want to maintain container size during animation */
 .responsive-svg.animating {
   width: inherit !important;
   height: inherit !important;
