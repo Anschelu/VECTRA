@@ -24,36 +24,77 @@
       <div id="pageLayout">
         <div id="svg-container">
         </div>
-      
+
         <div class="slidecontainer">
-          <label for="timeline">Timeline</label>
-        <input type="range" id="timeline" value="0" min="0" max="100" step="0.1" class="slider">
-      </div>
+          <label for="timeline"></label>
+          <input type="range" id="timeline" value="0" min="0" max="100" step="0.1" class="slider">
+        </div>
       </div>
 
 
-      
+
       <div class="gui-container">
         <div class="page-header">
           <h2>VECTRA</h2>
         </div>
-        
-        <div id="drawWindow">
-          <div id="drawingArea"></div>
-          <div class="drawWindow-controls">
-            <button id="saveDraw">Save Path</button>
-            <button id="clearDraw">Clear</button>
-            <button id="closeDraw">Close</button>
+
+        <div id="upload-zone">
+          <div class="dropzone" id="dropzone1">
+            <input type="file" multiple style="display: none;">
+            <svg width="30px" height="30px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+
+              <title/>
+              
+              <g id="Complete">
+              
+              <g id="upload">
+              
+              <g>
+              
+              <path d="M3,12.3v7a2,2,0,0,0,2,2H19a2,2,0,0,0,2-2v-7" fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+              
+              <g>
+              
+              <polyline data-name="Right" fill="none" id="Right-2" points="7.9 6.7 12 2.7 16.1 6.7" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+              
+              <line fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="12" x2="12" y1="16.3" y2="4.8"/>
+              
+              </g>
+              
+              </g>
+              
+              </g>
+              
+              </g>
+              
+              </svg>
+          </div>
+          <button id="drawBtn"><svg width="30px" height="30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 7.49996L17.5 9.99996M7.5 20L19.25 8.24996C19.9404 7.5596 19.9404 6.44032 19.25 5.74996V5.74996C18.5596 5.0596 17.4404 5.05961 16.75 5.74996L5 17.5V20H7.5ZM7.5 20H15.8787C17.0503 20 18 19.0502 18 17.8786V17.8786C18 17.316 17.7765 16.7765 17.3787 16.3786L17 16M4.5 4.99996C6.5 2.99996 10 3.99996 10 5.99996C10 8.5 4 8.5 4 11C4 11.8759 4.53314 12.5256 5.22583 13" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg></button>
+          <div id="drawWindow">
+            <div id="drawingArea"></div>
+            <div class="drawWindow-controls">
+              <button id="saveDraw">Save Path</button>
+              <button id="clearDraw">Clear</button>
+              <button id="closeDraw">Close</button>
+            </div>
           </div>
         </div>
 
-        <select id="scriptDropdown">
-          <option value="morphing">Morphing</option>
-          <!-- <option value="drawable">Drawable</option>
-          <option value="motionPath">MotionPath</option> -->
-        </select>
+        <div id="svg-preview-list">
+          <div></div>
+        </div> 
 
-        <button id="drawBtn">Open Draw Tool</button>
+      <button type="button" id="delete-button"><svg width="50px" height="50px" viewBox="0 0 24 24" fill="none"
+          xmlns="http://www.w3.org/2000/svg">
+          <path d="M8 8L16 16" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M16 8L8 16" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg></button>
+
+
+    
+
         <div id="morphing-GUI" class="mode-ui">
           <h4>Styling</h4>
           <label for="transparentFill">Fill</label>
@@ -88,28 +129,110 @@
             <option value="easeInOutSine">easeInOut</option>
           </select>
 
+          <button type="button" id="animate-button"><svg width="25px" height="25px" viewBox="-1 0 12 12" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+            <defs>
+        
+        </defs>
+            <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                <g id="Dribbble-Light-Preview" transform="translate(-65.000000, -3803.000000)" fill="#000000">
+                    <g id="icons" transform="translate(56.000000, 160.000000)">
+                        <path d="M18.074,3650.7335 L12.308,3654.6315 C10.903,3655.5815 9,3654.5835 9,3652.8985 L9,3645.1015 C9,3643.4155 10.903,3642.4185 12.308,3643.3685 L18.074,3647.2665 C19.306,3648.0995 19.306,3649.9005 18.074,3650.7335" id="play-[#1000]">
+        
+        </path>
+                    </g>
+                </g>
+            </g>
+        </svg></button>
+        
+
         </div>
-        <div id="upload-zone">
-          <div class="dropzone" id="dropzone1">
-            <input type="file" multiple style="display: none;">
-            <h4>upload</h4>
-          </div>
-          <button type="button" id="animate-button">Animate</button>
-          <button type="button" id="delete-button">Clear</button>
-        </div>
-        <div id="svg-preview-list"></div>
-        <div id="trash-area" class="trash-area">Delete</div>
+        <div id="trash-area" class="trash-area"><svg width="40px" height="40px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4 6H20M16 6L15.7294 5.18807C15.4671 4.40125 15.3359 4.00784 15.0927 3.71698C14.8779 3.46013 14.6021 3.26132 14.2905 3.13878C13.9376 3 13.523 3 12.6936 3H11.3064C10.477 3 10.0624 3 9.70951 3.13878C9.39792 3.26132 9.12208 3.46013 8.90729 3.71698C8.66405 4.00784 8.53292 4.40125 8.27064 5.18807L8 6M18 6V16.2C18 17.8802 18 18.7202 17.673 19.362C17.3854 19.9265 16.9265 20.3854 16.362 20.673C15.7202 21 14.8802 21 13.2 21H10.8C9.11984 21 8.27976 21 7.63803 20.673C7.07354 20.3854 6.6146 19.9265 6.32698 19.362C6 18.7202 6 17.8802 6 16.2V6M14 10V17M10 10V17" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg></div>
 
 
-        <button id="export-btn-svg">Export SVG</button>
-        <button id="export-btn-png">Export PNG</button>
-        <!-- <button id="export-btn-vid">Export Video</button> -->
-        <!-- <div id="motion-GUI" class="mode-ui"> -->
-        <!-- </div> -->
-        <!-- <div id="drawable-GUI" class="mode-ui"></div> -->
+          <h4 id="toggle-export">Export</h4>
+        <div id="export">
+          <button id="export-btn-svg">
+            <svg height="50px" width="50px" version="1.1" id="_x32_" xmlns="http://www.w3.org/2000/svg"
+              xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" xml:space="preserve">
+              <style type="text/css">
+                .st0 {
+                  fill: #000000;
+                }
+              </style>
+              <g>
+                <path class="st0" d="M378.409,0H208.294h-13.176l-9.314,9.315L57.017,138.101l-9.314,9.315v13.176v265.513
+		c0,47.36,38.528,85.896,85.895,85.896h244.811c47.361,0,85.888-38.535,85.888-85.896V85.896C464.297,38.528,425.77,0,378.409,0z
+		 M432.493,426.104c0,29.877-24.214,54.091-54.084,54.091H133.598c-29.877,0-54.091-24.214-54.091-54.091V160.592h83.717
+		c24.884,0,45.07-20.179,45.07-45.071V31.804h170.114c29.87,0,54.084,24.214,54.084,54.091V426.104z" />
+                <path class="st0" d="M180.296,296.668l-4.846-0.67c-10.63-1.487-14.265-4.978-14.265-10.104c0-5.78,4.309-9.817,12.383-9.817
+		c5.653,0,11.305,1.62,15.745,3.764c1.886,0.942,3.903,1.487,5.789,1.487c4.845,0,8.612-3.63,8.612-8.616
+		c0-3.226-1.481-5.921-4.71-7.939c-5.384-3.372-15.476-6.06-25.572-6.06c-19.781,0-32.436,11.171-32.436,27.998
+		c0,16.15,10.232,24.898,28.938,27.454l4.846,0.67c10.903,1.48,14.129,4.846,14.129,10.229c0,6.326-5.247,10.766-14.939,10.766
+		c-6.727,0-12.111-1.745-19.645-5.921c-1.616-0.942-3.634-1.62-5.788-1.62c-5.115,0-8.885,3.91-8.885,8.756
+		c0,3.226,1.616,6.326,4.713,8.344c6.054,3.764,15.878,7.8,28.798,7.8c23.823,0,35.934-12.24,35.934-28.795
+		C209.097,307.84,199.273,299.356,180.296,296.668z" />
+                <path class="st0" d="M281.108,259.382c-4.577,0-7.939,2.43-9.556,7.674l-16.69,54.51h-0.402l-17.634-54.51
+		c-1.745-5.244-4.978-7.674-9.551-7.674c-5.653,0-9.692,4.176-9.692,9.287c0,1.347,0.269,2.834,0.67,4.175l23.286,68.104
+		c2.96,8.477,6.727,11.57,12.652,11.57c5.785,0,9.555-3.093,12.516-11.57l23.282-68.104c0.406-1.341,0.674-2.828,0.674-4.175
+		C290.664,263.558,286.76,259.382,281.108,259.382z" />
+                <path class="st0" d="M364.556,300.836h-18.841c-5.114,0-8.344,3.1-8.344,7.806c0,4.713,3.23,7.814,8.344,7.814h6.193
+		c0.538,0,0.803,0.258,0.803,0.803c0,3.505-0.265,6.598-1.075,9.014c-1.882,5.796-7.67,9.426-14.669,9.426
+		c-7.943,0-12.921-3.903-14.939-10.096c-1.075-3.365-1.48-7.8-1.48-19.648c0-11.842,0.405-16.15,1.48-19.516
+		c2.018-6.325,6.867-10.228,14.67-10.228c5.924,0,10.362,1.885,13.859,6.724c2.695,3.777,5.387,4.852,8.749,4.852
+		c4.981,0,9.021-3.638,9.021-8.888c0-2.151-0.674-4.035-1.752-5.921c-4.842-8.204-15.071-14.264-29.877-14.264
+		c-16.287,0-28.935,7.408-33.644,22.204c-2.022,6.466-2.559,11.576-2.559,25.038c0,13.454,0.538,18.573,2.559,25.031
+		c4.709,14.802,17.357,22.204,33.644,22.204c16.286,0,28.668-8.204,33.374-22.881c1.617-5.111,2.29-12.645,2.29-20.716v-0.95
+		C372.362,303.664,369.538,300.836,364.556,300.836z" />
+              </g>
+            </svg>
+          </button>
+
+          <button id="export-btn-png">
+            <svg height="50px" width="50px" version="1.1" id="_x32_" xmlns="http://www.w3.org/2000/svg"
+              xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" xml:space="preserve">
+              <style type="text/css">
+                .st0 {
+                  fill: #000000;
+                }
+              </style>
+              <g>
+                <path class="st0" d="M378.413,0H208.297h-13.182L185.8,9.314L57.02,138.102l-9.314,9.314v13.176v265.514
+		c0,47.36,38.528,85.895,85.896,85.895h244.811c47.353,0,85.881-38.535,85.881-85.895V85.896C464.294,38.528,425.766,0,378.413,0z
+		 M432.497,426.105c0,29.877-24.214,54.091-54.084,54.091H133.602c-29.884,0-54.098-24.214-54.098-54.091V160.591h83.716
+		c24.885,0,45.077-20.178,45.077-45.07V31.804h170.116c29.87,0,54.084,24.214,54.084,54.092V426.105z" />
+                <path class="st0"
+                  d="M165.287,252.785h-28.515c-5.432,0-8.7,3.533-8.7,8.825v73.754c0,6.388,4.218,10.599,10.055,10.599
+		c5.697,0,9.914-4.21,9.914-10.599v-22.406c0-0.545,0.265-0.817,0.81-0.817h16.436c20.109,0,32.188-12.226,32.188-29.612
+		C197.475,264.871,185.521,252.785,165.287,252.785z M164.072,294.888h-15.221c-0.545,0-0.81-0.272-0.81-0.81v-23.23
+		c0-0.545,0.265-0.816,0.81-0.816h15.221c8.42,0,13.448,5.027,13.448,12.498C177.519,290,172.492,294.888,164.072,294.888z" />
+                <path class="st0" d="M275.187,251.968c-5.432,0-9.104,3.532-9.104,9.642v50.531h-0.545l-28.25-50.39
+		c-3.658-6.389-7.471-9.782-13.168-9.782c-6.801,0-11.144,4.622-11.144,11.954v72.398c0,6.109,3.673,9.643,9.105,9.643
+		c5.432,0,9.09-3.534,9.09-9.643v-50.398h0.545l28.25,50.258c3.673,6.382,7.471,9.782,13.182,9.782
+		c6.787,0,11.144-4.622,11.144-11.954V261.61C284.292,255.5,280.619,251.968,275.187,251.968z" />
+                <path class="st0" d="M366.878,293.806h-19.019c-5.153,0-8.421,3.121-8.421,7.876c0,4.755,3.268,7.876,8.421,7.876h6.256
+		c0.544,0,0.809,0.272,0.809,0.816c0,3.533-0.265,6.654-1.089,9.098c-1.899,5.844-7.736,9.51-14.802,9.51
+		c-8.016,0-13.043-3.938-15.068-10.187c-1.09-3.393-1.494-7.876-1.494-19.83c0-11.953,0.405-16.296,1.494-19.696
+		c2.025-6.382,6.926-10.32,14.802-10.32c5.976,0,10.459,1.899,13.992,6.786c2.709,3.805,5.432,4.895,8.826,4.895
+		c5.027,0,9.091-3.666,9.091-8.965c0-2.171-0.671-4.078-1.76-5.977c-4.888-8.287-15.208-14.397-30.149-14.397
+		c-16.437,0-29.2,7.471-33.962,22.412c-2.039,6.515-2.584,11.682-2.584,25.262c0,13.581,0.545,18.74,2.584,25.262
+		c4.762,14.942,17.525,22.413,33.962,22.413c16.436,0,28.92-8.288,33.682-23.09c1.634-5.16,2.304-12.77,2.304-20.919v-0.95
+		C374.754,296.654,371.905,293.806,366.878,293.806z" />
+              </g>
+            </svg>
+          </button>
+          <button id="export-btn-vid"><svg width="50px" height="50px" viewBox="0 0 24 24" fill="none"
+              xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M16 10L18.5768 8.45392C19.3699 7.97803 19.7665 7.74009 20.0928 7.77051C20.3773 7.79703 20.6369 7.944 20.806 8.17433C21 8.43848 21 8.90095 21 9.8259V14.1741C21 15.099 21 15.5615 20.806 15.8257C20.6369 16.056 20.3773 16.203 20.0928 16.2295C19.7665 16.2599 19.3699 16.022 18.5768 15.5461L16 14M6.2 18H12.8C13.9201 18 14.4802 18 14.908 17.782C15.2843 17.5903 15.5903 17.2843 15.782 16.908C16 16.4802 16 15.9201 16 14.8V9.2C16 8.0799 16 7.51984 15.782 7.09202C15.5903 6.71569 15.2843 6.40973 14.908 6.21799C14.4802 6 13.9201 6 12.8 6H6.2C5.0799 6 4.51984 6 4.09202 6.21799C3.71569 6.40973 3.40973 6.71569 3.21799 7.09202C3 7.51984 3 8.07989 3 9.2V14.8C3 15.9201 3 16.4802 3.21799 16.908C3.40973 17.2843 3.71569 17.5903 4.09202 17.782C4.51984 18 5.07989 18 6.2 18Z"
+                stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg></button>
+        </div>
       </div>
     </div>
   </div>
+  <script src="https://cdn.jsdelivr.net/npm/ccapture.js-npmfixed@1.1.0/build/CCapture.all.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
   <script src="anime.min.js"></script>
   <script src="flubber.min.js"></script>

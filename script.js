@@ -3,19 +3,14 @@ let deleteButton = document.getElementById("delete-button");
 let deleteButtonDraw = document.getElementById("delete-button-draw");
 let animateButton = document.getElementById("animate-button");
 let slider = document.getElementById("myRange");
-const maxVal = parseInt(document.getElementById("myRange").max);
-const max = maxVal * 1.2;
 let animation = null;
 let animationSpeed = slider ? parseFloat(slider.value) : 0.001;
 let svgs = [];
 let interpolator = null;
-let maxSVG;
+let maxSVG = 6;
 let currentID = 1;
 let interP = [];
 let path = null;
-const saveDraw = document.getElementById("saveDraw");
-const clearDraw = document.getElementById("clearDraw");
-const closeDraw = document.getElementById("closeDraw");
 let isCalculating = false;
 let loadingElement = null;
 let bounceInterP = [];
@@ -26,37 +21,34 @@ let isAnimationPaused = false;
 let animationCompleted = false;
 let transparentFill = document.getElementById("transparentFill");
 let transparentStroke = document.getElementById("transparentStroke");
-const morphing_GUI = document.getElementById("morphing-GUI");
-const drawable_GUI = document.getElementById("drawable-GUI");
-const motion_GUI = document.getElementById("motion-GUI");
+let exportIndexSVG = 0;
+let exportIndexPNG = 0;
+let exportIndexMP4 = 0;
+const drawWindow = document.getElementById("drawWindow");
+const openDrawBtn = document.getElementById("drawBtn");
+const timeline = document.getElementById('timeline');
+let isTimelineDragging = false;
+let wasAnimationRunning = false;
+let dropzone = document.querySelector('.dropzone');
+let input = document.querySelector("input[type='file']");
+let previewList = document.getElementById("svg-preview-list");
+let svgContainer = document.getElementById("svg-container");
 
-//Choose Mode
-document.getElementById("scriptDropdown").addEventListener("change", function () {
-  const selected = this.value;
-  resetGUI(svgContainer);
-  isAnimationReady = false;
-  isAnimationRunning = false;
-  updateAnimateButton();
+const maxVal = parseInt(document.getElementById("myRange").max);
+const max = maxVal * 1.2;
+const saveDraw = document.getElementById("saveDraw");
+const clearDraw = document.getElementById("clearDraw");
+const closeDraw = document.getElementById("closeDraw");
+let previewDrawing = {}
 
-  switch (selected) {
-    case "morphing":
-      morphing_GUI.style.display = "block";
-      morphing();
-      break;
-    case "drawable":
-      drawable_GUI.style.display = "block";
-      drawable();
-      break;
-    case "motionPath":
-      motion_GUI.style.display = "block";
-      motion();
-      break;
-    default:
-      break;
-  }
-});
-
-var previewDrawing = {}
+let currentStep = 0;
+let autoAdvanceTimer;
+let running = true;
+const instructionText = document.getElementById("instructionText");
+const main = document.getElementById("mainApp");
+const nextBtn = document.getElementById("nextBtn");
+const overlay = document.getElementById("welcomeOverlay");
+const overlayText = document.querySelector("#welcomeOverlay h2");
 
 
 //transparent Filling
@@ -93,25 +85,6 @@ function setupDrawing() {
   previewDrawing.styleElement = defs.element('style');
 
 
-  // function updateDrawingColor() {
-  //   const currentFillColor = getCurrentFillColor();
-  //   const currentStrokeColor = getCurrentStrokeColor();
-  //   const currentStrokeWidth = getCurrentStrokeWidth();;
-
-  //   previewDrawing.styleElement.words(`
-  //     .drawing-path {
-  //       fill: ${currentFillColor};
-  //       stroke: ${currentStrokeColor};
-  //       stroke-width: ${currentStrokeWidth};
-  //     }
-  //   `);
-
-  //   if (previewDrawing.pathp) {
-  //     previewDrawing.pathp.stroke({ color: currentStrokeColor, width: currentStrokeWidth });
-  //     previewDrawing.pathp.fill(currentFillColor);
-  //   }
-  // }
-
   function updateDrawingColor() {
     const currentFillColor = getCurrentFillColor();
     const currentStrokeColor = getCurrentStrokeColor();
@@ -133,7 +106,10 @@ function setupDrawing() {
     }
   }
   
-
+//Pop Up GUI
+document.getElementById("toggle-export").addEventListener("click", function () {
+  document.getElementById("export").classList.toggle("open");
+});
 
   updateDrawingColor();
 
@@ -163,11 +139,10 @@ function setupDrawing() {
   });
 }
 
-
 saveDraw.addEventListener('click', () => {
   let myDrawing = document.querySelector("#drawingArea svg")
   let svgContent = new XMLSerializer().serializeToString(myDrawing);
-  modeChooser();
+  // modeChooser();
   limitControl();
   uploadAndDraw(svgContent);
   previewDrawing.points = [];
@@ -178,84 +153,33 @@ saveDraw.addEventListener('click', () => {
 });
 
 deleteButton.addEventListener("click", () => {
+  // Stop any running animation
+  if (animation) {
+      animation.pause();
+      animation = null;
+  }
+  
+  // Reset timeline position
+  timeline.value = 0;
+  
+  // Reset animation states
+  isAnimationReady = false;
+  isAnimationRunning = false;
+  isTimelineDragging = false;
+  wasAnimationRunning = false;
+  currentAnimationIndex = 0;
+  
+  // Clear drawing area and reset
   drawingArea.innerHTML = "";
   resetUploads();
   setupDrawing();
-  isAnimationReady = false;
-  isAnimationRunning = false;
   updateAnimateButton();
 });
 
-function resetGUI(svgContainer) {
-  document.getElementById("morphing-GUI").style.display = "none";
-  document.getElementById("drawable-GUI").style.display = "none";
-  document.getElementById("motion-GUI").style.display = "none";
-}
 
 setupDrawing();
 
-//debug 
-function morphing() {
-  currentID = 1;
-}
 
-function drawable() {
-  currentID = 2;
-}
-
-function drawableAnimation() {
-  path = document.querySelector("#path-00"); // 
-
-  if (!path) {
-    console.error("No <path> found with ID #path-00.");
-    return;
-  }
-  animation = anime({
-    targets: path,
-    strokeDashoffset: [anime.setDashoffset, 0],
-    easing: 'easeInOutQuad',
-    duration: 2000,
-    delay: 0,
-    direction: 'normal',
-    loop: true
-  });
-
-  isAnimationRunning = true;
-  updateAnimateButton();
-}
-
-function motionPathAnimation() {
-  const path = document.querySelector("#path-00");
-  const car = document.querySelector("#car");
-
-  if (!path || !car) return;
-
-  const pathLength = path.getTotalLength();
-
-  animation = anime({
-    targets: { progress: 0 },
-    progress: 100,
-    duration: 4000,
-    easing: 'linear',
-    loop: true,
-    direction: 'alternate',
-    update: function (anim) {
-      const progress = anim.animations[0].currentValue / 100;
-      const point = path.getPointAtLength(progress * pathLength);
-      const nextPoint = path.getPointAtLength(Math.min(progress * pathLength + 1, pathLength));
-
-      const angle = Math.atan2(nextPoint.y - point.y, nextPoint.x - point.x) * (180 / Math.PI);
-      car.setAttribute("transform", `translate(${point.x}, ${point.y}) rotate(${angle})`);
-    }
-  });
-
-  isAnimationRunning = true;
-  updateAnimateButton();
-}
-
-function motion() {
-  currentID = 3;
-}
 
 function createLoadingElement() {
   if (!loadingElement) {
@@ -373,15 +297,13 @@ animateButton.addEventListener("click", () => {
   animateButton.textContent = "Calculating";
 
   setTimeout(() => {
-    animationChooser(currentID);
+    morphingAnimation();
     setTimeout(() => {
       animateButton.classList.remove('button-loading');
       updateAnimateButton();
     }, 500);
   }, 100);
 });
-
-//hieeer
 
 const NORMALIZED_SIZE = 400;
 const NORMALIZED_VIEWBOX = `0 0 ${NORMALIZED_SIZE} ${NORMALIZED_SIZE}`;
@@ -394,7 +316,6 @@ function normalizePathToCenter(pathData, targetSize = NORMALIZED_SIZE) {
         // Use SVG path parsing instead of DOM manipulation
         const bounds = getPathBounds(pathData);
         if (!bounds || bounds.width === 0 || bounds.height === 0) {
-            console.warn('Invalid path bounds:', bounds);
             return pathData;
         }
         
@@ -410,7 +331,6 @@ function normalizePathToCenter(pathData, targetSize = NORMALIZED_SIZE) {
         
         return transformPath(pathData, translateX, translateY, scale);
     } catch (error) {
-        console.warn('Path normalization failed:', error);
         return pathData;
     }
 }
@@ -538,7 +458,6 @@ function parsePathData(pathData) {
     return commands;
 }
 
-// Transform path with proper command handling
 function transformPath(pathData, translateX, translateY, scale) {
     const commands = parsePathData(pathData);
     let result = '';
@@ -661,7 +580,6 @@ function createNormalizedSVG(svgContent) {
   const svgDoc = parser.parseFromString(singlePathSVG, "image/svg+xml");
   
   if (svgDoc.documentElement.nodeName === 'parsererror') {
-      console.error('SVG parsing failed');
       return svgContent;
   }
   
@@ -741,10 +659,6 @@ function uploadAndDraw(svgContent) {
         
         limitControl();
         
-        if (currentID === 3) {
-            createTracingElement();
-        }
-        
         if (index === 0) {
             svgContainer.innerHTML = svgs[index].svg;
             // Ensure the container has the normalized viewBox
@@ -772,10 +686,6 @@ function setupMorphingContainer() {
         }
     }
 }
-
-
-
-
 
 
 function showSimpleLoading(message = 'Loading...') {
@@ -815,9 +725,7 @@ if (checkLoop) {
     updateAnimateButton();
   });
 }
-const timeline = document.getElementById('timeline');
-let isTimelineDragging = false;
-let wasAnimationRunning = false;
+
 timeline.addEventListener('input', function () {
   if (!isTimelineDragging) {
     isTimelineDragging = true;
@@ -1033,7 +941,6 @@ function playNextFromProgress(i, startProgress, shouldLoop) {
 
       path.setAttribute('d', currentInterpolator(easedT));
 
-      // Aktualisiere Timeline (nur wenn nicht manuell gesteuert)
       if (!timelineUpdateLock && !isTimelineDragging) {
         const totalAnimations = interP.length;
         const progressPerAnimation = 100 / totalAnimations;
@@ -1120,17 +1027,13 @@ function playNext(i, shouldLoop) {
 
 document.querySelector('#myRange').addEventListener('input', function () {
   animationSpeed = this.value;
-  var speedAnimation = max - animationSpeed;
+  letspeedAnimation = max - animationSpeed;
   if (animation) {
     animation.duration = speedAnimation;
   }
 });
 
 //Drag and Drop function 
-let dropzone = document.querySelector('.dropzone');
-let input = document.querySelector("input[type='file']");
-let previewList = document.getElementById("svg-preview-list");
-let svgContainer = document.getElementById("svg-container");
 
 function setupDropzone(dropzone) {
   dropzone.addEventListener("click", () => {
@@ -1159,7 +1062,7 @@ function rightFiles(file) {
 }
 
 function upload(file) {
-  modeChooser();
+  // modeChooser();
 
   const reader = new FileReader();
   reader.onload = function (event) {
@@ -1290,59 +1193,6 @@ Sortable.create(previewList, {
   }
 });
 
-function animationChooser(currentID) {
-  switch (currentID) {
-    case 1:
-      console.log("option 1")
-      morphingAnimation();
-      break;
-    case 2:
-      console.log("option 2")
-      drawableAnimation();
-      break;
-    case 3:
-      motionPathAnimation();
-      console.log("option 3")
-      break;
-    default:
-      break;
-  }
-}
-
-function createTracingElement() {
-  const svg = svgContainer.querySelector("svg");
-  const carGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
-  carGroup.setAttribute("id", "car");
-
-  const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-  circle.setAttribute("r", 10);
-  circle.setAttribute("fill", "red");
-  circle.setAttribute("cx", "0");
-  circle.setAttribute("cy", "0");
-
-  console.log(svg)
-  carGroup.appendChild(circle);
-  svgContainer.appendChild(carGroup);
-}
-
-function modeChooser() {
-  switch (currentID) {
-    case 1:
-      maxSVG = 6;
-      break;
-    case 2:
-      maxSVG = 1;
-      break;
-    case 3:
-      maxSVG = 1;
-      break;
-    default:
-      break;
-  }
-}
-
-const drawWindow = document.getElementById("drawWindow");
-const openDrawBtn = document.getElementById("drawBtn");
 
 openDrawBtn.addEventListener("click", () => {
   drawWindow.style.display = "flex";
@@ -1364,15 +1214,6 @@ const instructions = [
   "Be aware that only similar SVG's are morphable",
   "Export your own creation as Video, Path or Path Animation!"
 ];
-
-let currentStep = 0;
-let autoAdvanceTimer;
-let running = true;
-const instructionText = document.getElementById("instructionText");
-const main = document.getElementById("mainApp");
-const nextBtn = document.getElementById("nextBtn");
-const overlay = document.getElementById("welcomeOverlay");
-const overlayText = document.querySelector("#welcomeOverlay h2");
 
 function loopInstructions() {
   if (!running) return;
@@ -1722,9 +1563,7 @@ function setupStrokeWidthControl() {
 setupStrokeWidthControl();
 
 
-let exportIndexSVG = 0;
-let exportIndexPNG = 0;
-let exportIndexMP4 = 0;
+//EXPORTING
 
 //SVG EXPORT
 function exportSVGContainer() {
@@ -1773,10 +1612,107 @@ document.getElementById("export-btn-png").addEventListener("click", () => {
       URL.revokeObjectURL(url);
     }, "image/png");
   };
-  img.onerror = () => console.error("Failed to load SVG for PNG export.");
   img.src = url;
 });
 
-// VIDEO EXPORT
+// VIDEO EXPORT NOT WORKING
 
+// Record only SVG container without GUI/cursor
+// === Aufnahmevariablen ===
+let mediaRecorder = null;
+let recordedChunks = [];
+let isRecording = false;
 
+// === SVG-zu-Canvas Aufnahme mit hoher Qualität ===
+async function recordSVGWithCanvasHighQuality() {
+    if (isRecording) return;
+
+    const svgContainer = document.getElementById('svg-container');
+    const svgElement = svgContainer.querySelector('svg');
+
+    if (!svgElement) {
+        alert('Kein SVG im Container gefunden!');
+        return;
+    }
+
+    const canvas = document.createElement('canvas');
+    const rect = svgContainer.getBoundingClientRect();
+    canvas.width = svgElement.getAttribute('width') || rect.width || 1920;
+    canvas.height = svgElement.getAttribute('height') || rect.height || 1080;
+
+    const stream = canvas.captureStream(30); // 30 FPS
+    const ctx = canvas.getContext('2d');
+
+    // MediaRecorder mit hoher Qualität
+    const options = {
+        mimeType: 'video/webm;codecs=vp9',
+        videoBitsPerSecond: 10_000_000 // 10 Mbps für hohe Qualität
+    };
+
+    mediaRecorder = new MediaRecorder(stream, options);
+    recordedChunks = [];
+
+    mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+            recordedChunks.push(event.data);
+        }
+    };
+
+    mediaRecorder.onstop = () => {
+        const blob = new Blob(recordedChunks, { type: 'video/webm' });
+        downloadWebM(blob);
+    };
+
+    // SVG auf Canvas zeichnen – Frame für Frame
+    function drawSVGToCanvas() {
+      if (!isRecording) return;
+  
+      const serializer = new XMLSerializer();
+      const svgString = serializer.serializeToString(svgElement);
+      const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(svgBlob);
+  
+      const img = new Image();
+      img.onload = () => {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          URL.revokeObjectURL(url);
+  
+          requestAnimationFrame(drawSVGToCanvas);
+      };
+      img.src = url;
+  }
+  
+
+    mediaRecorder.start();
+    isRecording = true;
+    drawSVGToCanvas();
+}
+
+function stopRecording() {
+    if (!mediaRecorder || !isRecording) return;
+
+    mediaRecorder.stop();
+    isRecording = false;
+
+    mediaRecorder.stream.getTracks().forEach(track => track.stop());
+}
+
+function downloadWebM(blob) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `svg-animation-${Date.now()}.webm`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+document.getElementById("export-btn-vid").addEventListener("click", () => {
+    if (isRecording) {
+        stopRecording();
+    } else {
+        recordSVGWithCanvasHighQuality();
+    }
+});

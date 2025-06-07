@@ -16,6 +16,12 @@ body {
     height: 100%;
   }
 
+  #welcomeOverlay h2{
+    font-size: 200px;
+    line-height: 0.8;
+  }
+
+
   h3{
     font-size: 18px;
     margin: 0px;
@@ -25,17 +31,32 @@ body {
     font-size: 11px;
     margin: 0px;
   }
-  .dropzone{
-    width: 50%;
-    height: 100px;
-    border: 2px dashed #eee;
+
+  .dropzone {
     text-align: center;
-    line-height: 100px;
+    align-content: center;
+    width:30%;
+    border: none;
+    border-radius: 16px;
+    background-color: #cc80ff;
+    aspect-ratio: 1/1;
+  }
+  
+  .dropzone:hover{
+    cursor: pointer;
+    background-color: #FFEA00;
   }
 
   .dropzone input{
     display: none;
   }
+
+  /* input{
+    border: 2px solid black;
+    padding: 5px 10px;
+    border-radius: 5px;
+    background-color: lightgreen;
+  } */
 
   .page-container{
     display: flex;
@@ -63,7 +84,7 @@ body {
     width: 300px;
     flex-direction: column;
     display: flex;
-
+    overflow: scroll;
   }
 
   #svg-container{
@@ -86,9 +107,8 @@ body {
     appearance: none;
     width: 100%;
     height: 15px;
-    background: white;
+    background: #cc80ff;
     outline: none;
-    opacity: 0.7;
     -webkit-transition: .2s; 
     transition: opacity .2s;
   }
@@ -139,7 +159,6 @@ body {
   
 
 
-/* welcoming page */
   #welcomeOverlay {
     font-family: "Montserrat-BoldItalic", Helvetica, sans-serif;
     position: fixed;
@@ -149,11 +168,6 @@ body {
     display: flex;
     z-index: 1000;
     flex-direction: column;
-  }
-
-  #welcomeOverlay h2{
-    font-size: 200px;
-    line-height: 0.8;
   }
 
   .instruction-box {
@@ -195,7 +209,6 @@ body {
 
   #mainApp{
     display: none;
-    /* display: block; */
     height: 100%;
   }
 
@@ -344,15 +357,15 @@ body {
 }
 
 .trash-area {
-  width: 100%;
-  height: 100px;
-  margin-top: 20px;
-  border: 2px dashed white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-weight: bold;
+  text-align: center;
+  align-content: center;
+  width:30%;
+  border: none;
+  border-radius: 16px;
+  background-color: #cc80ff;
+  aspect-ratio: 1/1;
 }
+
 
 .responsive-svg {
   width: 100% !important;
@@ -379,4 +392,39 @@ body {
   height: inherit !important;
   max-width: inherit !important;
   max-height: inherit !important;
+}
+
+
+#export{
+  display: flex;
+  justify-content: space-between;
+}
+
+#export-btn-svg{
+  height: auto;
+  aspect-ratio: 1/1;
+}
+
+.gui-container button{
+  width:30%;
+  border: none;
+  border-radius: 16px;
+  background-color: #cc80ff;
+  aspect-ratio: 1/1;
+}
+
+.gui-container button:hover{
+  cursor: pointer;
+  background-color: #FFEA00;
+}
+
+
+#export {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+#export.open {
+  max-height: 500px;
 }
