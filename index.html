@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VECTRA</title>
-  <link rel="icon" type="image/x-icon" href="/asstes/favicon.ico">
+  <link rel="icon" type="image/x-icon" href="/asstes/images/favicon.ico">
   <link rel="stylesheet" href="styles.css">
 </head>
 
@@ -19,12 +19,8 @@
   </div>
 
   <div id="mainApp">
-
     <div class="page-container">
-      <div id="pageLayout">
-        <div id="svg-container">
-        </div>
-      </div>
+      <div id="svg-container"></div>
 
       <div class="gui-container">
         <div class="page-header">
@@ -32,72 +28,30 @@
         </div>
 
         <h2 class="line">IMPORT</h2>
-        <!-- <div> -->
         <div class="category">
           <div class="dropzone" id="dropzone1">
             <input type="file" multiple style="display: none;">
-            <svg width="30px" height="30px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-
-              <title />
-
-              <g id="Complete">
-
-
-                <g>
-
-                  <path d="M3,12.3v7a2,2,0,0,0,2,2H19a2,2,0,0,0,2-2v-7" fill="none" stroke="#000000"
-                    stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
-
-                  <g>
-
-                    <polyline data-name="Right" fill="none" id="Right-2" points="7.9 6.7 12 2.7 16.1 6.7"
-                      stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
-
-                    <line fill="none" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      x1="12" x2="12" y1="16.3" y2="4.8" />
-
-                  </g>
-
-                </g>
-
-              </g>
-
-
-            </svg>
+            <img src="/asstes/images/upload.svg" alt="Upload icon" width="30" height="30" />
           </div>
-          <button id="drawBtn"><svg width="30px" height="30px" viewBox="0 0 24 24" fill="none"
-              xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M15 7.49996L17.5 9.99996M7.5 20L19.25 8.24996C19.9404 7.5596 19.9404 6.44032 19.25 5.74996V5.74996C18.5596 5.0596 17.4404 5.05961 16.75 5.74996L5 17.5V20H7.5ZM7.5 20H15.8787C17.0503 20 18 19.0502 18 17.8786V17.8786C18 17.316 17.7765 16.7765 17.3787 16.3786L17 16M4.5 4.99996C6.5 2.99996 10 3.99996 10 5.99996C10 8.5 4 8.5 4 11C4 11.8759 4.53314 12.5256 5.22583 13"
-                stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-            </svg></button>
+          <button id="drawBtn"><img src="/asstes/images/draw.svg" alt="Draw icon" width="30" height="30" /></button>
           <div id="drawWindow">
             <div id="drawingArea"></div>
             <div class="drawWindow-controls">
-              <button id="saveDraw">Save Path</button>
-              <button id="clearDraw">Clear</button>
-              <button id="closeDraw">Close</button>
+              <button id="saveDraw"><img src="/asstes/images/ok.svg" alt="ok icon" width="30" height="30"/></button>
+              <button id="clearDraw"><img src="/asstes/images/trash.svg" alt="Clear icon" width="30" height="30"/></button>
+              <button id="closeDraw"><img src="/asstes/images/clear.svg" alt="Close icon" width="30" height="30"/></button>
             </div>
           </div>
-          <div id="trash-area" class="trash-area"><svg width="30px" height="30px" viewBox="0 0 24 24" fill="none"
-              xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M4 6H20M16 6L15.7294 5.18807C15.4671 4.40125 15.3359 4.00784 15.0927 3.71698C14.8779 3.46013 14.6021 3.26132 14.2905 3.13878C13.9376 3 13.523 3 12.6936 3H11.3064C10.477 3 10.0624 3 9.70951 3.13878C9.39792 3.26132 9.12208 3.46013 8.90729 3.71698C8.66405 4.00784 8.53292 4.40125 8.27064 5.18807L8 6M18 6V16.2C18 17.8802 18 18.7202 17.673 19.362C17.3854 19.9265 16.9265 20.3854 16.362 20.673C15.7202 21 14.8802 21 13.2 21H10.8C9.11984 21 8.27976 21 7.63803 20.673C7.07354 20.3854 6.6146 19.9265 6.32698 19.362C6 18.7202 6 17.8802 6 16.2V6M14 10V17M10 10V17"
-                stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
+          <div id="trash-area" class="trash-area"><img src="/asstes/images/trash.svg" alt="Trash icon" width="30"
+              height="30" />
           </div>
           <div id="svg-preview-list"></div>
           <div id="deleteButton">
-            <button type="button" id="delete-button"><svg width="30px" height="30px" viewBox="0 0 24 24" fill="none"
-                xmlns="http://www.w3.org/2000/svg">
-                <path d="M8 8L16 16" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                <path d="M16 8L8 16" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
+            <button type="button" id="delete-button">
+              <img src="/asstes/images/clear.svg" alt="Clear icon" width="30" height="30" />
               <h2>DELETE ALL</h2>
             </button>
           </div>
-
-          <!-- </div> -->
         </div>
 
 
@@ -110,31 +64,18 @@
           <label class="custom-checkbox">
             <input type="checkbox" id="transparentFill" checked>
             <span class="checkbox-style">
-              <svg fill="#000000" height="30px" width="30px" version="1.1" id="Capa_1"
-                xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 297 297"
-                xml:space="preserve">
-                <path d="M289.5,0H7.5C3.358,0,0,3.357,0,7.5v282c0,4.143,3.358,7.5,7.5,7.5h282c4.143,0,7.5-3.357,7.5-7.5V7.5
-C297,3.357,293.643,0,289.5,0z M109.653,282L282,109.654v62.831L172.485,282H109.653z M25.607,282L282,25.607v62.832L88.439,282
-H25.607z M184.113,15L15,184.113v-62.832L121.281,15H184.113z M15,205.328L205.328,15h66.065L15,271.393V205.328z M100.067,15
-L15,100.066V15H100.067z M193.7,282l88.3-88.3V282H193.7z" />
-              </svg>
+              <img src="/asstes/images/fill.svg" alt="Fill icon" width="30" height="30" />
             </span>
           </label>
-
 
           <label class="color-button">
             <input type="color" id="fillColorPicker" value="#000000">
           </label>
 
-
-
           <label class="custom-checkbox">
             <input type="checkbox" id="transparentStroke">
             <span class="checkbox-style">
-              <svg fill="#000000" width="30px" height="30px" viewBox="0 0 14 14" role="img" focusable="false"
-                aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-                <path d="M1 1h12v3H1V1zm0 4.2h12v2.4H1V5.2zm0 3.6h12v1.8H1V8.8zm0 3h12V13H1v-1.2z" />
-              </svg>
+              <img src="/asstes/images/stroke.svg" alt="Atroke icon" width="30" height="30" />
             </span>
           </label>
 
@@ -154,49 +95,23 @@ L15,100.066V15H100.067z M193.7,282l88.3-88.3V282H193.7z" />
           <h2 class="line">ANIMATION</h2>
           <div id>
             <div id="speed-container">
-              <svg fill="#000000" width="30px" height="30px" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
-                <path
-                  d="M 4.8942 42.0850 C 8.1403 42.0850 11.4863 40.6700 14.1332 37.9400 C 15.9810 38.9388 17.7789 39.8544 20.4590 39.8544 C 23.3888 39.8544 25.2200 39.0886 26.8680 38.1730 C 29.4317 40.7200 32.7443 42.1183 35.9238 42.1183 C 38.5708 42.1183 40.5850 41.0196 40.5850 38.9887 C 40.5850 37.0577 39.1534 36.2586 37.2057 35.7259 C 36.7062 35.5928 36.2068 35.4762 35.7077 35.3431 C 43.0986 35.1932 43.1818 31.4477 48.1426 31.4477 C 52.6541 31.4477 56.0000 29.8829 56.0000 26.7866 C 56.0000 20.1611 52.2045 16.6320 47.7932 16.6320 C 43.2653 16.6320 40.8512 19.4952 39.8857 23.2574 C 39.3365 25.3050 38.3710 26.5868 36.9060 27.3193 L 35.8573 25.3882 C 31.4958 17.2479 27.3674 13.9851 20.6920 13.9685 C 13.4673 13.9851 9.7717 17.1314 4.3948 27.3193 C 2.7634 30.4322 0 31.1148 0 33.0624 C 0 34.4275 1.0488 35.3431 3.1629 35.3431 L 4.8775 35.3431 C 4.1617 35.5428 3.4459 35.7259 2.7967 35.9590 C 1.2319 36.5083 .2331 37.3407 .2331 38.9388 C .2331 40.9697 2.2473 42.0850 4.8942 42.0850 Z M 20.6920 16.6154 C 25.1867 16.6154 28.0499 18.6296 30.3805 21.6094 C 27.6338 23.9233 24.3044 25.2218 20.4923 25.2218 C 16.7301 25.2218 13.4507 23.9899 10.7539 21.7259 C 13.6005 17.9471 16.3971 16.6154 20.6920 16.6154 Z M 40.5018 31.9305 C 39.7361 31.3478 38.8537 30.2491 38.3212 29.3169 C 40.1356 28.6344 41.3507 27.4191 42.0666 24.5725 C 42.8658 21.1433 44.6969 19.1457 47.7932 19.1457 C 50.9727 19.1457 53.6196 22.0755 53.6196 26.3871 C 53.6196 27.9852 51.1725 29.0172 48.6421 29.0172 C 44.7634 29.0172 42.6326 30.5654 40.5018 31.9305 Z M 48.2759 25.1219 C 49.0083 25.1219 49.5909 24.5226 49.5909 23.7901 C 49.5909 23.0577 49.0083 22.4750 48.2759 22.4750 C 47.5433 22.4750 46.9606 23.0577 46.9606 23.7901 C 46.9606 24.5226 47.5433 25.1219 48.2759 25.1219 Z M 33.7098 26.8199 C 34.8584 28.8674 36.3234 31.1980 37.8050 32.6629 C 37.1225 32.6796 36.3401 32.6629 35.5409 32.6629 C 33.0607 32.6629 31.2129 33.1124 29.6647 33.7283 C 28.0499 31.5809 26.8847 28.5345 26.6183 26.2705 C 28.5660 25.5381 30.2307 24.5060 31.6291 23.3573 C 32.3447 24.4394 33.0273 25.6047 33.7098 26.8199 Z M 5.8264 32.6629 C 4.9774 32.6629 4.1118 32.6796 3.3460 32.7295 L 3.2129 32.4964 C 4.3448 31.5476 5.7598 30.3490 6.7586 28.3514 C 7.7408 26.4703 8.6397 24.8722 9.5220 23.4905 C 10.9203 24.6391 12.6350 25.6879 14.6825 26.4037 C 14.3496 28.5844 13.1510 31.6475 11.6195 33.7283 C 10.1046 33.1124 8.2735 32.6629 5.8264 32.6629 Z M 20.4590 37.2075 C 17.5458 37.2075 15.7646 35.8425 13.4673 34.6106 C 15.0155 32.4132 16.1641 29.3835 16.4970 26.9198 C 17.7289 27.2028 19.0606 27.3692 20.4923 27.3692 C 22.0238 27.3692 23.4388 27.1694 24.7539 26.8532 C 25.0036 29.4168 26.1855 32.4465 27.8002 34.6272 C 25.4863 35.8591 23.6219 37.2075 20.4590 37.2075 Z M 2.7134 38.5892 C 2.7134 37.9899 3.1463 37.5904 4.4281 37.2741 C 5.2105 37.0743 7.2913 36.4251 8.8062 35.7093 C 9.9382 35.9590 10.9203 36.3252 11.8026 36.7414 C 9.2557 38.8888 6.9750 39.8544 4.9108 39.8544 C 3.4459 39.8544 2.7134 39.3882 2.7134 38.5892 Z M 36.3902 37.3240 C 37.6717 37.6403 38.1047 38.0398 38.1047 38.6391 C 38.1047 39.4215 37.3721 39.8876 35.9071 39.8876 C 33.8762 39.8876 31.6291 38.9554 29.1320 36.8912 C 29.9810 36.4251 30.8965 36.0256 31.9786 35.7426 C 33.4770 36.4584 35.6078 37.1076 36.3902 37.3240 Z" />
-              </svg>
+              <img src="/asstes/images/slow.svg" alt="Slow icon" width="30" height="30" />
               <div class="slidecontainer">
                 <input type="range" min="1000" max="3000" value="2000" step="10" class="slider" id="myRange">
               </div>
-              <svg width="30px" height="30px" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" stroke-width="3"
-                stroke="#000000" fill="none">
-                <path d="M28.79,44l-9.4-9.4S31.76,5.41,56.77,7C56.77,7,60.25,30.12,28.79,44Z" />
-                <path d="M56,16.82a10.87,10.87,0,0,1-6-3.08,11,11,0,0,1-3.11-6.15" />
-                <circle cx="42.32" cy="21.44" r="5.48" />
-                <path d="M30.61,43.16,30,47.84a.24.24,0,0,0,.33.25l8-3.47A2.32,2.32,0,0,0,39.63,43l1.22-5.83" />
-                <path d="M20,33.29l-4.69.6a.23.23,0,0,1-.24-.32l3.46-7.95a2.33,2.33,0,0,1,1.67-1.35l5.82-1.22" />
-                <path d="M21.49,36.68c-6.55,2.1-6.88,12.47-6.88,12.47s10.08.11,12.59-6.76" />
-                <line x1="10.88" y1="52.82" x2="7.12" y2="56.59" stroke-linecap="round" />
-                <line x1="10.6" y1="45.63" x2="7.41" y2="48.81" stroke-linecap="round" />
-                <line x1="17.94" y1="53.11" x2="14.76" y2="56.3" stroke-linecap="round" />
-              </svg>
+              <img src="/asstes/images/fast.svg" alt="Fast icon" width="30" height="30" />
             </div>
             <div>
 
               <div id="easingButtons">
-                <button type="button" data-value="linear" class="easing-btn"><svg width="30px" height="30px"
-                    viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M3 20L21 4" stroke="#000000" stroke-width="1.5" stroke-linecap="round"
-                      stroke-linejoin="round" />
-                  </svg></button>
-                <button type="button" data-value="easeOutQuad" class="easing-btn"><svg width="30px" height="30px"
-                    viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M3 20C3 20 13 4 21 4" stroke="#000000" stroke-width="1.5" stroke-linecap="round"
-                      stroke-linejoin="round" />
-                  </svg></button>
-                <button type="button" data-value="easeInQuad" class="easing-btn"><svg width="30px" height="30px"
-                    viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M3 20C11 20 21 4 21 4" stroke="#000000" stroke-width="1.5" stroke-linecap="round"
-                      stroke-linejoin="round" />
-                  </svg></button>
-                <button type="button" data-value="easeInOutSine" class="easing-btn"><svg width="30px" height="30px"
-                    viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M3 20C11 20 13 4 21 4" stroke="#000000" stroke-width="1.5" stroke-linecap="round"
-                      stroke-linejoin="round" />
-                  </svg></button>
+                <button type="button" data-value="linear" class="easing-btn"><img src="/asstes/images/linear.svg"
+                    alt="Linear icon" width="30" height="30" /></button>
+                <button type="button" data-value="easeOutQuad" class="easing-btn"><img src="/asstes/images/ease-out.svg"
+                    alt="EaseOut icon" width="30" height="30" /></button>
+                <button type="button" data-value="easeInQuad" class="easing-btn"><img src="/asstes/images/ease-in.svg"
+                    alt="EaseIn icon" width="30" height="30" /></button>
+                <button type="button" data-value="easeInOutSine" class="easing-btn"><img
+                    src="/asstes/images/ease-in-out.svg" alt="easeInOut icon" width="30" height="30" /></button>
               </div>
               <select id="easingSelect" style="display: none;">
                 <option value="easeOutQuad">easeOut</option>
@@ -207,36 +122,15 @@ L15,100.066V15H100.067z M193.7,282l88.3-88.3V282H193.7z" />
 
 
 
-              <div id="animation_settings">
+              <div class="gridOfTwo">
                 <label class="custom-checkbox">
                   <input type="checkbox" id="checkLoop">
                   <span class="checkbox-style">
-                    <svg width="30px" height="30px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path
-                        d="M8 18H7C5.34315 18 4 16.6569 4 15V9C4 7.34315 5.34315 6 7 6H17C18.6569 6 20 7.34315 20 9V15C20 16.6569 18.6569 18 17 18H12M12 18L15 15M12 18L15 21"
-                        stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
+                    <img src="/asstes/images/loop.svg" alt="loop icon" width="30" height="30" />
                   </span>
                 </label>
-                <button type="button" id="animate-button"><svg width="25px" height="25px" viewBox="-1 0 12 12"
-                    version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                    <defs>
-
-
-
-                    </defs>
-                    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                      <g id="Dribbble-Light-Preview" transform="translate(-65.000000, -3803.000000)" fill="#000000">
-                        <g id="icons" transform="translate(56.000000, 160.000000)">
-                          <path
-                            d="M18.074,3650.7335 L12.308,3654.6315 C10.903,3655.5815 9,3654.5835 9,3652.8985 L9,3645.1015 C9,3643.4155 10.903,3642.4185 12.308,3643.3685 L18.074,3647.2665 C19.306,3648.0995 19.306,3649.9005 18.074,3650.7335"
-                            id="play-[#1000]">
-
-                          </path>
-                        </g>
-                      </g>
-                    </g>
-                  </svg></button>
+                <button type="button" id="animate-button"><img src="/asstes/images/play.svg" alt="Play icon" width="30"
+                    height="30" /></button>
               </div>
 
               <div class="slidecontainer">
@@ -249,92 +143,24 @@ L15,100.066V15H100.067z M193.7,282l88.3-88.3V282H193.7z" />
         </div>
 
         <div class="category">
-          <div id="exportArea">
-            <div class="line">
-              <h2>EXPORT</h2>
-            </div>
-          </div>
-          <div>
+            <h2 class="line">EXPORT</h2>
+          <div class="gridOfTwo">
             <button id="export-btn-svg">
-              <svg height="50px" width="50px" version="1.1" id="_x32_" xmlns="http://www.w3.org/2000/svg"
-                xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" xml:space="preserve">
-                <style type="text/css">
-                  .st0 {
-                    fill: #000000;
-                  }
-                </style>
-                <g>
-                  <path class="st0" d="M378.409,0H208.294h-13.176l-9.314,9.315L57.017,138.101l-9.314,9.315v13.176v265.513
-		c0,47.36,38.528,85.896,85.895,85.896h244.811c47.361,0,85.888-38.535,85.888-85.896V85.896C464.297,38.528,425.77,0,378.409,0z
-		 M432.493,426.104c0,29.877-24.214,54.091-54.084,54.091H133.598c-29.877,0-54.091-24.214-54.091-54.091V160.592h83.717
-		c24.884,0,45.07-20.179,45.07-45.071V31.804h170.114c29.87,0,54.084,24.214,54.084,54.091V426.104z" />
-                  <path class="st0" d="M180.296,296.668l-4.846-0.67c-10.63-1.487-14.265-4.978-14.265-10.104c0-5.78,4.309-9.817,12.383-9.817
-		c5.653,0,11.305,1.62,15.745,3.764c1.886,0.942,3.903,1.487,5.789,1.487c4.845,0,8.612-3.63,8.612-8.616
-		c0-3.226-1.481-5.921-4.71-7.939c-5.384-3.372-15.476-6.06-25.572-6.06c-19.781,0-32.436,11.171-32.436,27.998
-		c0,16.15,10.232,24.898,28.938,27.454l4.846,0.67c10.903,1.48,14.129,4.846,14.129,10.229c0,6.326-5.247,10.766-14.939,10.766
-		c-6.727,0-12.111-1.745-19.645-5.921c-1.616-0.942-3.634-1.62-5.788-1.62c-5.115,0-8.885,3.91-8.885,8.756
-		c0,3.226,1.616,6.326,4.713,8.344c6.054,3.764,15.878,7.8,28.798,7.8c23.823,0,35.934-12.24,35.934-28.795
-		C209.097,307.84,199.273,299.356,180.296,296.668z" />
-                  <path class="st0" d="M281.108,259.382c-4.577,0-7.939,2.43-9.556,7.674l-16.69,54.51h-0.402l-17.634-54.51
-		c-1.745-5.244-4.978-7.674-9.551-7.674c-5.653,0-9.692,4.176-9.692,9.287c0,1.347,0.269,2.834,0.67,4.175l23.286,68.104
-		c2.96,8.477,6.727,11.57,12.652,11.57c5.785,0,9.555-3.093,12.516-11.57l23.282-68.104c0.406-1.341,0.674-2.828,0.674-4.175
-		C290.664,263.558,286.76,259.382,281.108,259.382z" />
-                  <path class="st0" d="M364.556,300.836h-18.841c-5.114,0-8.344,3.1-8.344,7.806c0,4.713,3.23,7.814,8.344,7.814h6.193
-		c0.538,0,0.803,0.258,0.803,0.803c0,3.505-0.265,6.598-1.075,9.014c-1.882,5.796-7.67,9.426-14.669,9.426
-		c-7.943,0-12.921-3.903-14.939-10.096c-1.075-3.365-1.48-7.8-1.48-19.648c0-11.842,0.405-16.15,1.48-19.516
-		c2.018-6.325,6.867-10.228,14.67-10.228c5.924,0,10.362,1.885,13.859,6.724c2.695,3.777,5.387,4.852,8.749,4.852
-		c4.981,0,9.021-3.638,9.021-8.888c0-2.151-0.674-4.035-1.752-5.921c-4.842-8.204-15.071-14.264-29.877-14.264
-		c-16.287,0-28.935,7.408-33.644,22.204c-2.022,6.466-2.559,11.576-2.559,25.038c0,13.454,0.538,18.573,2.559,25.031
-		c4.709,14.802,17.357,22.204,33.644,22.204c16.286,0,28.668-8.204,33.374-22.881c1.617-5.111,2.29-12.645,2.29-20.716v-0.95
-		C372.362,303.664,369.538,300.836,364.556,300.836z" />
-                </g>
-              </svg>
+              <img src="/asstes/images/svg.svg" alt="SVGExport icon" width="40" height="40" />
             </button>
-
             <button id="export-btn-png">
-              <svg height="50px" width="50px" version="1.1" id="_x32_" xmlns="http://www.w3.org/2000/svg"
-                xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" xml:space="preserve">
-                <style type="text/css">
-                  .st0 {
-                    fill: #000000;
-                  }
-                </style>
-                <g>
-                  <path class="st0" d="M378.413,0H208.297h-13.182L185.8,9.314L57.02,138.102l-9.314,9.314v13.176v265.514
-		c0,47.36,38.528,85.895,85.896,85.895h244.811c47.353,0,85.881-38.535,85.881-85.895V85.896C464.294,38.528,425.766,0,378.413,0z
-		 M432.497,426.105c0,29.877-24.214,54.091-54.084,54.091H133.602c-29.884,0-54.098-24.214-54.098-54.091V160.591h83.716
-		c24.885,0,45.077-20.178,45.077-45.07V31.804h170.116c29.87,0,54.084,24.214,54.084,54.092V426.105z" />
-                  <path class="st0"
-                    d="M165.287,252.785h-28.515c-5.432,0-8.7,3.533-8.7,8.825v73.754c0,6.388,4.218,10.599,10.055,10.599
-		c5.697,0,9.914-4.21,9.914-10.599v-22.406c0-0.545,0.265-0.817,0.81-0.817h16.436c20.109,0,32.188-12.226,32.188-29.612
-		C197.475,264.871,185.521,252.785,165.287,252.785z M164.072,294.888h-15.221c-0.545,0-0.81-0.272-0.81-0.81v-23.23
-		c0-0.545,0.265-0.816,0.81-0.816h15.221c8.42,0,13.448,5.027,13.448,12.498C177.519,290,172.492,294.888,164.072,294.888z" />
-                  <path class="st0" d="M275.187,251.968c-5.432,0-9.104,3.532-9.104,9.642v50.531h-0.545l-28.25-50.39
-		c-3.658-6.389-7.471-9.782-13.168-9.782c-6.801,0-11.144,4.622-11.144,11.954v72.398c0,6.109,3.673,9.643,9.105,9.643
-		c5.432,0,9.09-3.534,9.09-9.643v-50.398h0.545l28.25,50.258c3.673,6.382,7.471,9.782,13.182,9.782
-		c6.787,0,11.144-4.622,11.144-11.954V261.61C284.292,255.5,280.619,251.968,275.187,251.968z" />
-                  <path class="st0" d="M366.878,293.806h-19.019c-5.153,0-8.421,3.121-8.421,7.876c0,4.755,3.268,7.876,8.421,7.876h6.256
-		c0.544,0,0.809,0.272,0.809,0.816c0,3.533-0.265,6.654-1.089,9.098c-1.899,5.844-7.736,9.51-14.802,9.51
-		c-8.016,0-13.043-3.938-15.068-10.187c-1.09-3.393-1.494-7.876-1.494-19.83c0-11.953,0.405-16.296,1.494-19.696
-		c2.025-6.382,6.926-10.32,14.802-10.32c5.976,0,10.459,1.899,13.992,6.786c2.709,3.805,5.432,4.895,8.826,4.895
-		c5.027,0,9.091-3.666,9.091-8.965c0-2.171-0.671-4.078-1.76-5.977c-4.888-8.287-15.208-14.397-30.149-14.397
-		c-16.437,0-29.2,7.471-33.962,22.412c-2.039,6.515-2.584,11.682-2.584,25.262c0,13.581,0.545,18.74,2.584,25.262
-		c4.762,14.942,17.525,22.413,33.962,22.413c16.436,0,28.92-8.288,33.682-23.09c1.634-5.16,2.304-12.77,2.304-20.919v-0.95
-		C374.754,296.654,371.905,293.806,366.878,293.806z" />
-                </g>
-              </svg>
+              <img src="/asstes/images/png.svg" alt="PNGExport icon" width="40" height="40" />
             </button>
           </div>
         </div>
       </div>
     </div>
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/ccapture.js-npmfixed@1.1.0/build/CCapture.all.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-  <script src="anime.min.js"></script>
-  <script src="flubber.min.js"></script>
-  <script src="svg.min.js"></script>
-  <script src="script.js"></script>
+  <script src="/lib/Sortable.min.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/flubber.min.js"></script>
+  <script src="/lib/svg.min.js"></script>
+  <script src="/lib/script.js"></script>
 </body>
 
 </html>
