@@ -38,7 +38,7 @@ body {
 
   p {
     font-family: "Montserrat-Light";
-    margin: 0 0 10px 0;
+    margin: 0 0 0 0;
   }
 
   .page-container{
@@ -48,7 +48,7 @@ body {
   }
 
   #welcomeOverlay {
-    font-family: "Montserrat-BoldItalic", Helvetica, sans-serif;
+    font-family: "Montserrat-BoldItalic";
     position: fixed;
     width: 100%;
     height: 100%;
@@ -85,6 +85,7 @@ body {
    .line{
     border-top: solid;
     border-bottom: solid;
+    border-width: 2px;
     padding: 5px 0px
   }
 
@@ -298,7 +299,7 @@ button{
 
 #delete-button {
   display: flex;
-  gap: 5px; 
+  gap: 10px; 
   padding: 10px 16px;
   cursor: pointer;
 }
@@ -318,32 +319,45 @@ button{
   background-color: #FFEA00;
 }
 
+.easing-btn.selected {
+  background-color: #FFEA00;
+}
 
-#easingButtons{
+
+.gridOfFour{
   display: flex;
       flex-direction: row;
-      gap: 5px;
+      gap: 10px;
       cursor: pointer;
       justify-content: space-between;
   }
 
-#easingButtons button{
+.gridOfFour button{
   width: 25%;
+}
+
+.gap{
+  padding-top: 10px;
+}
+
+.gapdown{
+  margin-bottom: 10px;
 }
 
 #speed-container{
   display: flex;
       flex-direction: row;
-      gap: 5px;
+      gap: 10px;
       cursor: pointer;
       justify-content: space-between;
       align-items: center;
+      padding-bottom: 5px;
 }
 
 .gridOfTwo {
   display: flex;
   flex-direction: row;
-  gap: 5px;
+  gap: 10px;
   cursor: pointer;
   justify-content: space-between;
   align-items: center;
@@ -352,14 +366,14 @@ button{
 #gridOfThree {
   display: flex;
   flex-direction: row;
-  gap: 5px;
+  gap: 10px;
   cursor: pointer;
   justify-content: space-between;
   align-items: center;
 }
 
 .sectionSep{
-  padding-bottom: 5px;
+  padding-bottom: 10px;
 }
 
 
@@ -410,3 +424,7 @@ button{
   border-radius: 8px;
 }
 
+
+.categoryexport{
+  margin-top: 0px;
+}

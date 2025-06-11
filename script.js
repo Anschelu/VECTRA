@@ -55,7 +55,6 @@ transparentFill.addEventListener('change', function () {
     currentFillColor = getCurrentFillColor() || '#000';
   } else {
     currentFillColor = 'none';
-
   }
   changeSVGFillColor(currentFillColor);
 });
@@ -66,7 +65,6 @@ transparentStroke.addEventListener('change', function () {
   if (transparentStroke.checked) {
     currentStrokeColor = getCurrentStrokeColor() || '#000';
   } else {
-
     currentStrokeColor = 'none';
   }
 
@@ -75,12 +73,10 @@ transparentStroke.addEventListener('change', function () {
 
 function setupDrawing() {
   previewDrawing.draw = SVG().addTo('#drawingArea').size(400, 400);
-
   const defs = previewDrawing.draw.defs();
   previewDrawing.styleElement = defs.element('style');
 
 
-  //Drawings
 function updateDrawingColor() {
     const currentFillColor = getCurrentFillColor();
     const currentStrokeColor = getCurrentStrokeColor();
@@ -113,7 +109,6 @@ function updateDrawingColor() {
   previewDrawing.points = [];
 
   previewDrawing.draw.on('mousedown', function (e) {
-    console.log(e);
     previewDrawing.drawing = true;
     previewDrawing.points = [];
     previewDrawing.pathp.plot('');
@@ -207,7 +202,6 @@ function morphingAnimation() {
     return;
   }
 
-  // showLoading();
 
   setTimeout(() => {
     try {
@@ -225,11 +219,8 @@ function morphingAnimation() {
       path = document.querySelector("#path-00");
 
       if (!path) {
-        console.error("No <path> found with ID #path-00.");
-        // hideLoading();
         return;
       }
-      // hideLoading();
       isAnimationReady = true;
       animate();
 
@@ -237,9 +228,6 @@ function morphingAnimation() {
     }
   }, 100);
 }
-
-
-
 
 animateButton.addEventListener("click", () => {
   if (isCalculating) {
@@ -285,9 +273,6 @@ animateButton.addEventListener("click", () => {
     }, 500);
   }, 100);
 });
-
-
-
 
 function normalizePathToCenter(pathData, targetSize = NORMALIZED_SIZE) {
     if (!pathData) return pathData;
@@ -554,9 +539,6 @@ function createNormalizedSVG(svgContent) {
   const parser = new DOMParser();
   const svgDoc = parser.parseFromString(singlePathSVG, "image/svg+xml");
   
-  if (svgDoc.documentElement.nodeName === 'parsererror') {
-      return svgContent;
-  }
   
   const svgElement = svgDoc.documentElement;
   const pathElement = svgDoc.querySelector("path");
@@ -577,16 +559,13 @@ function createNormalizedSVG(svgContent) {
 }
 
 function testNormalization(pathData) {
-    console.log('Original:', pathData);
     const normalized = normalizePathToCenter(pathData);
-    console.log('Normalized:', normalized);
     return normalized;
 }
 
 
 function uploadAndDraw(svgContent) {
     setTimeout(() => {
-        console.log(svgs.length);
         const currentFillColor = getCurrentFillColor();
         const currentStrokeColor = getCurrentStrokeColor();
         const currentStrokeWidth = getCurrentStrokeWidth();
@@ -860,6 +839,7 @@ timeline.addEventListener('click', function (event) {
   }
 });
 
+
 function playNextFromProgress(i, startProgress, shouldLoop) {
   if (i >= interP.length) return;
 
@@ -917,6 +897,7 @@ function playNextFromProgress(i, startProgress, shouldLoop) {
   isAnimationPaused = false;
   updateAnimateButton();
 }
+
 
 function playNext(i, shouldLoop) {
   if (i >= interP.length) return;
@@ -1176,7 +1157,6 @@ loopInstructions();
 
 function changeSVGFillColor(newColor) {
   if (!svgs || svgs.length === 0) {
-    console.log("No SVGs uploaded yet");
     return;
   }
 
@@ -1227,13 +1207,10 @@ function changeSVGFillColor(newColor) {
   isAnimationReady = false;
   isAnimationRunning = false;
   updateAnimateButton();
-
-  console.log(`Changed fill color to ${newColor} for ${svgs.length} SVG(s)`);
 }
 
 function changeSVGStrokeColor(newColor) {
   if (!svgs || svgs.length === 0) {
-    console.log("No SVGs uploaded yet");
     return;
   }
 
@@ -1284,8 +1261,6 @@ function changeSVGStrokeColor(newColor) {
   isAnimationReady = false;
   isAnimationRunning = false;
   updateAnimateButton();
-
-  console.log(`Changed stroke color to ${newColor} for ${svgs.length} SVG(s)`);
 }
 
 function setupFillColorChanger() {
@@ -1439,7 +1414,6 @@ function updateDrawingAreaOnOpen() {
 
 function changeSVGStrokeWidth(newWidth) {
   if (!svgs || svgs.length === 0) {
-    console.log("No SVGs uploaded yet");
     return;
   }
 
@@ -1482,8 +1456,6 @@ function changeSVGStrokeWidth(newWidth) {
 
   previewList.innerHTML = '';
   svgs.forEach((_, index) => previewSVG(index));
-
-  console.log(`Changed stroke width to ${newWidth} for ${svgs.length} SVG(s)`);
 }
 
 function setupStrokeWidthControl() {
@@ -1502,10 +1474,6 @@ function setupStrokeWidthControl() {
 
 setupStrokeWidthControl();
 
-
-//EXPORT Functions
-
-//SVG EXPORT
 function exportSVGContainer() {
   const svgElement = document.querySelector("#svg-container svg");
   const serializer = new XMLSerializer();
@@ -1526,7 +1494,6 @@ document.getElementById("export-btn-svg").addEventListener("click", () => {
   URL.revokeObjectURL(url);
 });
 
-//PNG EXPORT
 document.getElementById("export-btn-png").addEventListener("click", () => {
   const { svgElement, url } = exportSVGContainer();
   const svgWidth = svgElement.getAttribute('width') || svgElement.viewBox.baseVal.width || 1920;
