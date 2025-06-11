@@ -291,6 +291,8 @@ animateButton.addEventListener("click", () => {
   }
 
   animateButton.classList.add('button-loading');
+  animateButton.innerHTML = ""; 
+  animateButton.textContent = "";
 
 
 
@@ -298,10 +300,13 @@ animateButton.addEventListener("click", () => {
     morphingAnimation();
     setTimeout(() => {
       animateButton.classList.remove('button-loading');
+      animateButton.innerHTML = ""; 
       updateAnimateButton();
     }, 500);
   }, 100);
 });
+
+
 
 
 function normalizePathToCenter(pathData, targetSize = NORMALIZED_SIZE) {
