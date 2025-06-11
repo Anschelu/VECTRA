@@ -16,22 +16,91 @@ body {
     height: 100%;
   }
 
-  #welcomeOverlay h2{
+ h1{
     font-size: 200px;
     line-height: 0.8;
+    margin-bottom: 10px;
+    margin-top: 0px;
   }
 
-
-  h3{
-    font-size: 21px;
-    margin: 0px;
-  }
-
-  h4{
+  h2{
     font-size: 16px;
     margin: 0px;
   }
 
+  p {
+    font-family: "Montserrat-Light", Helvetica, sans-serif;
+    margin: 0 0 10px 0;
+  }
+
+  .page-container{
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  #welcomeOverlay {
+    font-family: "Montserrat-BoldItalic", Helvetica, sans-serif;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    flex-direction: column;
+  }
+
+  body button:hover {
+    cursor: pointer;
+    background: #FFEA00;
+  }
+
+  .instruction-box {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100%;
+    height: 100%;
+  }
+
+  #mainApp{
+    display: none;
+    height: 100%;
+  }
+
+  .page-header{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+   .line{
+    border-top: solid;
+    border-bottom: solid;
+    padding: 5px 0px
+  }
+
+button{
+    font-family: "Montserrat-Light", Helvetica, sans-serif;
+    border: none;
+    border-radius: 16px;
+    background-color: #cc80ff;
+    justify-content: center;
+    align-items: center;
+  }
+
+.instruction-box button {
+    padding: 10px 20px;
+    font-size: 28px;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .gui-container button{
+    width:30%;
+    aspect-ratio: 1/1;
+}
+  
   .dropzone {
     text-align: center;
     align-content: center;
@@ -51,17 +120,9 @@ body {
     display: none;
   }
 
-  .page-container{
-    display: flex;
-    width: 100vw;
-    height: 100vh;
-  }
-
-  #upload-zone{
+  .category{
     margin-top: 10px;
     margin-bottom: 10px;
-    display: flex;
-    justify-content: space-between;
   }
 
   .slidecontainer {
@@ -110,17 +171,6 @@ body {
     display: grid;
   grid-template-columns: repeat(3, 1fr);
   }
-  #morphing-GUI{
-    display: block;
-  }
-
-  #drawable-GUI{
-    display: none;
-  }
-
-  #motion-GUI{
-    display: none;
-  }
 
 
 
@@ -130,7 +180,7 @@ body {
     left: 50%;
     transform: translate(-50%, -50%);
     background: white;
-    border: 2px solid #333;
+    border: 2px solid #cc80ff;
     display: none;
     flex-direction: column;
     z-index: 999;
@@ -146,73 +196,12 @@ body {
     display: flex;
     justify-content: space-around;
     padding: 10px;
-    background: #f2f2f2;
-    border-top: 1px solid #ccc;
-  }
-  
-
-
-  #welcomeOverlay {
-    font-family: "Montserrat-BoldItalic", Helvetica, sans-serif;
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    color: black;
-    display: flex;
-    z-index: 1000;
-    flex-direction: column;
+    border-top: 1px solid #cc80ff;
   }
 
-  .instruction-box {
-    display: flex;
-    flex-direction: column;
-    text-align: center;
-    justify-content: center !important;
-    align-items: center !important;
-    width: 100%;
-    height: 100%;
-  }
 
-  .instruction-box h2 {
-    margin-bottom: 10px;
-    margin-top: 0px;
-  }
 
-  .instruction-box p {
-    font-family: "Montserrat-Light", Helvetica, sans-serif;
-    margin: 0 0 10px 0;
-  }
-
-  .instruction-box button {
-    font-family: "Montserrat-Light", Helvetica, sans-serif;
-    padding: 10px 20px;
-    border: none;
-    background: #DBA5FF;
-    color: black;
-    border-radius: 16px;
-    cursor: pointer;
-    font-size: 32px;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .instruction-box button:hover {
-    background: #FFEA00;
-  }
-
-  #mainApp{
-    display: none;
-    height: 100%;
-  }
-
-  .page-header{
-    display: flex;
-    font-size: 21px;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .page-header h2{
+  .page-header h1{
     font-family: "Montserrat-BoldItalic", Helvetica, sans-serif;
     font-size: 21px;
     padding-bottom: 10px;
@@ -230,9 +219,6 @@ body {
     border: 2px dashed #888;
   }
 
-
-
-/* loading  */
 
 .loading-modal {
   position: absolute;
@@ -400,19 +386,9 @@ body {
   aspect-ratio: 1/1;
 }
 
-.gui-container button{
-  width:30%;
-  border: none;
-  border-radius: 16px;
-  background-color: #cc80ff;
-  aspect-ratio: 1/1;
-}
 
 .gui-container #animation_settings button{
   width:50%;
-  border: none;
-  border-radius: 16px;
-  background-color: #cc80ff;
   aspect-ratio: 2/1;
 }
 
@@ -440,19 +416,9 @@ body {
 
 #delete-button {
   display: flex;
-  align-items: center;
-  justify-content: center;
   gap: 5px; 
-  font-size: 16px;
   padding: 10px 16px;
   cursor: pointer;
-}
-#delete-button svg {
-  flex-shrink: 0; 
-}
-
-#delete-button H4 {
-  padding-bottom: 0; 
 }
 
 #deleteButton button{
@@ -460,76 +426,16 @@ body {
   aspect-ratio: 6/1;
 }
 
-.gui-container button:hover{
-  cursor: pointer;
-  background-color: #FFEA00;
-}
-
-.category{
-  border-bottom: solid;
-  padding-top: 20px;
-}
-
-.category:hover{
-cursor: pointer;
-}
-
-h4 svg {
-  align-items: center;     
-  justify-content: center;
-}
-
-
-#export {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.3s ease;
-  margin-bottom: 10px;
-}
-
-#export.open {
-  max-height: 500px;
-}
-
-#upload {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.3s ease;
-  margin-bottom: 10px;
-}
-
-#upload.open {
-  max-height: 500px;
-}
-
-#animation {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.3s ease;
-  margin-bottom: 10px;
-}
-
-#animation.open {
-  max-height: 500px;
-}
 
 #uploader{
   padding-bottom: 20px;
 }
 
 
-#toggle-export{
-  display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      gap: 5px;
-      font-size: 16px;
-      cursor: pointer;
-}
-
 .easing-btn.active {
   background-color: #FFEA00;
 }
+
 
 #easingButtons{
   display: flex;
@@ -561,13 +467,11 @@ h4 svg {
   align-items: center;
 }
 
-/* Beide Kinder (Checkbox-Label + Button) sollen 50% haben */
 #animation_settings label,
 #animation_settings button {
   width: 50%;
 }
 
-/* Checkbox-Stil */
 .checkbox-style {
   aspect-ratio: 2 / 1;
   background-color: #cc80ff;
@@ -579,11 +483,36 @@ h4 svg {
   cursor: pointer;
 }
 
-/* Button-Stil */
 #animation_settings button {
-  border: none;
-  border-radius: 16px;
-  background-color: #cc80ff;
   aspect-ratio: 2 / 1;
+}
+
+.custom-checkbox svg {
+  pointer-events: none;
+}
+
+
+.color-button input[type="color"] {
+  appearance: none;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 8px;
+  padding: 0;
+  cursor: pointer;
+  background-color: transparent;
+}
+
+.color-button input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+.color-button input[type="color"]::-webkit-color-swatch {
+  border: none;
+  border-radius: 8px;
+}
+
+.color-button input[type="color"]::-moz-color-swatch {
+  border: none;
+  border-radius: 8px;
 }
 

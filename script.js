@@ -23,7 +23,6 @@ let transparentFill = document.getElementById("transparentFill");
 let transparentStroke = document.getElementById("transparentStroke");
 let exportIndexSVG = 0;
 let exportIndexPNG = 0;
-let exportIndexMP4 = 0;
 const drawWindow = document.getElementById("drawWindow");
 const openDrawBtn = document.getElementById("drawBtn");
 const timeline = document.getElementById('timeline');
@@ -33,6 +32,9 @@ let dropzone = document.querySelector('.dropzone');
 let input = document.querySelector("input[type='file']");
 let previewList = document.getElementById("svg-preview-list");
 let svgContainer = document.getElementById("svg-container");
+let mediaRecorder = null;
+let recordedChunks = [];
+let isRecording = false;
 
 const maxVal = parseInt(document.getElementById("myRange").max);
 const max = maxVal * 1.2;
@@ -106,34 +108,6 @@ function setupDrawing() {
     }
   }
   
-//Pop Up GUI
-
-document.querySelector("#toggle-upload h4").addEventListener("click", function () {
-  document.getElementById("upload").classList.toggle("open");
-});
-
-document.querySelector("#toggle-export").addEventListener("click", function () {
-  document.getElementById("export").classList.toggle("open");
-});
-
-document.querySelector("#toggle-animation h4").addEventListener("click", function () {
-  document.getElementById("animation").classList.toggle("open");
-});
-
-document.querySelectorAll('#easingButtons .easing-btn').forEach(button => {
-  button.addEventListener('click', () => {
-    // Update the hidden select
-    document.getElementById('easingSelect').value = button.dataset.value;
-
-    // Optional: Add active styling
-    document.querySelectorAll('.easing-btn').forEach(btn => btn.classList.remove('active'));
-    button.classList.add('active');
-
-    // If you had a change listener on the select, manually trigger it
-    const event = new Event('change');
-    document.getElementById('easingSelect').dispatchEvent(event);
-  });
-});
 
 
   updateDrawingColor();
@@ -1248,7 +1222,7 @@ clearDraw.addEventListener("click", () => {
 });
 
 const instructions = [
-  "Upload an SVG or use the draw function",
+  "Upload an SVG or use the brush to draw your own SVG",
   "Choose your own settings and see your path in action.",
   "Be aware that only similar SVG's are morphable",
   "Export your own creation as Video, Path or Path Animation!"
@@ -1652,106 +1626,4 @@ document.getElementById("export-btn-png").addEventListener("click", () => {
     }, "image/png");
   };
   img.src = url;
-});
-
-// VIDEO EXPORT NOT WORKING
-
-// Record only SVG container without GUI/cursor
-// === Aufnahmevariablen ===
-let mediaRecorder = null;
-let recordedChunks = [];
-let isRecording = false;
-
-// === SVG-zu-Canvas Aufnahme mit hoher Qualität ===
-async function recordSVGWithCanvasHighQuality() {
-    if (isRecording) return;
-
-    const svgContainer = document.getElementById('svg-container');
-    const svgElement = svgContainer.querySelector('svg');
-
-    if (!svgElement) {
-        alert('Kein SVG im Container gefunden!');
-        return;
-    }
-
-    const canvas = document.createElement('canvas');
-    const rect = svgContainer.getBoundingClientRect();
-    canvas.width = svgElement.getAttribute('width') || rect.width || 1920;
-    canvas.height = svgElement.getAttribute('height') || rect.height || 1080;
-
-    const stream = canvas.captureStream(30); // 30 FPS
-    const ctx = canvas.getContext('2d');
-
-    // MediaRecorder mit hoher Qualität
-    const options = {
-        mimeType: 'video/webm;codecs=vp9',
-        videoBitsPerSecond: 10_000_000 // 10 Mbps für hohe Qualität
-    };
-
-    mediaRecorder = new MediaRecorder(stream, options);
-    recordedChunks = [];
-
-    mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-            recordedChunks.push(event.data);
-        }
-    };
-
-    mediaRecorder.onstop = () => {
-        const blob = new Blob(recordedChunks, { type: 'video/webm' });
-        downloadWebM(blob);
-    };
-
-    // SVG auf Canvas zeichnen – Frame für Frame
-    function drawSVGToCanvas() {
-      if (!isRecording) return;
-  
-      const serializer = new XMLSerializer();
-      const svgString = serializer.serializeToString(svgElement);
-      const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-      const url = URL.createObjectURL(svgBlob);
-  
-      const img = new Image();
-      img.onload = () => {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          URL.revokeObjectURL(url);
-  
-          requestAnimationFrame(drawSVGToCanvas);
-      };
-      img.src = url;
-  }
-  
-
-    mediaRecorder.start();
-    isRecording = true;
-    drawSVGToCanvas();
-}
-
-function stopRecording() {
-    if (!mediaRecorder || !isRecording) return;
-
-    mediaRecorder.stop();
-    isRecording = false;
-
-    mediaRecorder.stream.getTracks().forEach(track => track.stop());
-}
-
-function downloadWebM(blob) {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `svg-animation-${Date.now()}.webm`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-}
-
-document.getElementById("export-btn-vid").addEventListener("click", () => {
-    if (isRecording) {
-        stopRecording();
-    } else {
-        recordSVGWithCanvasHighQuality();
-    }
 });
