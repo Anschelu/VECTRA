@@ -175,26 +175,6 @@ function createLoadingElement() {
   }
 }
 
-// function showLoading() {
-//   // createLoadingElement();
-//   // // loadingElement.style.display = 'block';
-//   // loadingElement.classList.add('fade-in');
-//   // isCalculating = true;
-//   console.log("hii")
-// }
-
-// function hideLoading() {
-//   console.log("huuuhuuu")
-//   if (loadingElement) {
-//     loadingElement.classList.add('fade-out');
-//     setTimeout(() => {
-//       loadingElement.style.display = 'none';
-//       loadingElement.classList.remove('fade-in', 'fade-out');
-//     }, 300);
-//   }
-//   isCalculating = false;
-// }
-
 function updateAnimateButton() {
   if (isAnimationRunning) {
     animateButton.innerHTML = `
@@ -1523,7 +1503,7 @@ function setupStrokeWidthControl() {
 setupStrokeWidthControl();
 
 
-//EXPORT
+//EXPORT Functions
 
 //SVG EXPORT
 function exportSVGContainer() {

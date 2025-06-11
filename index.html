@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VECTRA</title>
-  <link rel="icon" type="image/x-icon" href="/asstes/images/favicon.ico">
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
   <link rel="stylesheet" href="styles.css">
 </head>
 
@@ -29,26 +29,28 @@
 
         <h2 class="line">IMPORT</h2>
         <div class="category">
+          <div id="gridOfThree" class="sectionSep">
           <div class="dropzone" id="dropzone1">
             <input type="file" multiple style="display: none;">
-            <img src="/asstes/images/upload.svg" alt="Upload icon" width="30" height="30" />
+            <img src="/assets/images/upload.svg" alt="Upload icon" width="30" height="30" />
           </div>
-          <button id="drawBtn"><img src="/asstes/images/draw.svg" alt="Draw icon" width="30" height="30" /></button>
+          <button id="drawBtn"><img src="/assets/images/draw.svg" alt="Draw icon" width="30" height="30" /></button>
           <div id="drawWindow">
             <div id="drawingArea"></div>
             <div class="drawWindow-controls">
-              <button id="saveDraw"><img src="/asstes/images/ok.svg" alt="ok icon" width="30" height="30"/></button>
-              <button id="clearDraw"><img src="/asstes/images/trash.svg" alt="Clear icon" width="30" height="30"/></button>
-              <button id="closeDraw"><img src="/asstes/images/clear.svg" alt="Close icon" width="30" height="30"/></button>
+              <button id="saveDraw"><img src="/assets/images/ok.svg" alt="ok icon" width="30" height="30"/></button>
+              <button id="clearDraw"><img src="/assets/images/trash.svg" alt="Clear icon" width="30" height="30"/></button>
+              <button id="closeDraw"><img src="/assets/images/clear.svg" alt="Close icon" width="30" height="30"/></button>
             </div>
           </div>
-          <div id="trash-area" class="trash-area"><img src="/asstes/images/trash.svg" alt="Trash icon" width="30"
+          <div id="trash-area" class="trash-area"><img src="/assets/images/trash.svg" alt="Trash icon" width="30"
               height="30" />
           </div>
+        </div>
           <div id="svg-preview-list"></div>
           <div id="deleteButton">
             <button type="button" id="delete-button">
-              <img src="/asstes/images/clear.svg" alt="Clear icon" width="30" height="30" />
+              <img src="/assets/images/clear.svg" alt="Clear icon" width="30" height="30" />
               <h2>DELETE ALL</h2>
             </button>
           </div>
@@ -64,7 +66,7 @@
           <label class="custom-checkbox">
             <input type="checkbox" id="transparentFill" checked>
             <span class="checkbox-style">
-              <img src="/asstes/images/fill.svg" alt="Fill icon" width="30" height="30" />
+              <img src="/assets/images/fill.svg" alt="Fill icon" width="30" height="30" />
             </span>
           </label>
 
@@ -75,7 +77,7 @@
           <label class="custom-checkbox">
             <input type="checkbox" id="transparentStroke">
             <span class="checkbox-style">
-              <img src="/asstes/images/stroke.svg" alt="Atroke icon" width="30" height="30" />
+              <img src="/assets/images/stroke.svg" alt="Atroke icon" width="30" height="30" />
             </span>
           </label>
 
@@ -95,23 +97,23 @@
           <h2 class="line">ANIMATION</h2>
           <div id>
             <div id="speed-container">
-              <img src="/asstes/images/slow.svg" alt="Slow icon" width="30" height="30" />
+              <img src="/assets/images/slow.svg" alt="Slow icon" width="30" height="30" />
               <div class="slidecontainer">
                 <input type="range" min="1000" max="3000" value="2000" step="10" class="slider" id="myRange">
               </div>
-              <img src="/asstes/images/fast.svg" alt="Fast icon" width="30" height="30" />
+              <img src="/assets/images/fast.svg" alt="Fast icon" width="30" height="30" />
             </div>
             <div>
 
               <div id="easingButtons">
-                <button type="button" data-value="linear" class="easing-btn" checked><img src="/asstes/images/linear.svg"
+                <button type="button" data-value="linear" class="easing-btn" checked><img src="/assets/images/linear.svg"
                     alt="Linear icon" width="30" height="30" /></button>
-                <button type="button" data-value="easeOutQuad" class="easing-btn"><img src="/asstes/images/ease-out.svg"
+                <button type="button" data-value="easeOutQuad" class="easing-btn"><img src="/assets/images/ease-out.svg"
                     alt="EaseOut icon" width="30" height="30" /></button>
-                <button type="button" data-value="easeInQuad" class="easing-btn"><img src="/asstes/images/ease-in.svg"
+                <button type="button" data-value="easeInQuad" class="easing-btn"><img src="/assets/images/ease-in.svg"
                     alt="EaseIn icon" width="30" height="30" /></button>
                 <button type="button" data-value="easeInOutSine" class="easing-btn"><img
-                    src="/asstes/images/ease-in-out.svg" alt="easeInOut icon" width="30" height="30" /></button>
+                    src="/assets/images/ease-in-out.svg" alt="easeInOut icon" width="30" height="30" /></button>
               </div>
               <select id="easingSelect" style="display: none;">
                 <option value="easeOutQuad">easeOut</option>
@@ -126,10 +128,10 @@
                 <label class="custom-checkbox">
                   <input type="checkbox" id="checkLoop">
                   <span class="checkbox-style">
-                    <img src="/asstes/images/loop.svg" alt="loop icon" width="30" height="30" />
+                    <img src="/assets/images/loop.svg" alt="loop icon" width="30" height="30" />
                   </span>
                 </label>
-                <button type="button" id="animate-button"><img src="/asstes/images/play.svg" alt="Play icon" width="30"
+                <button type="button" id="animate-button"><img src="/assets/images/play.svg" alt="Play icon" width="30"
                     height="30" /></button>
               </div>
 
@@ -146,10 +148,10 @@
             <h2 class="line">EXPORT</h2>
           <div class="gridOfTwo">
             <button id="export-btn-svg">
-              <img src="/asstes/images/svg.svg" alt="SVGExport icon" width="40" height="40" />
+              <img src="/assets/images/svg.svg" alt="SVGExport icon" width="40" height="40" />
             </button>
             <button id="export-btn-png">
-              <img src="/asstes/images/png.svg" alt="PNGExport icon" width="40" height="40" />
+              <img src="/assets/images/png.svg" alt="PNGExport icon" width="40" height="40" />
             </button>
           </div>
         </div>

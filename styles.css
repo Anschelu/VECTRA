@@ -1,11 +1,11 @@
 @font-face {
   font-family: 'Montserrat-SemiBoldItalic.woff';
-  src: url("../SVG-Tool/asstes/fonts/Montserrat-SemiBoldItalic.woff") format('woff');
+  src: url("../SVG-Tool/assets/fonts/Montserrat-SemiBoldItalic.woff") format('woff');
 }
 
 @font-face {
   font-family: 'Montserrat-Light.woff';
-  src: url("../SVG-Tool/asstes/fonts/Montserrat-Light.ttf") format('woff');
+  src: url("../SVG-Tool/assets/fonts/Montserrat-Light.ttf") format('woff');
 }
 
 body {
@@ -17,7 +17,7 @@ body {
   }
 
  h1{
-  font-family: "Montserrat-SemiBoldItalic", Helvetica, sans-serif;
+  font-family: "Montserrat-SemiBoldItalic";
     font-size: 200px;
     line-height: 0.8;
     margin-bottom: 10px;
@@ -31,6 +31,7 @@ body {
   }
 
   h2{
+    font-family: "Montserrat-Light";
     font-size: 16px;
     margin: 0px;
   }
@@ -347,6 +348,20 @@ button{
   justify-content: space-between;
   align-items: center;
 }
+
+#gridOfThree {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+  cursor: pointer;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sectionSep{
+  padding-bottom: 5px;
+}
+
 
 .gridOfTwo label,
 .gridOfTwo button {
