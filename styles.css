@@ -395,3 +395,19 @@ button{
   border-radius: 8px;
 }
 
+
+#animate-button.button-loading .button-icon {
+  display: none;
+}
+
+#animate-button.button-loading::after {
+  content: '';
+  display: inline-block;
+  width: 21px;
+  height: 21px;
+  border: 2px solid transparent;
+  border-top: 2px solid #000;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+

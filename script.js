@@ -45,6 +45,7 @@ const overlay = document.getElementById("welcomeOverlay");
 const NORMALIZED_SIZE = 400;
 const NORMALIZED_VIEWBOX = `0 0 ${NORMALIZED_SIZE} ${NORMALIZED_SIZE}`;
 const PATH_PADDING = 0.8;
+let timelineUpdateLock = false;
 
 
 transparentFill.addEventListener('change', function () {
@@ -194,6 +195,29 @@ function createLoadingElement() {
 //   isCalculating = false;
 // }
 
+function updateAnimateButton() {
+  if (isAnimationRunning) {
+    animateButton.innerHTML = `
+      <svg fill="#000000" width="25px" height="25px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg">
+        <title>pause</title>
+        <path d="M5.92 24.096q0 0.832 0.576 1.408t1.44 0.608h4.032q0.832 0 1.44-0.608t0.576-1.408v-16.16q0-0.832-0.576-1.44t-1.44-0.576h-4.032q-0.832 0-1.44 0.576t-0.576 1.44v16.16zM18.016 24.096q0 0.832 0.608 1.408t1.408 0.608h4.032q0.832 0 1.44-0.608t0.576-1.408v-16.16q0-0.832-0.576-1.44t-1.44-0.576h-4.032q-0.832 0-1.408 0.576t-0.608 1.44v16.16z"></path>
+      </svg>
+    `;
+  } else {
+    animateButton.innerHTML = `
+      <svg width="25px" height="25px" viewBox="-1 0 12 12" version="1.1" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+          <g transform="translate(-65, -3803)" fill="#000000">
+            <g transform="translate(56, 160)">
+              <path d="M18.074,3650.7335 L12.308,3654.6315 C10.903,3655.5815 9,3654.5835 9,3652.8985 L9,3645.1015 C9,3643.4155 10.903,3642.4185 12.308,3643.3685 L18.074,3647.2665 C19.306,3648.0995 19.306,3649.9005 18.074,3650.7335"></path>
+            </g>
+          </g>
+        </g>
+      </svg>
+    `;
+  }
+}
+
 function morphingAnimation() {
   if (isCalculating) {
     return;
@@ -234,28 +258,6 @@ function morphingAnimation() {
   }, 100);
 }
 
-function updateAnimateButton() {
-  if (isAnimationRunning) {
-    animateButton.innerHTML = `
-      <svg fill="#000000" width="25px" height="25px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg">
-        <title>pause</title>
-        <path d="M5.92 24.096q0 0.832 0.576 1.408t1.44 0.608h4.032q0.832 0 1.44-0.608t0.576-1.408v-16.16q0-0.832-0.576-1.44t-1.44-0.576h-4.032q-0.832 0-1.44 0.576t-0.576 1.44v16.16zM18.016 24.096q0 0.832 0.608 1.408t1.408 0.608h4.032q0.832 0 1.44-0.608t0.576-1.408v-16.16q0-0.832-0.576-1.44t-1.44-0.576h-4.032q-0.832 0-1.408 0.576t-0.608 1.44v16.16z"></path>
-      </svg>
-    `;
-  } else {
-    animateButton.innerHTML = `
-      <svg width="25px" height="25px" viewBox="-1 0 12 12" version="1.1" xmlns="http://www.w3.org/2000/svg">
-        <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-          <g transform="translate(-65, -3803)" fill="#000000">
-            <g transform="translate(56, 160)">
-              <path d="M18.074,3650.7335 L12.308,3654.6315 C10.903,3655.5815 9,3654.5835 9,3652.8985 L9,3645.1015 C9,3643.4155 10.903,3642.4185 12.308,3643.3685 L18.074,3647.2665 C19.306,3648.0995 19.306,3649.9005 18.074,3650.7335"></path>
-            </g>
-          </g>
-        </g>
-      </svg>
-    `;
-  }
-}
 
 
 
@@ -289,6 +291,8 @@ animateButton.addEventListener("click", () => {
   }
 
   animateButton.classList.add('button-loading');
+
+
 
   setTimeout(() => {
     morphingAnimation();
@@ -558,7 +562,6 @@ function keepOnlyFirstPath(svgContent) {
   return serializer.serializeToString(svgDoc);
 }
 
-
 function createNormalizedSVG(svgContent) {
 
   const singlePathSVG = keepOnlyFirstPath(svgContent);
@@ -631,7 +634,6 @@ function uploadAndDraw(svgContent) {
         const finalSVGContent = serializer.serializeToString(svgDoc);
         
         let style = svgDoc.querySelector('style')?.textContent;
-        console.log(style);
         
         const pathData = pathElement?.getAttribute("d");
         
@@ -799,7 +801,6 @@ function animate() {
   if (animation) animation.pause();
 
   const shouldLoop = checkLoop.checked;
-  console.log("Animating with loop:", shouldLoop);
 
   if (animationCompleted || (!isAnimationPaused && currentAnimationIndex === 0)) {
     currentAnimationIndex = 0;
@@ -831,8 +832,6 @@ function handleParameterChange() {
     timelineUpdateLock = false;
   }
 }
-
-let timelineUpdateLock = false;
 
 timeline.addEventListener('mousedown', function () {
   isTimelineDragging = true;
