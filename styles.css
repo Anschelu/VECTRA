@@ -98,6 +98,28 @@ button{
     align-items: center;
   }
 
+  #easingSelect {
+    font-family: "Montserrat-Light", sans-serif;
+    border: none;
+    border-radius: 16px;
+    background-color: #cc80ff;
+    padding: 10px 20px;
+    aspect-ratio: 2/1;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    outline: none; 
+    appearance: none;
+  }
+
+  #easingSelect:hover{
+    cursor: pointer;
+    background-color: #FFEA00;
+  }
+  
+
 .instruction-box button {
     padding: 10px 20px;
     font-size: 28px;
@@ -312,15 +334,6 @@ button{
 
 #uploader{
   padding-bottom: 20px;
-}
-
-
-.easing-btn.active {
-  background-color: #FFEA00;
-}
-
-.easing-btn.selected {
-  background-color: #FFEA00;
 }
 
 

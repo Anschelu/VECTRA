@@ -839,7 +839,6 @@ timeline.addEventListener('click', function (event) {
   }
 });
 
-
 function playNextFromProgress(i, startProgress, shouldLoop) {
   if (i >= interP.length) return;
 
@@ -897,6 +896,8 @@ function playNextFromProgress(i, startProgress, shouldLoop) {
   isAnimationPaused = false;
   updateAnimateButton();
 }
+
+let selectedEasing = 'linear';
 
 
 function playNext(i, shouldLoop) {
