@@ -1,19 +1,16 @@
 let checkLoop = document.getElementById("checkLoop");
 let deleteButton = document.getElementById("delete-button");
-let deleteButtonDraw = document.getElementById("delete-button-draw");
 let animateButton = document.getElementById("animate-button");
 let slider = document.getElementById("myRange");
 let animation = null;
 let animationSpeed = slider ? parseFloat(slider.value) : 0.001;
 let svgs = [];
-let interpolator = null;
 let maxSVG = 6;
 let currentID = 1;
 let interP = [];
 let path = null;
 let isCalculating = false;
 let loadingElement = null;
-let bounceInterP = [];
 let isAnimationReady = false;
 let isAnimationRunning = false;
 let currentAnimationIndex = 0;
@@ -32,17 +29,12 @@ let dropzone = document.querySelector('.dropzone');
 let input = document.querySelector("input[type='file']");
 let previewList = document.getElementById("svg-preview-list");
 let svgContainer = document.getElementById("svg-container");
-let mediaRecorder = null;
-let recordedChunks = [];
-let isRecording = false;
-
 const maxVal = parseInt(document.getElementById("myRange").max);
 const max = maxVal * 1.2;
 const saveDraw = document.getElementById("saveDraw");
 const clearDraw = document.getElementById("clearDraw");
 const closeDraw = document.getElementById("closeDraw");
 let previewDrawing = {}
-
 let currentStep = 0;
 let autoAdvanceTimer;
 let running = true;
@@ -50,10 +42,11 @@ const instructionText = document.getElementById("instructionText");
 const main = document.getElementById("mainApp");
 const nextBtn = document.getElementById("nextBtn");
 const overlay = document.getElementById("welcomeOverlay");
-const overlayText = document.querySelector("#welcomeOverlay h2");
+const NORMALIZED_SIZE = 400;
+const NORMALIZED_VIEWBOX = `0 0 ${NORMALIZED_SIZE} ${NORMALIZED_SIZE}`;
+const PATH_PADDING = 0.8;
 
 
-//transparent Filling
 transparentFill.addEventListener('change', function () {
   let currentFillColor;
 
@@ -66,7 +59,6 @@ transparentFill.addEventListener('change', function () {
   changeSVGFillColor(currentFillColor);
 });
 
-//transparent Stroke
 transparentStroke.addEventListener('change', function () {
   let currentStrokeColor;
 
@@ -87,7 +79,8 @@ function setupDrawing() {
   previewDrawing.styleElement = defs.element('style');
 
 
-  function updateDrawingColor() {
+  //Drawings
+function updateDrawingColor() {
     const currentFillColor = getCurrentFillColor();
     const currentStrokeColor = getCurrentStrokeColor();
     const currentStrokeWidth = getCurrentStrokeWidth();
@@ -99,7 +92,6 @@ function setupDrawing() {
         stroke-width: ${currentStrokeWidth};
       }
     `);
-  
     const pathEl = document.querySelector("#path-00");
     if (pathEl) {
       pathEl.setAttribute("fill", currentFillColor);
@@ -141,7 +133,6 @@ function setupDrawing() {
 saveDraw.addEventListener('click', () => {
   let myDrawing = document.querySelector("#drawingArea svg")
   let svgContent = new XMLSerializer().serializeToString(myDrawing);
-  // modeChooser();
   limitControl();
   uploadAndDraw(svgContent);
   previewDrawing.points = [];
@@ -165,7 +156,6 @@ deleteButton.addEventListener("click", () => {
   wasAnimationRunning = false;
   currentAnimationIndex = 0;
   
-  // Clear drawing area and reset
   drawingArea.innerHTML = "";
   resetUploads();
   setupDrawing();
@@ -184,50 +174,47 @@ function createLoadingElement() {
   }
 }
 
-function showLoading() {
-  createLoadingElement();
-  loadingElement.style.display = 'block';
-  loadingElement.classList.add('fade-in');
-  isCalculating = true;
-}
+// function showLoading() {
+//   // createLoadingElement();
+//   // // loadingElement.style.display = 'block';
+//   // loadingElement.classList.add('fade-in');
+//   // isCalculating = true;
+//   console.log("hii")
+// }
 
-function hideLoading() {
-  if (loadingElement) {
-    loadingElement.classList.add('fade-out');
-    setTimeout(() => {
-      loadingElement.style.display = 'none';
-      loadingElement.classList.remove('fade-in', 'fade-out');
-    }, 300);
-  }
-  isCalculating = false;
-}
+// function hideLoading() {
+//   console.log("huuuhuuu")
+//   if (loadingElement) {
+//     loadingElement.classList.add('fade-out');
+//     setTimeout(() => {
+//       loadingElement.style.display = 'none';
+//       loadingElement.classList.remove('fade-in', 'fade-out');
+//     }, 300);
+//   }
+//   isCalculating = false;
+// }
 
 function morphingAnimation() {
   if (isCalculating) {
-    console.log("Animation is already being calculated...");
     return;
   }
 
   if (svgs.length < 2) {
-    console.error("At least 2 SVGs required for morphing.");
     return;
   }
 
-  showLoading();
+  // showLoading();
 
   setTimeout(() => {
     try {
       interP = [];
 
       for (let i = 0; i < svgs.length; i++) {
-        console.log(`Calculating interpolation ${i + 1}/${svgs.length}...`);
 
         if (i === (svgs.length - 1)) {
           interP[i] = flubber.interpolate(svgs[i].path, svgs[0].path, { maxSegmentLength: 1 });
-          console.log("Last interpolation completed");
         } else {
           interP[i] = flubber.interpolate(svgs[i].path, svgs[i + 1].path, { maxSegmentLength: 1 });
-          console.log(`Interpolation ${i} completed`);
         }
       }
 
@@ -235,19 +222,14 @@ function morphingAnimation() {
 
       if (!path) {
         console.error("No <path> found with ID #path-00.");
-        hideLoading();
+        // hideLoading();
         return;
       }
-
-      console.log("All interpolations calculated, starting animation...");
-      hideLoading();
+      // hideLoading();
       isAnimationReady = true;
       animate();
 
     } catch (error) {
-      console.error("Error during animation calculation:", error);
-      hideLoading();
-      alert("Error calculating animation. Please check your SVG files.");
     }
   }, 100);
 }
@@ -307,7 +289,6 @@ animateButton.addEventListener("click", () => {
   }
 
   animateButton.classList.add('button-loading');
-  animateButton.textContent = "huhuuu";
 
   setTimeout(() => {
     morphingAnimation();
@@ -318,15 +299,11 @@ animateButton.addEventListener("click", () => {
   }, 100);
 });
 
-const NORMALIZED_SIZE = 400;
-const NORMALIZED_VIEWBOX = `0 0 ${NORMALIZED_SIZE} ${NORMALIZED_SIZE}`;
-const PATH_PADDING = 0.8;
 
 function normalizePathToCenter(pathData, targetSize = NORMALIZED_SIZE) {
     if (!pathData) return pathData;
     
     try {
-        // Use SVG path parsing instead of DOM manipulation
         const bounds = getPathBounds(pathData);
         if (!bounds || bounds.width === 0 || bounds.height === 0) {
             return pathData;
@@ -403,7 +380,6 @@ function getPathBounds(pathData) {
                 break;
                 
             case 'q':
-                // Quadratic Bézier
                 for (let i = 0; i < values.length; i += 4) {
                     const x1 = isRelative ? currentX + values[i] : values[i];
                     const y1 = isRelative ? currentY + values[i + 1] : values[i + 1];
@@ -459,8 +435,6 @@ function parsePathData(pathData) {
         const commandStr = match[0];
         const type = commandStr[0];
         const valueStr = commandStr.slice(1).trim();
-        
-        // Extract numbers, handling negative numbers properly
         const values = valueStr.match(/-?\d*\.?\d+(?:[eE][-+]?\d+)?/g) || [];
         commands.push({
             type,
@@ -530,7 +504,7 @@ function transformPath(pathData, translateX, translateY, scale) {
                 for (let i = 0; i < values.length; i += 7) {
                     const rx = values[i] * scale;
                     const ry = values[i + 1] * scale;
-                    const rotation = values[i + 2]; // Don't scale rotation
+                    const rotation = values[i + 2];
                     const largeArc = values[i + 3];
                     const sweep = values[i + 4];
                     const x = values[i + 5] * scale + (isRelative ? 0 : translateX);
@@ -614,7 +588,6 @@ function createNormalizedSVG(svgContent) {
   return serializer.serializeToString(svgDoc);
 }
 
-// Debug function to test normalization
 function testNormalization(pathData) {
     console.log('Original:', pathData);
     const normalized = normalizePathToCenter(pathData);
@@ -640,7 +613,6 @@ function uploadAndDraw(svgContent) {
             svgContent = applySingleSVGColor(svgContent, getCurrentStrokeWidth(), 3);
         }
         
-        // Create normalized version for consistent morphing
         const normalizedSVG = createNormalizedSVG(svgContent);
         
         const parser = new DOMParser();
@@ -664,8 +636,8 @@ function uploadAndDraw(svgContent) {
         const pathData = pathElement?.getAttribute("d");
         
         svgs.push({ 
-            svg: finalSVGContent, // Use normalized SVG
-            path: pathData, // Use normalized path for morphing
+            svg: finalSVGContent, 
+            path: pathData,
             id: newId, 
             style: style 
         });
@@ -674,7 +646,6 @@ function uploadAndDraw(svgContent) {
         
         if (index === 0) {
             svgContainer.innerHTML = svgs[index].svg;
-            // Ensure the container has the normalized viewBox
             setupMorphingContainer();
         }
         
@@ -683,7 +654,7 @@ function uploadAndDraw(svgContent) {
         }
         
         setTimeout(() => {
-            // Additional processing if needed
+
         }, 300);
     }, 50);
 }
@@ -700,28 +671,6 @@ function setupMorphingContainer() {
     }
 }
 
-
-function showSimpleLoading(message = 'Loading...') {
-  const existingLoader = document.querySelector('.simple-loader');
-  if (existingLoader) return;
-
-  const loader = document.createElement('div');
-  loader.textContent = message;
-  loader.className = 'simple-loader fade-in';
-  document.body.appendChild(loader);
-}
-
-function hideSimpleLoading() {
-  const loader = document.querySelector('.simple-loader');
-  if (loader) {
-    loader.classList.add('fade-out');
-    setTimeout(() => {
-      if (loader.parentNode) {
-        document.body.removeChild(loader);
-      }
-    }, 300);
-  }
-}
 
 if (checkLoop) {
   checkLoop.addEventListener('change', function () {
@@ -930,7 +879,6 @@ timeline.addEventListener('click', function (event) {
 function playNextFromProgress(i, startProgress, shouldLoop) {
   if (i >= interP.length) return;
 
-  // Stoppe vorherige Animation
   if (animation) animation.pause();
 
   currentAnimationIndex = i;
@@ -938,7 +886,6 @@ function playNextFromProgress(i, startProgress, shouldLoop) {
   const selectedEasing = document.getElementById('easingSelect').value;
   const easingFunction = easingFunctions[selectedEasing] || (t => t);
 
-  // Berechne verbleibende Duration basierend auf startProgress
   const remainingProgress = 100 - startProgress;
   const remainingDuration = (max - animationSpeed) * (remainingProgress / 100);
 
@@ -990,7 +937,6 @@ function playNextFromProgress(i, startProgress, shouldLoop) {
 function playNext(i, shouldLoop) {
   if (i >= interP.length) return;
 
-  // Stoppe vorherige Animation
   if (animation) animation.pause();
 
   currentAnimationIndex = i;
@@ -1046,7 +992,6 @@ document.querySelector('#myRange').addEventListener('input', function () {
   }
 });
 
-//Drag and Drop function 
 
 function setupDropzone(dropzone) {
   dropzone.addEventListener("click", () => {
@@ -1075,8 +1020,6 @@ function rightFiles(file) {
 }
 
 function upload(file) {
-  // modeChooser();
-
   const reader = new FileReader();
   reader.onload = function (event) {
 
@@ -1576,7 +1519,7 @@ function setupStrokeWidthControl() {
 setupStrokeWidthControl();
 
 
-//EXPORTING
+//EXPORT
 
 //SVG EXPORT
 function exportSVGContainer() {
