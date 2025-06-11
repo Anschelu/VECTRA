@@ -1,11 +1,11 @@
 @font-face {
   font-family: 'Montserrat-SemiBoldItalic.woff';
-  src: url("../SVG-Tool/assets/fonts/Montserrat-SemiBoldItalic.woff") format('woff');
+  src: url("assets/fonts/Montserrat-SemiBoldItalic.woff") format('woff');
 }
 
 @font-face {
   font-family: 'Montserrat-Light.woff';
-  src: url("../SVG-Tool/assets/fonts/Montserrat-Light.ttf") format('woff');
+  src: url("assets/fonts/Montserrat-Light.ttf") format('woff');
 }
 
 body {
